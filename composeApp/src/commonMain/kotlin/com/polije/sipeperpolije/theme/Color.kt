@@ -1,4 +1,4 @@
-package com.example.belajarkmp.ui.theme
+package com.polije.sipeperpolije.theme
 
 import androidx.compose.ui.graphics.Color
 

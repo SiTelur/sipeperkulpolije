@@ -59,13 +59,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.belajarkmp.DosenScreen
-import com.example.belajarkmp.JadwalScreen
-import com.example.belajarkmp.MatkulScreen
-import com.example.belajarkmp.SettingsScreen
-import com.example.belajarkmp.ui.theme.Blue100
-import com.example.belajarkmp.ui.theme.Green500
-import com.example.belajarkmp.ui.theme.Orange500
+import com.polije.sipeperpolije.feature.dashboard.list.JadwalScreen
+import com.polije.sipeperpolije.feature.dashboard.list.MatkulScreen
+import com.polije.sipeperpolije.feature.dashboard.list.SettingsScreen
+import com.polije.sipeperpolije.theme.Blue100
+import com.polije.sipeperpolije.theme.Green500
+import com.polije.sipeperpolije.theme.Orange500
+import com.polije.sipeperpolije.feature.dashboard.list.DosenScreen
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 

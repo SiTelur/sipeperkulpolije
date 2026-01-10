@@ -1,4 +1,4 @@
-package com.example.belajarkmp
+package com.polije.sipeperpolije.feature.dashboard.list
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

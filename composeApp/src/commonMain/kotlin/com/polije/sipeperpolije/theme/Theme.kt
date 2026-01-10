@@ -5,6 +5,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import com.polije.sipeperpolije.theme.md_theme_dark_background
+import com.polije.sipeperpolije.theme.md_theme_dark_onBackground
+import com.polije.sipeperpolije.theme.md_theme_dark_onPrimary
+import com.polije.sipeperpolije.theme.md_theme_dark_onSurface
+import com.polije.sipeperpolije.theme.md_theme_dark_onSurfaceVariant
+import com.polije.sipeperpolije.theme.md_theme_dark_primary
+import com.polije.sipeperpolije.theme.md_theme_dark_surface
+import com.polije.sipeperpolije.theme.md_theme_dark_surfaceVariant
+import com.polije.sipeperpolije.theme.md_theme_light_background
+import com.polije.sipeperpolije.theme.md_theme_light_onBackground
+import com.polije.sipeperpolije.theme.md_theme_light_onPrimary
+import com.polije.sipeperpolije.theme.md_theme_light_onSurface
+import com.polije.sipeperpolije.theme.md_theme_light_onSurfaceVariant
+import com.polije.sipeperpolije.theme.md_theme_light_primary
+import com.polije.sipeperpolije.theme.md_theme_light_surface
+import com.polije.sipeperpolije.theme.md_theme_light_surfaceVariant
 
 private val DarkColorScheme = darkColorScheme(
     primary = md_theme_dark_primary,
