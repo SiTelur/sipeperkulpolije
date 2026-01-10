@@ -6,6 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.belajarkmp.ui.theme.MainTheme
+import com.polije.sipeperpolije.feature.dashboard.list.DosenScreen
+import com.polije.sipeperpolije.feature.login.LoginScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,6 +23,15 @@ class MainActivity : ComponentActivity() {
 
 @Preview
 @Composable
-fun AppAndroidPreview() {
-    App()
+fun LoginScreenPreview() {
+    MainTheme(){
+        LoginScreen(onLoginSuccess = {})
+    }}
+
+@Preview
+@Composable
+fun DosenListPreview(){
+    MainTheme() {
+        DosenScreen()
+    }
 }
