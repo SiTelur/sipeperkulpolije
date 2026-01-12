@@ -9,6 +9,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.belajarkmp.ui.theme.MainTheme
 import com.polije.sipeperpolije.feature.dashboard.list.DosenScreen
 import com.polije.sipeperpolije.feature.dashboard.list.JadwalScreen
+import com.polije.sipeperpolije.feature.dashboard.list.MataKuliahDetailScreen
+import com.polije.sipeperpolije.feature.dashboard.list.MatkulScreen
 import com.polije.sipeperpolije.feature.login.LoginScreen
 
 class MainActivity : ComponentActivity() {
@@ -42,5 +44,14 @@ fun DosenListPreview(){
 private fun JadwalListPreview() {
     MainTheme() {
         JadwalScreen()
+    }
+}
+
+@Preview
+@Composable
+private fun MatkulDetailScreenPreview() {
+    MainTheme(
+    ) {
+        MataKuliahDetailScreen()
     }
 }

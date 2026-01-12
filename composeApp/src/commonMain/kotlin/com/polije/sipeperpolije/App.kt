@@ -13,7 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
 import com.example.belajarkmp.ui.theme.MainTheme
+import com.polije.sipeperpolije.core.navigation.NavigationRoot
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -22,7 +24,9 @@ import sistempenjadwalanperkuliahanpolitekniknegerijember.composeapp.generated.r
 
 @Composable
 fun App() {
-    MainTheme {
+    val navController = rememberNavController()
 
+    MainTheme {
+        NavigationRoot(navController)
     }
 }

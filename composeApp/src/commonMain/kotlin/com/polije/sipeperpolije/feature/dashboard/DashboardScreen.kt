@@ -60,12 +60,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.polije.sipeperpolije.feature.dashboard.list.JadwalScreen
-import com.polije.sipeperpolije.feature.dashboard.list.MatkulScreen
 import com.polije.sipeperpolije.feature.dashboard.list.SettingsScreen
 import com.polije.sipeperpolije.theme.Blue100
 import com.polije.sipeperpolije.theme.Green500
 import com.polije.sipeperpolije.theme.Orange500
 import com.polije.sipeperpolije.feature.dashboard.list.DosenScreen
+import com.polije.sipeperpolije.feature.dashboard.list.MataKuliahScreen
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
@@ -121,7 +121,7 @@ fun DashboardScreen() {
         NavHost(navController = navController, startDestination = "dashboard") {
             composable("dashboard") { DashboardContent() }
             composable("dosen") { DosenScreen() }
-            composable("matkul") { MatkulScreen() }
+            composable("matkul") { MataKuliahScreen() }
             composable("jadwal") { JadwalScreen() }
             composable("settings") { SettingsScreen() }
         }
