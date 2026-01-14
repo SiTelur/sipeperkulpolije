@@ -66,6 +66,7 @@ import com.polije.sipeperpolije.theme.Green500
 import com.polije.sipeperpolije.theme.Orange500
 import com.polije.sipeperpolije.feature.dashboard.list.DosenScreen
 import com.polije.sipeperpolije.feature.dashboard.list.MataKuliahScreen
+import kotlinx.serialization.Serializable
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
@@ -73,15 +74,15 @@ data class NavItem(
     val label: String,
     val icon: ImageVector,
     val selectedIcon: ImageVector,
-    val route: String
+    val route: Any
 )
 
 val navigationItems = listOf(
-    NavItem("Dashboard", Icons.Outlined.Dashboard, Icons.Filled.Dashboard, "dashboard"),
-    NavItem("Dosen", Icons.Outlined.School, Icons.Filled.School, "dosen"),
-    NavItem("Matkul", Icons.AutoMirrored.Outlined.MenuBook, Icons.AutoMirrored.Filled.MenuBook, "matkul"),
-    NavItem("Jadwal", Icons.Outlined.CalendarToday, Icons.Filled.CalendarToday, "jadwal"),
-    NavItem("Settings", Icons.Outlined.Settings, Icons.Filled.Settings, "settings")
+    NavItem("Dashboard", Icons.Outlined.Dashboard, Icons.Filled.Dashboard, DashboardRoute.Dashboard),
+    NavItem("Dosen", Icons.Outlined.School, Icons.Filled.School, DashboardRoute.Dosen),
+    NavItem("Matkul", Icons.AutoMirrored.Outlined.MenuBook, Icons.AutoMirrored.Filled.MenuBook, DashboardRoute.MataKuliah),
+    NavItem("Jadwal", Icons.Outlined.CalendarToday, Icons.Filled.CalendarToday, DashboardRoute.Jadwal),
+    NavItem("Settings", Icons.Outlined.Settings, Icons.Filled.Settings, DashboardRoute.Settings)
 )
 
 @Composable
@@ -118,12 +119,12 @@ fun DashboardScreen() {
             }
         }
     ) {
-        NavHost(navController = navController, startDestination = "dashboard") {
-            composable("dashboard") { DashboardContent() }
-            composable("dosen") { DosenScreen() }
-            composable("matkul") { MataKuliahScreen() }
-            composable("jadwal") { JadwalScreen() }
-            composable("settings") { SettingsScreen() }
+        NavHost(navController = navController, startDestination = DashboardRoute.Dashboard) {
+            composable<DashboardRoute.Dashboard> { DashboardContent() }
+            composable<DashboardRoute.Dosen> { DosenScreen() }
+            composable<DashboardRoute.MataKuliah> { MataKuliahScreen() }
+            composable<DashboardRoute.Jadwal> { JadwalScreen() }
+            composable<DashboardRoute.Settings> { SettingsScreen() }
         }
     }
 }
@@ -396,3 +397,19 @@ fun ActivityItem(icon: ImageVector, iconColor: Color, title: String, subtitle: S
         }
     }
 }
+
+@Serializable
+sealed class DashboardRoute {
+
+    @Serializable
+    object Dashboard : DashboardRoute()
+    @Serializable
+    object Dosen : DashboardRoute()
+    @Serializable
+    object MataKuliah : DashboardRoute()
+    @Serializable
+    object Jadwal : DashboardRoute()
+    @Serializable
+    object Settings : DashboardRoute()
+}
+

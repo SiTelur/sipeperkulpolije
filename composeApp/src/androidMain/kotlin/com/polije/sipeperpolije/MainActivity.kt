@@ -10,7 +10,6 @@ import com.example.belajarkmp.ui.theme.MainTheme
 import com.polije.sipeperpolije.feature.dashboard.list.DosenScreen
 import com.polije.sipeperpolije.feature.dashboard.list.JadwalScreen
 import com.polije.sipeperpolije.feature.dashboard.list.MataKuliahDetailScreen
-import com.polije.sipeperpolije.feature.dashboard.list.MatkulScreen
 import com.polije.sipeperpolije.feature.login.LoginScreen
 
 class MainActivity : ComponentActivity() {

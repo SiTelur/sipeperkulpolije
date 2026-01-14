@@ -11,13 +11,13 @@ import kotlinx.serialization.Serializable
 
 @Composable
 fun NavigationRoot(navController : NavHostController,modifier: Modifier = Modifier){
-    NavHost(navController = navController, startDestination = NavigationRoute.Login, modifier = modifier){
-        composable<NavigationRoute.Dashboard>{
+    NavHost(navController = navController, startDestination = Login, modifier = modifier){
+        composable<Dashboard>{
             DashboardScreen()
         }
-        composable<NavigationRoute.Login>{
-            LoginScreen({navController.navigate(NavigationRoute.Dashboard){
-                popUpTo(NavigationRoute.Login){
+        composable<Login>{
+            LoginScreen({navController.navigate(Dashboard){
+                popUpTo(Login){
                     inclusive = true
                 }
             } })
@@ -26,11 +26,10 @@ fun NavigationRoot(navController : NavHostController,modifier: Modifier = Modifi
     }
 }
 
-@Serializable
-sealed class NavigationRoute {
+
 
     @Serializable
-    object Dashboard : NavigationRoute()
+    object Dashboard
     @Serializable
-    object Login : NavigationRoute()
-}
+    object Login
+
