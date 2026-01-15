@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 data class MataKuliah(
     val code: String,
@@ -47,11 +48,6 @@ fun MataKuliahScreen() {
         topBar = {
             TopAppBar(
                 title = { Text("Daftar Mata Kuliah", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { /* TODO: Handle back navigation */ }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
-                    }
-                },
                 actions = {
                     IconButton(onClick = { /* TODO: Handle add action */ }) {
                         Icon(Icons.Default.Add, contentDescription = "Tambah Mata Kuliah", tint = MaterialTheme.colorScheme.primary)

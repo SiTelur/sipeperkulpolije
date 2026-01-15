@@ -47,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 enum class GenerationStatus(val displayName: String) {
     SUKSES("Sukses"),
@@ -65,6 +66,7 @@ val sampleLogs = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Preview
 fun JadwalScreen() {
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf<GenerationStatus?>(null) }
@@ -79,11 +81,6 @@ fun JadwalScreen() {
         topBar = {
             TopAppBar(
                 title = { Text("Status Generate Jadwal", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { /* TODO: Handle back navigation */ }) {
-                        Icon(Icons.Default.ArrowBackIosNew, contentDescription = "Kembali")
-                    }
-                },
                 actions = {
                     IconButton(onClick = { /* TODO: Refresh logs */ }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh")

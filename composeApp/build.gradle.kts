@@ -29,6 +29,8 @@ kotlin {
     }
     
     sourceSets {
+        val jsMain by getting
+
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -46,7 +48,11 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.compose.navigation)
             implementation(libs.kotlinx.serialization.json)
-        }
+            implementation(project.dependencies.platform(libs.supabase))
+            implementation(libs.postgrest.kt)
+            implementation(libs.koin.core)
+            implementation(libs.koin.viewmodel)
+            }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
