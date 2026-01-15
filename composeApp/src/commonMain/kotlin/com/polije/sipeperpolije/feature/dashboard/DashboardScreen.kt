@@ -45,7 +45,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,6 +63,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.createGraph
 import com.polije.sipeperpolije.feature.dashboard.list.JadwalScreen
 import com.polije.sipeperpolije.feature.dashboard.list.SettingsScreen
 import com.polije.sipeperpolije.theme.Blue100
@@ -66,7 +71,6 @@ import com.polije.sipeperpolije.theme.Green500
 import com.polije.sipeperpolije.theme.Orange500
 import com.polije.sipeperpolije.feature.dashboard.list.DosenScreen
 import com.polije.sipeperpolije.feature.dashboard.list.MataKuliahScreen
-import kotlinx.serialization.Serializable
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
@@ -74,15 +78,15 @@ data class NavItem(
     val label: String,
     val icon: ImageVector,
     val selectedIcon: ImageVector,
-    val route: Any
+    val route: String
 )
 
 val navigationItems = listOf(
-    NavItem("Dashboard", Icons.Outlined.Dashboard, Icons.Filled.Dashboard, DashboardRoute.Dashboard),
-    NavItem("Dosen", Icons.Outlined.School, Icons.Filled.School, DashboardRoute.Dosen),
-    NavItem("Matkul", Icons.AutoMirrored.Outlined.MenuBook, Icons.AutoMirrored.Filled.MenuBook, DashboardRoute.MataKuliah),
-    NavItem("Jadwal", Icons.Outlined.CalendarToday, Icons.Filled.CalendarToday, DashboardRoute.Jadwal),
-    NavItem("Settings", Icons.Outlined.Settings, Icons.Filled.Settings, DashboardRoute.Settings)
+    NavItem("Dashboard", Icons.Outlined.Dashboard, Icons.Filled.Dashboard, DashboardRoute.Dashboard.route),
+    NavItem("Dosen", Icons.Outlined.School, Icons.Filled.School, DashboardRoute.Dosen.route),
+    NavItem("Matkul", Icons.AutoMirrored.Outlined.MenuBook, Icons.AutoMirrored.Filled.MenuBook, DashboardRoute.MataKuliah.route),
+    NavItem("Jadwal", Icons.Outlined.CalendarToday, Icons.Filled.CalendarToday, DashboardRoute.Jadwal.route),
+    NavItem("Settings", Icons.Outlined.Settings, Icons.Filled.Settings, DashboardRoute.Settings.route)
 )
 
 @Composable
@@ -91,13 +95,17 @@ fun DashboardScreen() {
     val navController = rememberNavController();
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
+    var selectedNavigationIndex by  rememberSaveable{
+        mutableIntStateOf(0)
+    }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
-            navigationItems.forEach { item ->
+            navigationItems.forEachIndexed { index,item ->
                 item(
-                    selected = item.route == currentRoute,
+                    selected = selectedNavigationIndex == index,
                     onClick = {
+                        selectedNavigationIndex = index
                         navController.navigate(item.route) {
                             // Pop up to the start destination of the graph to
                             // avoid building up a large stack of destinations
@@ -119,13 +127,31 @@ fun DashboardScreen() {
             }
         }
     ) {
-        NavHost(navController = navController, startDestination = DashboardRoute.Dashboard) {
-            composable<DashboardRoute.Dashboard> { DashboardContent() }
-            composable<DashboardRoute.Dosen> { DosenScreen() }
-            composable<DashboardRoute.MataKuliah> { MataKuliahScreen() }
-            composable<DashboardRoute.Jadwal> { JadwalScreen() }
-            composable<DashboardRoute.Settings> { SettingsScreen() }
-        }
+       val graph = navController.createGraph(startDestination = DashboardRoute.Dashboard.route){
+           composable(DashboardRoute.Dashboard.route){
+               DashboardContent()
+           }
+
+           composable(DashboardRoute.Dosen.route){
+               DosenScreen()
+           }
+
+           composable(DashboardRoute.MataKuliah.route){
+               MataKuliahScreen()
+           }
+
+           composable(DashboardRoute.Jadwal.route){
+               JadwalScreen()
+           }
+
+           composable(DashboardRoute.Settings.route){
+               SettingsScreen()
+           }
+
+
+       }
+
+        NavHost(navController = navController, graph = graph)
     }
 }
 
@@ -398,18 +424,11 @@ fun ActivityItem(icon: ImageVector, iconColor: Color, title: String, subtitle: S
     }
 }
 
-@Serializable
-sealed class DashboardRoute {
 
-    @Serializable
-    object Dashboard : DashboardRoute()
-    @Serializable
-    object Dosen : DashboardRoute()
-    @Serializable
-    object MataKuliah : DashboardRoute()
-    @Serializable
-    object Jadwal : DashboardRoute()
-    @Serializable
-    object Settings : DashboardRoute()
+sealed class DashboardRoute(val route : String){
+    object Dashboard : DashboardRoute("dashboard")
+    object Dosen : DashboardRoute("dosen")
+    object MataKuliah : DashboardRoute("matkul")
+    object Jadwal : DashboardRoute("jadwal")
+    object Settings : DashboardRoute("settings")
 }
-
