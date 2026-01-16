@@ -16,8 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.belajarkmp.ui.theme.MainTheme
 import com.polije.sipeperpolije.core.navigation.NavigationRoot
+import com.polije.sipeperpolije.di.appModule
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.KoinApplication
+import org.koin.core.KoinApplication
+import org.koin.dsl.module
 
 import sistempenjadwalanperkuliahanpolitekniknegerijember.composeapp.generated.resources.Res
 import sistempenjadwalanperkuliahanpolitekniknegerijember.composeapp.generated.resources.compose_multiplatform
@@ -26,7 +30,9 @@ import sistempenjadwalanperkuliahanpolitekniknegerijember.composeapp.generated.r
 fun App() {
     val navController = rememberNavController()
 
-    MainTheme {
-        NavigationRoot(navController)
+    KoinApplication(application = { modules(appModule) }){
+        MainTheme {
+            NavigationRoot(navController = navController)
+        }
     }
 }
