@@ -6,7 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.polije.sipeperpolije.feature.dashboard.DashboardScreen
-import com.polije.sipeperpolije.feature.login.LoginScreen
+import com.polije.sipeperpolije.feature.login.presentation.screen.LoginScreen
 import kotlinx.serialization.Serializable
 
 @Composable

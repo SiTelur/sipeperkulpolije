@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.login
+package com.polije.sipeperpolije.feature.login.presentation.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -19,10 +19,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginAction
 
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
@@ -65,7 +64,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                             onPasswordChange = { password = it },
                             passwordVisible = passwordVisible,
                             onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
-                            onLoginClick = onLoginSuccess
+                            onLoginClick = { }
                         )
                     }
                 }

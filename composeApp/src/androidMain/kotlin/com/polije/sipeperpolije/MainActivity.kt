@@ -10,7 +10,7 @@ import com.example.belajarkmp.ui.theme.MainTheme
 import com.polije.sipeperpolije.feature.dashboard.list.DosenScreen
 import com.polije.sipeperpolije.feature.dashboard.list.JadwalScreen
 import com.polije.sipeperpolije.feature.dashboard.list.MataKuliahDetailScreen
-import com.polije.sipeperpolije.feature.login.LoginScreen
+import com.polije.sipeperpolije.feature.login.presentation.screen.LoginScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

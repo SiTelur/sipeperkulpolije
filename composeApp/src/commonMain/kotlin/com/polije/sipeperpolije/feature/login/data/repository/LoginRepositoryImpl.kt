@@ -1,8 +1,7 @@
-package com.polije.sipeperpolije.feature.login.data
+package com.polije.sipeperpolije.feature.login.data.repository
 
-import com.polije.sipeperpolije.feature.login.domain.LoginRepository
+import com.polije.sipeperpolije.feature.login.domain.repository.LoginRepository
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.OtpType
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 
