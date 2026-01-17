@@ -45,7 +45,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -64,13 +63,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
-import com.polije.sipeperpolije.feature.dashboard.list.JadwalScreen
-import com.polije.sipeperpolije.feature.dashboard.list.SettingsScreen
-import com.polije.sipeperpolije.theme.Blue100
-import com.polije.sipeperpolije.theme.Green500
-import com.polije.sipeperpolije.theme.Orange500
 import com.polije.sipeperpolije.feature.dashboard.list.DosenScreen
+import com.polije.sipeperpolije.feature.dashboard.list.JadwalScreen
 import com.polije.sipeperpolije.feature.dashboard.list.MataKuliahScreen
+import com.polije.sipeperpolije.feature.dashboard.list.SettingsScreen
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
@@ -92,27 +88,22 @@ val navigationItems = listOf(
 @Composable
 @Preview
 fun DashboardScreen() {
-    val navController = rememberNavController();
+    val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
-    var selectedNavigationIndex by  rememberSaveable{
+    var selectedNavigationIndex by rememberSaveable {
         mutableIntStateOf(0)
     }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
-            navigationItems.forEachIndexed { index,item ->
+            navigationItems.forEachIndexed { index, item ->
                 item(
                     selected = selectedNavigationIndex == index,
                     onClick = {
                         selectedNavigationIndex = index
                         navController.navigate(item.route) {
-                            // Pop up to the start destination of the graph to
-                            // avoid building up a large stack of destinations
-                            // on the back stack as users select items
                             popUpTo(navController.graph.startDestinationId)
-                            // Avoid multiple copies of the same destination when
-                            // reselecting the same item
                             launchSingleTop = true
                         }
                     },
@@ -127,29 +118,27 @@ fun DashboardScreen() {
             }
         }
     ) {
-       val graph = navController.createGraph(startDestination = DashboardRoute.Dashboard.route){
-           composable(DashboardRoute.Dashboard.route){
-               DashboardContent()
-           }
+        val graph = navController.createGraph(startDestination = DashboardRoute.Dashboard.route) {
+            composable(DashboardRoute.Dashboard.route) {
+                DashboardContent()
+            }
 
-           composable(DashboardRoute.Dosen.route){
-               DosenScreen()
-           }
+            composable(DashboardRoute.Dosen.route) {
+                DosenScreen()
+            }
 
-           composable(DashboardRoute.MataKuliah.route){
-               MataKuliahScreen()
-           }
+            composable(DashboardRoute.MataKuliah.route) {
+                MataKuliahScreen()
+            }
 
-           composable(DashboardRoute.Jadwal.route){
-               JadwalScreen()
-           }
+            composable(DashboardRoute.Jadwal.route) {
+                JadwalScreen()
+            }
 
-           composable(DashboardRoute.Settings.route){
-               SettingsScreen()
-           }
-
-
-       }
+            composable(DashboardRoute.Settings.route) {
+                SettingsScreen()
+            }
+        }
 
         NavHost(navController = navController, graph = graph)
     }
@@ -213,10 +202,10 @@ fun HeaderSection() {
             }
             Box(
                 modifier = Modifier
-                    .padding(top=10.dp, end=10.dp)
+                    .padding(top = 10.dp, end = 10.dp)
                     .size(8.dp)
                     .clip(CircleShape)
-                    .background(Color.Red)
+                    .background(MaterialTheme.colorScheme.error)
             )
         }
     }
@@ -238,8 +227,8 @@ fun SummaryStatisticsGrid() {
                 title = "Mata Kuliah",
                 value = "32",
                 icon = Icons.AutoMirrored.Filled.MenuBook,
-                iconBgColor = Orange500.copy(alpha = 0.1f),
-                iconColor = Orange500,
+                iconBgColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                iconColor = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -295,27 +284,27 @@ fun ScheduleSummaryCard() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Brush.horizontalGradient(colors = listOf(MaterialTheme.colorScheme.primary, Color(0xFF3B82F6))))
+                .background(Brush.horizontalGradient(colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.8f))))
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(text = "Jadwal Kelas", color = Blue100, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                Text(text = "120", color = Color.White, fontSize = 36.sp, fontWeight = FontWeight.Bold)
-                Text(text = "Status: Tergenerate", color = Blue100, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
+                Text(text = "Jadwal Kelas", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Text(text = "120", color = MaterialTheme.colorScheme.onPrimary, fontSize = 36.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Status: Tergenerate", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
             }
             Box(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.2f)),
+                    .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.CalendarMonth,
                     contentDescription = "Jadwal Kelas",
-                    tint = Color.White,
+                    tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(36.dp)
                 )
             }
@@ -373,7 +362,7 @@ fun RecentActivitySection() {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             ActivityItem(
                 icon = Icons.Default.CheckCircle,
-                iconColor = Green500,
+                iconColor = MaterialTheme.colorScheme.tertiary,
                 title = "Jadwal T. Informatika Fix",
                 subtitle = "Berhasil digenerate • 2 jam yang lalu",
             )
@@ -385,7 +374,7 @@ fun RecentActivitySection() {
             )
             ActivityItem(
                 icon = Icons.Outlined.Edit,
-                iconColor = Orange500,
+                iconColor = MaterialTheme.colorScheme.secondary,
                 title = "Update Mata Kuliah",
                 subtitle = "Algoritma Pemrograman • Kemarin",
             )
@@ -400,7 +389,7 @@ fun ActivityItem(icon: ImageVector, iconColor: Color, title: String, subtitle: S
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant.copy(alpha=0.5f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -425,7 +414,7 @@ fun ActivityItem(icon: ImageVector, iconColor: Color, title: String, subtitle: S
 }
 
 
-sealed class DashboardRoute(val route : String){
+sealed class DashboardRoute(val route: String) {
     object Dashboard : DashboardRoute("dashboard")
     object Dosen : DashboardRoute("dosen")
     object MataKuliah : DashboardRoute("matkul")

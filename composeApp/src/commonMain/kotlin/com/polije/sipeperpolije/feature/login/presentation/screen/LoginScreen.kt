@@ -1,3 +1,4 @@
+
 package com.polije.sipeperpolije.feature.login.presentation.screen
 
 import androidx.compose.foundation.background
@@ -21,10 +22,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginAction
 import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginEvent
 import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginViewModel
 import com.polije.sipeperpolije.utils.ObserveAsEvent
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -34,20 +37,26 @@ fun LoginScreen(loginViewModel : LoginViewModel = koinViewModel(), onLoginSucces
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     val snackBarState = remember { SnackbarHostState() }
-
-
-
+    val state by loginViewModel.state.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+    
     ObserveAsEvent(loginViewModel.events){ event ->
         when (event){
-            is LoginEvent.LoginSuccess -> {snackBarState.showSnackbar("Login Success")}
-            is LoginEvent.LoginFailed -> {}
+            is LoginEvent.LoginSuccess -> {
+                onLoginSuccess()
+            }
+            is LoginEvent.LoginFailed -> {
+                scope.launch {
+                    snackBarState.showSnackbar(event.message)
+                }
+            }
         }
     }
 
     Scaffold(snackbarHost = {SnackbarHost(snackBarState)}
 
-    ) {
-        BoxWithConstraints {
+    ) {paddingValues ->
+        BoxWithConstraints(modifier = Modifier.padding(paddingValues)) {
             val isTablet = maxWidth > 600.dp
 
             val cardWidth = if (isTablet) 420.dp else maxWidth
@@ -78,6 +87,7 @@ fun LoginScreen(loginViewModel : LoginViewModel = koinViewModel(), onLoginSucces
                             onPasswordChange = { password = it },
                             passwordVisible = passwordVisible,
                             onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
+                            isLoading = state.isLoading,
                             onLoginClick = {loginViewModel.onAction(LoginAction.OnLoginPressed(email, password))}
                         )
                     }
@@ -167,6 +177,7 @@ private fun Form(
     onPasswordChange: (String) -> Unit,
     passwordVisible: Boolean,
     onPasswordVisibilityChange: () -> Unit,
+    isLoading: Boolean,
     onLoginClick: () -> Unit
 ) {
     Column(
@@ -229,33 +240,31 @@ private fun Form(
             )
         )
 
-        TextButton(
-            onClick = { /* TODO */ },
-            modifier = Modifier.align(Alignment.End),
-            contentPadding = PaddingValues(0.dp)
-        ) {
-            Text(
-                text = "Lupa Password?",
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
 
         Button(
             onClick = onLoginClick,
+            enabled = !isLoading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
-            Text(text = "Masuk", fontWeight = FontWeight.SemiBold)
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.Login,
-                contentDescription = null
-            )
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    strokeWidth = 3.dp
+                )
+            } else {
+                Text(text = "Masuk", fontWeight = FontWeight.SemiBold)
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Login,
+                    contentDescription = "Masuk"
+                )
+            }
+
         }
     }
 }
