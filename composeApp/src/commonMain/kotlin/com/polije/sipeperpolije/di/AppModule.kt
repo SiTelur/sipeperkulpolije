@@ -1,6 +1,6 @@
 package com.polije.sipeperpolije.di
 
-import com.polije.sipeperpolije.AppConfig
+import com.polije.sipeperpolije.BuildKonfig
 import com.polije.sipeperpolije.feature.login.data.repository.LoginRepositoryImpl
 import com.polije.sipeperpolije.feature.login.domain.repository.LoginRepository
 import com.polije.sipeperpolije.feature.login.domain.usecase.LoginUseCase
@@ -15,8 +15,8 @@ import org.koin.dsl.module
 
 fun  appModule() = module {
     single { createSupabaseClient(
-        supabaseUrl = AppConfig.apiBaseUrl,
-        supabaseKey = AppConfig.apiKey
+        supabaseUrl = BuildKonfig.API_BASE_URL,
+        supabaseKey = BuildKonfig.API_KEY
     ) {
         install(Postgrest)
     } }

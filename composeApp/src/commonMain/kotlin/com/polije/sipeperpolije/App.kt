@@ -30,7 +30,7 @@ import sistempenjadwalanperkuliahanpolitekniknegerijember.composeapp.generated.r
 fun App() {
     val navController = rememberNavController()
 
-    KoinApplication(application = { modules(appModule) }){
+    KoinApplication(application = { modules(appModule()) }){
         MainTheme {
             NavigationRoot(navController = navController)
         }

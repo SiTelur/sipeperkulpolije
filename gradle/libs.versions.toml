@@ -17,6 +17,7 @@ kotlinxSerializationJson = "1.9.0"
 ktorClientAndroid = "3.3.3"
 supabase = "3.3.0"
 koin = "4.1.1"
+buildkonfig = "0.17.1"
 
 [libraries]
 koin-core = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
@@ -43,3 +44,4 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig" }

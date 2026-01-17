@@ -22,16 +22,30 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginAction
+import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginEvent
+import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginViewModel
+import com.polije.sipeperpolije.utils.ObserveAsEvent
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit) {
+fun LoginScreen(loginViewModel : LoginViewModel = koinViewModel(), onLoginSuccess: () -> Unit) {
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    val snackBarState = remember { SnackbarHostState() }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+
+
+    ObserveAsEvent(loginViewModel.events){ event ->
+        when (event){
+            is LoginEvent.LoginSuccess -> {snackBarState.showSnackbar("Login Success")}
+            is LoginEvent.LoginFailed -> {}
+        }
+    }
+
+    Scaffold(snackbarHost = {SnackbarHost(snackBarState)}
+
     ) {
         BoxWithConstraints {
             val isTablet = maxWidth > 600.dp
@@ -64,7 +78,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                             onPasswordChange = { password = it },
                             passwordVisible = passwordVisible,
                             onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
-                            onLoginClick = { }
+                            onLoginClick = {loginViewModel.onAction(LoginAction.OnLoginPressed(email, password))}
                         )
                     }
                 }

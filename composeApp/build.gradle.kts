@@ -1,4 +1,5 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.gradle.declarative.dsl.schema.FqName.Empty.packageName
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import org.jetbrains.compose.internal.utils.getLocalProperty
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -9,6 +10,8 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     kotlin("plugin.serialization") version "2.3.0"
+    alias(libs.plugins.buildkonfig)
+
 }
 
 kotlin {
@@ -93,6 +96,30 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 }
+
+buildkonfig {
+    packageName = "com.polije.sipeperpolije"
+
+    val apiBaseUrl = getLocalProperty("API_BASE_URL")
+    val apiKey = getLocalProperty("API_KEY")
+
+    // WAJIB ADA
+    defaultConfigs {
+        buildConfigField(
+            type = STRING,
+            name = "API_BASE_URL",
+            value = apiBaseUrl
+        )
+
+        buildConfigField(
+            type = STRING,
+            name = "API_KEY",
+            value = apiKey
+        )
+    }
+
+}
+
 
 dependencies {
     debugImplementation(compose.uiTooling)

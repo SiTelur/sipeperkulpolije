@@ -16,11 +16,11 @@ fun NavigationRoot(navController : NavHostController,modifier: Modifier = Modifi
             DashboardScreen()
         }
         composable<Login>{
-            LoginScreen({navController.navigate(Dashboard){
+            LoginScreen{navController.navigate(Dashboard){
                 popUpTo(Login){
                     inclusive = true
                 }
-            } })
+            } }
         }
 
     }
