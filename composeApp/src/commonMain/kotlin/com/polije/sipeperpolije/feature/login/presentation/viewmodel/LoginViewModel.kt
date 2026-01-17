@@ -1,5 +1,6 @@
 package com.polije.sipeperpolije.feature.login.presentation.viewmodel
 
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.polije.sipeperpolije.feature.login.domain.usecase.LoginUseCase
@@ -18,14 +19,24 @@ class LoginViewModel(private val loginUseCase: LoginUseCase) : ViewModel(){
     private val _eventChannel = Channel<LoginEvent>()
     val events = _eventChannel.receiveAsFlow()
 
+    val usernameState = TextFieldState()
+    val passwordState = TextFieldState()
+
     fun onAction(action: LoginAction){
         when(action){
             is LoginAction.OnLoginPressed -> {
                 viewModelScope.launch {
-                    _state.value = state.value.copy(isLoading = true)
-                    delay(500)
-                    _eventChannel.send(LoginEvent.LoginSuccess)
-                    _state.value = state.value.copy(isLoading = false)
+                    runCatching {
+                        _state.value = _state.value.copy(isLoading = true)
+                        loginUseCase.invoke(usernameState.text.toString(), passwordState.text.toString())
+
+                    }.onSuccess {
+                        _state.value = _state.value.copy(isLoading = false)
+                        _eventChannel.send(LoginEvent.LoginSuccess)
+                    }.onFailure {
+                        _state.value = _state.value.copy(isLoading = false)
+                        _eventChannel.send(LoginEvent.LoginFailed(it.message ?: "Unknown error"))
+                    }
                 }
             }
         }
@@ -33,7 +44,7 @@ class LoginViewModel(private val loginUseCase: LoginUseCase) : ViewModel(){
 }
 
 sealed class LoginAction{
-    data class OnLoginPressed(val username: String, val password: String) : LoginAction()
+    object OnLoginPressed : LoginAction()
 }
 
 sealed class LoginEvent{

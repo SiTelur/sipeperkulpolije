@@ -1,4 +1,3 @@
-import org.gradle.declarative.dsl.schema.FqName.Empty.packageName
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import org.jetbrains.compose.internal.utils.getLocalProperty
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
@@ -52,8 +51,10 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(project.dependencies.platform(libs.supabase))
             implementation(libs.postgrest.kt)
+            implementation(libs.auth.kt)
             implementation(libs.koin.core)
             implementation(libs.koin.viewmodel)
+            implementation(libs.kermit)
             }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -103,7 +104,6 @@ buildkonfig {
     val apiBaseUrl = getLocalProperty("API_BASE_URL")
     val apiKey = getLocalProperty("API_KEY")
 
-    // WAJIB ADA
     defaultConfigs {
         buildConfigField(
             type = STRING,
@@ -117,6 +117,21 @@ buildkonfig {
             value = apiKey
         )
     }
+
+    targetConfigs {
+        create("js"){
+            buildConfigField(
+                type = STRING,
+                name = "API_BASE_URL",
+                value = apiBaseUrl)
+
+            buildConfigField(
+                type = STRING,
+                name = "API_KEY",
+                value = apiKey)
+        }
+    }
+
 
 }
 

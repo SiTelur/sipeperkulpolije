@@ -1,16 +1,50 @@
-
 package com.polije.sipeperpolije.feature.login.presentation.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedSecureTextField
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,8 +52,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,20 +63,19 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun LoginScreen(loginViewModel : LoginViewModel = koinViewModel(), onLoginSuccess: () -> Unit) {
+fun LoginScreen(loginViewModel: LoginViewModel = koinViewModel(), onLoginSuccess: () -> Unit) {
 
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     val snackBarState = remember { SnackbarHostState() }
     val state by loginViewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-    
-    ObserveAsEvent(loginViewModel.events){ event ->
-        when (event){
+
+    ObserveAsEvent(loginViewModel.events) { event ->
+        when (event) {
             is LoginEvent.LoginSuccess -> {
-                onLoginSuccess()
+
             }
+
             is LoginEvent.LoginFailed -> {
                 scope.launch {
                     snackBarState.showSnackbar(event.message)
@@ -53,9 +84,9 @@ fun LoginScreen(loginViewModel : LoginViewModel = koinViewModel(), onLoginSucces
         }
     }
 
-    Scaffold(snackbarHost = {SnackbarHost(snackBarState)}
+    Scaffold(snackbarHost = { SnackbarHost(snackBarState) }
 
-    ) {paddingValues ->
+    ) { paddingValues ->
         BoxWithConstraints(modifier = Modifier.padding(paddingValues)) {
             val isTablet = maxWidth > 600.dp
 
@@ -81,14 +112,16 @@ fun LoginScreen(loginViewModel : LoginViewModel = koinViewModel(), onLoginSucces
                         HeaderImage()
                         Headline()
                         Form(
-                            email = email,
-                            onEmailChange = { email = it },
-                            password = password,
-                            onPasswordChange = { password = it },
+                            emailState = loginViewModel.usernameState,
+                            passwordState = loginViewModel.passwordState,
                             passwordVisible = passwordVisible,
                             onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
                             isLoading = state.isLoading,
-                            onLoginClick = {loginViewModel.onAction(LoginAction.OnLoginPressed(email, password))}
+                            onLoginClick = {
+                                loginViewModel.onAction(
+                                    LoginAction.OnLoginPressed
+                                )
+                            }
                         )
                     }
                 }
@@ -171,10 +204,8 @@ private fun Headline() {
 
 @Composable
 private fun Form(
-    email: String,
-    onEmailChange: (String) -> Unit,
-    password: String,
-    onPasswordChange: (String) -> Unit,
+    emailState : TextFieldState,
+    passwordState : TextFieldState,
     passwordVisible: Boolean,
     onPasswordVisibilityChange: () -> Unit,
     isLoading: Boolean,
@@ -187,8 +218,7 @@ private fun Form(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         OutlinedTextField(
-            value = email,
-            onValueChange = onEmailChange,
+            state = emailState,
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Email Institusi") },
             placeholder = { Text("nama@universitas.ac.id") },
@@ -199,19 +229,11 @@ private fun Form(
                 )
             },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
-                focusedLabelColor = MaterialTheme.colorScheme.primary,
-                cursorColor = MaterialTheme.colorScheme.primary,
-                focusedLeadingIconColor = MaterialTheme.colorScheme.primary
-            )
         )
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = onPasswordChange,
+
+        OutlinedSecureTextField(
+            state = passwordState,
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Kata Sandi") },
             placeholder = { Text("••••••••") },
@@ -220,24 +242,18 @@ private fun Form(
                     imageVector = Icons.Default.Lock,
                     contentDescription = null
                 )
-            },
-            trailingIcon = {
-                val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+            }, trailingIcon = {
+                val image =
+                    if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                 IconButton(onClick = onPasswordVisibilityChange) {
-                    Icon(imageVector = image, contentDescription = if (passwordVisible) "Hide password" else "Show password")
+                    Icon(
+                        imageVector = image,
+                        contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                    )
                 }
             },
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
-                focusedLabelColor = MaterialTheme.colorScheme.primary,
-                cursorColor = MaterialTheme.colorScheme.primary,
-                focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
-                focusedTrailingIconColor = MaterialTheme.colorScheme.primary
-            )
+            textObfuscationMode = if (passwordVisible) TextObfuscationMode.Visible else TextObfuscationMode.RevealLastTyped,
         )
 
 
