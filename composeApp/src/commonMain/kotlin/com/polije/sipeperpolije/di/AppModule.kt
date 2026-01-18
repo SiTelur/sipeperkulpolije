@@ -1,8 +1,13 @@
 package com.polije.sipeperpolije.di
 
 import com.polije.sipeperpolije.BuildKonfig
+import com.polije.sipeperpolije.feature.dashboard.data.repository.DashboardRepositoryImpl
+import com.polije.sipeperpolije.feature.dashboard.domain.repository.DashboardRepository
+import com.polije.sipeperpolije.feature.dashboard.domain.usecase.LogoutUseCase
+import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardViewModel
 import com.polije.sipeperpolije.feature.login.data.repository.LoginRepositoryImpl
 import com.polije.sipeperpolije.feature.login.domain.repository.LoginRepository
+import com.polije.sipeperpolije.feature.login.domain.usecase.IsLoginUseCase
 import com.polije.sipeperpolije.feature.login.domain.usecase.LoginUseCase
 import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginViewModel
 import io.github.jan.supabase.auth.Auth
@@ -12,7 +17,6 @@ import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
-import kotlin.js.JsName
 
 fun  appModule() = module {
 
@@ -28,7 +32,12 @@ fun  appModule() = module {
 
     singleOf(::LoginRepositoryImpl) { bind <LoginRepository>() }
     singleOf(::LoginUseCase)
-
+    singleOf(::IsLoginUseCase)
     viewModelOf(::LoginViewModel)
+
+
+    singleOf(::DashboardRepositoryImpl) { bind <DashboardRepository>() }
+    singleOf(::LogoutUseCase)
+    viewModelOf(::DashboardViewModel)
 }
 

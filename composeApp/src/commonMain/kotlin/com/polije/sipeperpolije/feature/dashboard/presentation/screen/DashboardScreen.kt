@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.dashboard
+package com.polije.sipeperpolije.feature.dashboard.presentation.screen
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -18,26 +18,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.CalendarToday
-import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.School
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -63,31 +55,23 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
-import com.polije.sipeperpolije.feature.dashboard.list.DosenScreen
-import com.polije.sipeperpolije.feature.dashboard.list.JadwalScreen
-import com.polije.sipeperpolije.feature.dashboard.list.MataKuliahScreen
-import com.polije.sipeperpolije.feature.dashboard.list.SettingsScreen
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardEvent
+import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardViewModel
+import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginAction
+import com.polije.sipeperpolije.feature.master.DosenScreen
+import com.polije.sipeperpolije.feature.master.JadwalScreen
+import com.polije.sipeperpolije.feature.master.MataKuliahScreen
+import com.polije.sipeperpolije.feature.master.SettingsScreen
+import com.polije.sipeperpolije.utils.ObserveAsEvent
+import org.koin.compose.viewmodel.koinViewModel
 
-
-data class NavItem(
-    val label: String,
-    val icon: ImageVector,
-    val selectedIcon: ImageVector,
-    val route: String
-)
-
-val navigationItems = listOf(
-    NavItem("Dashboard", Icons.Outlined.Dashboard, Icons.Filled.Dashboard, DashboardRoute.Dashboard.route),
-    NavItem("Dosen", Icons.Outlined.School, Icons.Filled.School, DashboardRoute.Dosen.route),
-    NavItem("Matkul", Icons.AutoMirrored.Outlined.MenuBook, Icons.AutoMirrored.Filled.MenuBook, DashboardRoute.MataKuliah.route),
-    NavItem("Jadwal", Icons.Outlined.CalendarToday, Icons.Filled.CalendarToday, DashboardRoute.Jadwal.route),
-    NavItem("Settings", Icons.Outlined.Settings, Icons.Filled.Settings, DashboardRoute.Settings.route)
-)
 
 @Composable
-@Preview
-fun DashboardScreen() {
+fun DashboardScreen(
+    viewModel: DashboardViewModel = koinViewModel(),
+    modifier: Modifier = Modifier,
+    onLogout: () -> Unit
+) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -95,7 +79,21 @@ fun DashboardScreen() {
         mutableIntStateOf(0)
     }
 
+    ObserveAsEvent(viewModel.events) { event ->
+        when (event) {
+            is DashboardEvent.LogoutSuccess -> {
+                onLogout()
+            }
+
+            is DashboardEvent.LogoutFailed -> {
+                print(event.message)
+            }
+        }
+    }
+
+
     NavigationSuiteScaffold(
+        modifier = modifier,
         navigationSuiteItems = {
             navigationItems.forEachIndexed { index, item ->
                 item(
@@ -120,7 +118,7 @@ fun DashboardScreen() {
     ) {
         val graph = navController.createGraph(startDestination = DashboardRoute.Dashboard.route) {
             composable(DashboardRoute.Dashboard.route) {
-                DashboardContent()
+                DashboardContent { viewModel.onAction(LoginAction.OnLoginPressed) }
             }
 
             composable(DashboardRoute.Dosen.route) {
@@ -145,13 +143,13 @@ fun DashboardScreen() {
 }
 
 @Composable
-fun DashboardContent() {
+fun DashboardContent(onLogoutPressed: () -> Unit) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(bottom = 20.dp)
     ) {
-        item { HeaderSection() }
+        item { HeaderSection(true, onLogoutPressed) }
         item { SummaryStatisticsGrid() }
         item { QuickActionButton() }
         item { RecentActivitySection() }
@@ -159,15 +157,18 @@ fun DashboardContent() {
 }
 
 @Composable
-fun HeaderSection() {
+fun HeaderSection(isLogoutLoading: Boolean, onLogoutPressed: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 16.dp), // p-4 pt-6
+            .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             Box(
                 modifier = Modifier
                     .size(56.dp)
@@ -191,29 +192,27 @@ fun HeaderSection() {
                 )
             }
         }
-        Box(contentAlignment = Alignment.TopEnd) {
-            IconButton(onClick = { /* TODO */ }) {
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notifications",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .padding(top = 10.dp, end = 10.dp)
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.error)
+
+
+        IconButton(onClick = onLogoutPressed, enabled = !isLogoutLoading) {
+            if (isLogoutLoading) CircularProgressIndicator(modifier = Modifier.padding(12.dp)) else Icon(
+                imageVector = Icons.AutoMirrored.Filled.Logout,
+                contentDescription = "Logout",
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(24.dp)
             )
         }
+
+
     }
 }
 
 @Composable
 fun SummaryStatisticsGrid() {
-    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             SummaryCard(
                 title = "Dosen Aktif",
@@ -266,8 +265,18 @@ fun SummaryCard(
                 Icon(imageVector = icon, contentDescription = title, tint = iconColor)
             }
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(text = value, color = MaterialTheme.colorScheme.onSurface, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                Text(text = title, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Text(
+                    text = value,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = title,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
     }
@@ -284,15 +293,37 @@ fun ScheduleSummaryCard() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Brush.horizontalGradient(colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.8f))))
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                        )
+                    )
+                )
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(text = "Jadwal Kelas", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                Text(text = "120", color = MaterialTheme.colorScheme.onPrimary, fontSize = 36.sp, fontWeight = FontWeight.Bold)
-                Text(text = "Status: Tergenerate", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
+                Text(
+                    text = "Jadwal Kelas",
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = "120",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontSize = 36.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Status: Tergenerate",
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
             Box(
                 modifier = Modifier
@@ -321,15 +352,31 @@ fun QuickActionButton() {
             .padding(16.dp)
             .height(56.dp),
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(2.dp, brush = Brush.verticalGradient(listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)))),
+        border = BorderStroke(
+            2.dp,
+            brush = Brush.verticalGradient(
+                listOf(
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                )
+            )
+        ),
         colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(imageVector = Icons.Default.Bolt, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-            Text(text = "Generate Jadwal Baru", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+            Icon(
+                imageVector = Icons.Default.Bolt,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "Generate Jadwal Baru",
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
@@ -403,11 +450,25 @@ fun ActivityItem(icon: ImageVector, iconColor: Color, title: String, subtitle: S
                     .background(iconColor.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(imageVector = icon, contentDescription = title, tint = iconColor, modifier = Modifier.size(20.dp))
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    tint = iconColor,
+                    modifier = Modifier.size(20.dp)
+                )
             }
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                Text(text = subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                Text(
+                    text = title,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = subtitle,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp
+                )
             }
         }
     }

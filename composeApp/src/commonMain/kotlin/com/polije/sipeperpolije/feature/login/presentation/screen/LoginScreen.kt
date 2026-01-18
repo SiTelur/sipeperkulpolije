@@ -72,10 +72,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = koinViewModel(), onLoginSuccess
 
     ObserveAsEvent(loginViewModel.events) { event ->
         when (event) {
-            is LoginEvent.LoginSuccess -> {
-
-            }
-
+            is LoginEvent.LoginSuccess -> onLoginSuccess()
             is LoginEvent.LoginFailed -> {
                 scope.launch {
                     snackBarState.showSnackbar(event.message)

@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.dashboard.list
+package com.polije.sipeperpolije.feature.master
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
