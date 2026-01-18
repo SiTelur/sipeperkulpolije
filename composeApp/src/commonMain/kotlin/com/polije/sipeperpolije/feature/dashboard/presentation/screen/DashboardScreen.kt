@@ -62,7 +62,10 @@ import com.polije.sipeperpolije.feature.master.DosenScreen
 import com.polije.sipeperpolije.feature.master.JadwalScreen
 import com.polije.sipeperpolije.feature.master.MataKuliahScreen
 import com.polije.sipeperpolije.feature.master.SettingsScreen
+import com.polije.sipeperpolije.theme.AppTheme
 import com.polije.sipeperpolije.utils.ObserveAsEvent
+import com.polije.sipeperpolije.utils.shimmerEffect
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 
@@ -269,7 +272,8 @@ fun SummaryCard(
                     text = value,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.shimmerEffect()
                 )
                 Text(
                     text = title,
@@ -471,6 +475,20 @@ fun ActivityItem(icon: ImageVector, iconColor: Color, title: String, subtitle: S
                 )
             }
         }
+    }
+}
+
+@Preview()
+@Composable
+fun SummaryCardPreview() {
+    AppTheme {
+        SummaryCard(
+            title = "Dosen Aktif",
+            value = "45",
+            icon = Icons.Default.Group,
+            iconBgColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+            iconColor = MaterialTheme.colorScheme.primary,
+        )
     }
 }
 
