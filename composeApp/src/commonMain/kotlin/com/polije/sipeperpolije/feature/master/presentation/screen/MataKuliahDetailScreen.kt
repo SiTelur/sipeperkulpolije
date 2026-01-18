@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master
+package com.polije.sipeperpolije.feature.master.presentation.screen
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -78,7 +78,14 @@ fun MataKuliahDetailScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Detail Mata Kuliah", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                title = {
+                    Text(
+                        "Detail Mata Kuliah",
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { /* TODO: Handle back navigation */ }) {
                         Icon(Icons.Default.ArrowBackIosNew, contentDescription = "Kembali")
@@ -164,13 +171,28 @@ private fun QuickStats(matkul: MataKuliahDetails) {
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        StatCard(modifier = Modifier.weight(1f), label = "Kode", value = matkul.code, icon = Icons.Default.Fingerprint)
-        StatCard(modifier = Modifier.weight(1f), label = "Kredit", value = "${matkul.sks} SKS", icon = Icons.Default.School)
+        StatCard(
+            modifier = Modifier.weight(1f),
+            label = "Kode",
+            value = matkul.code,
+            icon = Icons.Default.Fingerprint
+        )
+        StatCard(
+            modifier = Modifier.weight(1f),
+            label = "Kredit",
+            value = "${matkul.sks} SKS",
+            icon = Icons.Default.School
+        )
     }
 }
 
 @Composable
-private fun StatCard(modifier: Modifier = Modifier, label: String, value: String, icon: ImageVector) {
+private fun StatCard(
+    modifier: Modifier = Modifier,
+    label: String,
+    value: String,
+    icon: ImageVector
+) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
@@ -182,11 +204,28 @@ private fun StatCard(modifier: Modifier = Modifier, label: String, value: String
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            Text(
+                value,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
             Spacer(modifier = Modifier.height(4.dp))
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
@@ -206,7 +245,11 @@ private fun InfoSection(matkul: MataKuliahDetails) {
             value = matkul.lecturer
         ) {
             IconButton(onClick = { /*TODO*/ }) {
-                Icon(Icons.Default.ChatBubble, contentDescription = "Chat Dosen", tint = MaterialTheme.colorScheme.primary)
+                Icon(
+                    Icons.Default.ChatBubble,
+                    contentDescription = "Chat Dosen",
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
         }
         InfoRow(
@@ -263,8 +306,16 @@ private fun InfoRow(
                 Icon(icon, contentDescription = null, tint = iconColor)
             }
             Column(modifier = Modifier.padding(horizontal = 16.dp).weight(1f)) {
-                Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    value,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
             if (trailingContent != null) {
                 trailingContent()

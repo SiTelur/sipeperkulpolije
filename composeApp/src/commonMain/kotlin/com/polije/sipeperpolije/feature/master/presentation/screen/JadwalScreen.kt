@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master
+package com.polije.sipeperpolije.feature.master.presentation.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -70,9 +70,9 @@ fun JadwalScreen() {
     var selectedFilter by remember { mutableStateOf<GenerationStatus?>(null) }
 
     val filteredLogs = sampleLogs.filter {
-        (it.title.contains(searchQuery, ignoreCase = true) || 
-         it.semester.contains(searchQuery, ignoreCase = true)) &&
-        (selectedFilter == null || it.status == selectedFilter)
+        (it.title.contains(searchQuery, ignoreCase = true) ||
+                it.semester.contains(searchQuery, ignoreCase = true)) &&
+                (selectedFilter == null || it.status == selectedFilter)
     }
 
     Scaffold(
@@ -126,15 +126,17 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
 }
 
 @Composable
-private fun FilterChips(selectedFilter: GenerationStatus?, onFilterSelected: (GenerationStatus?) -> Unit) {
+private fun FilterChips(
+    selectedFilter: GenerationStatus?,
+    onFilterSelected: (GenerationStatus?) -> Unit
+) {
     val filters = listOf(null) + GenerationStatus.entries.toTypedArray()
 
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(filters) {
-            filter ->
+        items(filters) { filter ->
             val isSelected = selectedFilter == filter
             FilterChip(
                 selected = isSelected,
@@ -158,9 +160,17 @@ private fun ListHeader(count: Int) {
             .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("Log Generate", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(
+            "Log Generate",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
         Spacer(modifier = Modifier.width(8.dp))
-        Text("($count Item)", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            "($count Item)",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -182,7 +192,11 @@ private fun LogListItem(log: JadwalLog, onClick: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
-                Text(log.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(
+                    log.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = log.semester,
@@ -198,8 +212,17 @@ private fun LogListItem(log: JadwalLog, onClick: () -> Unit) {
 @Composable
 private fun StatusBadge(status: GenerationStatus) {
     val (icon, color, text) = when (status) {
-        GenerationStatus.SUKSES -> Triple(Icons.Default.CheckCircle, MaterialTheme.colorScheme.tertiary, "Sukses")
-        GenerationStatus.GAGAL -> Triple(Icons.Default.Error, MaterialTheme.colorScheme.error, "Gagal")
+        GenerationStatus.SUKSES -> Triple(
+            Icons.Default.CheckCircle,
+            MaterialTheme.colorScheme.tertiary,
+            "Sukses"
+        )
+
+        GenerationStatus.GAGAL -> Triple(
+            Icons.Default.Error,
+            MaterialTheme.colorScheme.error,
+            "Gagal"
+        )
     }
 
     Row(

@@ -1,6 +1,5 @@
 package com.polije.sipeperpolije.feature.dashboard.presentation.screen
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,20 +19,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
@@ -45,8 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,23 +49,26 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
+import com.polije.sipeperpolije.feature.dashboard.presentation.component.ActivityItem
+import com.polije.sipeperpolije.feature.dashboard.presentation.component.QuickActionButton
+import com.polije.sipeperpolije.feature.dashboard.presentation.component.SummaryCard
+import com.polije.sipeperpolije.feature.dashboard.presentation.component.navigationItems
+import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardAction
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardEvent
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardViewModel
-import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginAction
-import com.polije.sipeperpolije.feature.master.DosenScreen
-import com.polije.sipeperpolije.feature.master.JadwalScreen
-import com.polije.sipeperpolije.feature.master.MataKuliahScreen
-import com.polije.sipeperpolije.feature.master.SettingsScreen
+import com.polije.sipeperpolije.feature.master.presentation.screen.DosenScreen
+import com.polije.sipeperpolije.feature.master.presentation.screen.JadwalScreen
+import com.polije.sipeperpolije.feature.master.presentation.screen.MataKuliahScreen
+import com.polije.sipeperpolije.feature.master.presentation.screen.SettingsScreen
 import com.polije.sipeperpolije.theme.AppTheme
 import com.polije.sipeperpolije.utils.ObserveAsEvent
-import com.polije.sipeperpolije.utils.shimmerEffect
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 
 @Composable
-fun DashboardScreen(
-    viewModel: DashboardViewModel = koinViewModel(),
+fun MainScreen(
+
     modifier: Modifier = Modifier,
     onLogout: () -> Unit
 ) {
@@ -81,19 +78,6 @@ fun DashboardScreen(
     var selectedNavigationIndex by rememberSaveable {
         mutableIntStateOf(0)
     }
-
-    ObserveAsEvent(viewModel.events) { event ->
-        when (event) {
-            is DashboardEvent.LogoutSuccess -> {
-                onLogout()
-            }
-
-            is DashboardEvent.LogoutFailed -> {
-                print(event.message)
-            }
-        }
-    }
-
 
     NavigationSuiteScaffold(
         modifier = modifier,
@@ -121,7 +105,7 @@ fun DashboardScreen(
     ) {
         val graph = navController.createGraph(startDestination = DashboardRoute.Dashboard.route) {
             composable(DashboardRoute.Dashboard.route) {
-                DashboardContent { viewModel.onAction(LoginAction.OnLoginPressed) }
+                DashboardScreen(onLogout = onLogout)
             }
 
             composable(DashboardRoute.Dosen.route) {
@@ -146,16 +130,34 @@ fun DashboardScreen(
 }
 
 @Composable
-fun DashboardContent(onLogoutPressed: () -> Unit) {
+fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel(), onLogout: () -> Unit) {
+
+    ObserveAsEvent(viewModel.events) { event ->
+        when (event) {
+            is DashboardEvent.LogoutSuccess -> {
+                onLogout()
+            }
+
+            is DashboardEvent.LogoutFailed -> {
+                print(event.message)
+            }
+        }
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(bottom = 20.dp)
     ) {
-        item { HeaderSection(true, onLogoutPressed) }
-        item { SummaryStatisticsGrid() }
+        item { HeaderSection(true) { viewModel.onAction(DashboardAction.OnLogoutPressed) } }
+        item {
+            SummaryStatisticsGrid(
+                dosenCount = 10,
+                matkulCount = 20
+            )
+        }
         item { QuickActionButton() }
-        item { RecentActivitySection() }
+        item { RecentActivitySection(true) }
     }
 }
 
@@ -211,7 +213,7 @@ fun HeaderSection(isLogoutLoading: Boolean, onLogoutPressed: () -> Unit) {
 }
 
 @Composable
-fun SummaryStatisticsGrid() {
+fun SummaryStatisticsGrid(dosenCount: Int, matkulCount: Int) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -219,7 +221,7 @@ fun SummaryStatisticsGrid() {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             SummaryCard(
                 title = "Dosen Aktif",
-                value = "45",
+                value = "$dosenCount",
                 icon = Icons.Default.Group,
                 iconBgColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                 iconColor = MaterialTheme.colorScheme.primary,
@@ -227,7 +229,7 @@ fun SummaryStatisticsGrid() {
             )
             SummaryCard(
                 title = "Mata Kuliah",
-                value = "32",
+                value = "$matkulCount",
                 icon = Icons.AutoMirrored.Filled.MenuBook,
                 iconBgColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
                 iconColor = MaterialTheme.colorScheme.secondary,
@@ -238,53 +240,6 @@ fun SummaryStatisticsGrid() {
     }
 }
 
-@Composable
-fun SummaryCard(
-    title: String,
-    value: String,
-    icon: ImageVector,
-    iconBgColor: Color,
-    iconColor: Color,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(iconBgColor),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(imageVector = icon, contentDescription = title, tint = iconColor)
-            }
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = value,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.shimmerEffect()
-                )
-                Text(
-                    text = title,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun ScheduleSummaryCard() {
@@ -347,46 +302,9 @@ fun ScheduleSummaryCard() {
     }
 }
 
-@Composable
-fun QuickActionButton() {
-    OutlinedButton(
-        onClick = { /* TODO */ },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .height(56.dp),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(
-            2.dp,
-            brush = Brush.verticalGradient(
-                listOf(
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                )
-            )
-        ),
-        colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Bolt,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = "Generate Jadwal Baru",
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
 
 @Composable
-fun RecentActivitySection() {
+fun RecentActivitySection(isLoading: Boolean) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         Row(
             modifier = Modifier
@@ -416,67 +334,26 @@ fun RecentActivitySection() {
                 iconColor = MaterialTheme.colorScheme.tertiary,
                 title = "Jadwal T. Informatika Fix",
                 subtitle = "Berhasil digenerate • 2 jam yang lalu",
+                isLoading = isLoading
             )
             ActivityItem(
                 icon = Icons.Default.PersonAdd,
                 iconColor = MaterialTheme.colorScheme.primary,
                 title = "Dosen Baru Ditambahkan",
                 subtitle = "Budi Santoso, M.Kom • 5 jam yang lalu",
+                isLoading = isLoading
             )
             ActivityItem(
                 icon = Icons.Outlined.Edit,
                 iconColor = MaterialTheme.colorScheme.secondary,
                 title = "Update Mata Kuliah",
                 subtitle = "Algoritma Pemrograman • Kemarin",
+                isLoading = isLoading
             )
         }
     }
 }
 
-@Composable
-fun ActivityItem(icon: ImageVector, iconColor: Color, title: String, subtitle: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(iconColor.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    tint = iconColor,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = subtitle,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 12.sp
-                )
-            }
-        }
-    }
-}
 
 @Preview()
 @Composable

@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.dashboard.presentation.screen
+package com.polije.sipeperpolije.feature.dashboard.presentation.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -12,6 +12,7 @@ import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.polije.sipeperpolije.feature.dashboard.presentation.screen.DashboardRoute
 
 data class NavItem(
     val label: String,

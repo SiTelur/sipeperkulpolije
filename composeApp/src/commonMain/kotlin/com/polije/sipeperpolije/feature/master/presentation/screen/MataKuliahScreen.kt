@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master
+package com.polije.sipeperpolije.feature.master.presentation.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -54,9 +54,9 @@ data class MataKuliah(
 
 val sampleMataKuliahList = listOf(
     MataKuliah("IF2024", "Pemrograman Web", 3, "Dr. Budi Santoso, M.Kom"),
-    MataKuliah("IF3050", "Algoritma & Struktur Data", 4, "Prof. Siti Aminah, Ph.D",),
-    MataKuliah("IF1010", "Dasar Sistem Komputer", 3, "Bambang S.T., M.T.", ),
-    MataKuliah("IF2200", "Matematika Diskrit", 3, "Dr. Eka Putra", ),
+    MataKuliah("IF3050", "Algoritma & Struktur Data", 4, "Prof. Siti Aminah, Ph.D"),
+    MataKuliah("IF1010", "Dasar Sistem Komputer", 3, "Bambang S.T., M.T."),
+    MataKuliah("IF2200", "Matematika Diskrit", 3, "Dr. Eka Putra"),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +64,10 @@ val sampleMataKuliahList = listOf(
 fun MataKuliahScreen() {
     var searchQuery by remember { mutableStateOf("") }
     val filteredList = sampleMataKuliahList.filter {
-        it.name.contains(searchQuery, ignoreCase = true) || it.code.contains(searchQuery, ignoreCase = true)
+        it.name.contains(searchQuery, ignoreCase = true) || it.code.contains(
+            searchQuery,
+            ignoreCase = true
+        )
     }
 
     Scaffold(
@@ -73,7 +76,11 @@ fun MataKuliahScreen() {
                 title = { Text("Daftar Mata Kuliah", fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = { /* TODO: Handle add action */ }) {
-                        Icon(Icons.Default.Add, contentDescription = "Tambah Mata Kuliah", tint = MaterialTheme.colorScheme.primary)
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Tambah Mata Kuliah",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -136,7 +143,7 @@ private fun MataKuliahListItem(mataKuliah: MataKuliah) {
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             CourseIcon(code = mataKuliah.code)
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Row(
                     verticalAlignment = Alignment.Top,

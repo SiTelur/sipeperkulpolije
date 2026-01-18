@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master
+package com.polije.sipeperpolije.feature.master.presentation.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

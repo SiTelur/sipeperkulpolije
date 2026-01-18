@@ -3,7 +3,6 @@ package com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.polije.sipeperpolije.feature.dashboard.domain.usecase.LogoutUseCase
-import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginAction
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,9 +16,9 @@ class DashboardViewModel(private val logoutUseCase: LogoutUseCase) : ViewModel()
     private val _events = Channel<DashboardEvent>()
     val events = _events.receiveAsFlow()
 
-    fun onAction(loginAction: LoginAction) {
-        when (loginAction) {
-            is LoginAction.OnLoginPressed -> {
+    fun onAction(dashboardAction: DashboardAction) {
+        when (dashboardAction) {
+            is DashboardAction.OnLogoutPressed -> {
                 viewModelScope.launch {
                     _state.value = _state.value.copy(isLogoutLoading = true)
                     runCatching {
