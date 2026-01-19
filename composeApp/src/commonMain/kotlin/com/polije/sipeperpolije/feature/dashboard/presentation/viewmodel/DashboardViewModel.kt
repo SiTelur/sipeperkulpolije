@@ -2,6 +2,7 @@ package com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.polije.sipeperpolije.feature.dashboard.domain.usecase.FetchDashboardUseCase
 import com.polije.sipeperpolije.feature.dashboard.domain.usecase.LogoutUseCase
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,12 +10,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-class DashboardViewModel(private val logoutUseCase: LogoutUseCase) : ViewModel() {
+class DashboardViewModel(
+    private val logoutUseCase: LogoutUseCase,
+    private val fetchDashboardUseCase: FetchDashboardUseCase
+) : ViewModel() {
     private val _state = MutableStateFlow(DashboardState())
     val state = _state.asStateFlow()
 
     private val _events = Channel<DashboardEvent>()
     val events = _events.receiveAsFlow()
+
+    init {
+        fetchDashboard()
+    }
 
     fun onAction(dashboardAction: DashboardAction) {
         when (dashboardAction) {
@@ -36,6 +44,26 @@ class DashboardViewModel(private val logoutUseCase: LogoutUseCase) : ViewModel()
         }
     }
 
+    private fun fetchDashboard() {
+        _state.value = _state.value.copy(isLoading = true)
+        viewModelScope.launch {
+            fetchDashboardUseCase().onSuccess {
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    dosenCount = it.dosenActiveCount,
+                    matkulCount = it.matkulActiveCount
+                )
+            }.onFailure {
+                _state.value = _state.value.copy(isLoading = false)
+            }
+        }
+    }
+
 }
 
-data class DashboardState(val isLogoutLoading: Boolean = false)
+data class DashboardState(
+    val dosenCount: Int = 0,
+    val matkulCount: Int = 0,
+    val isLoading: Boolean = false,
+    val isLogoutLoading: Boolean = false
+)

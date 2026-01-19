@@ -32,6 +32,7 @@ fun SummaryCard(
     icon: ImageVector,
     iconBgColor: Color,
     iconColor: Color,
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -56,11 +57,11 @@ fun SummaryCard(
             }
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = value,
+                    text = if (!isLoading) value else "",
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.shimmerEffect()
+                    modifier = if (isLoading) Modifier.shimmerEffect() else Modifier
                 )
                 Text(
                     text = title,

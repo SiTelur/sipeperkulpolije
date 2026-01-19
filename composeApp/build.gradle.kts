@@ -19,18 +19,18 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     js {
         browser()
         binaries.executable()
     }
-    
+
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()
         binaries.executable()
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
@@ -51,14 +51,19 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(project.dependencies.platform(libs.supabase))
             implementation(libs.postgrest.kt)
+            implementation(libs.ktor.client.core)
             implementation(libs.auth.kt)
             implementation(libs.koin.core)
             implementation(libs.koin.viewmodel)
             implementation(libs.kermit)
-            }
+        }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+        jsMain.dependencies {
+            implementation("io.ktor:ktor-client-js:3.3.3")
+        }
+
     }
 }
 
@@ -119,16 +124,18 @@ buildkonfig {
     }
 
     targetConfigs {
-        create("js"){
+        create("js") {
             buildConfigField(
                 type = STRING,
                 name = "API_BASE_URL",
-                value = apiBaseUrl)
+                value = apiBaseUrl
+            )
 
             buildConfigField(
                 type = STRING,
                 name = "API_KEY",
-                value = apiKey)
+                value = apiKey
+            )
         }
     }
 

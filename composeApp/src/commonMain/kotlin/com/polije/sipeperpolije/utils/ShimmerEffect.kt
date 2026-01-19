@@ -5,9 +5,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,19 +21,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun Shimmer(
-    isLoading: Boolean,
-    contentAfterLoading: @Composable () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    if (isLoading) {
-        Row(modifier = modifier) {
-            Box(Modifier.size(100.dp))
-        }
-    } else {
-        contentAfterLoading()
-    }
-}
+
 
 fun Modifier.shimmerEffect(): Modifier = composed {
     var size by remember { mutableStateOf(IntSize.Zero) }

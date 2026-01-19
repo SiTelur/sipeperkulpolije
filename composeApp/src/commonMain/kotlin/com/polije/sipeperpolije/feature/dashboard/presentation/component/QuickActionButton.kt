@@ -22,9 +22,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun QuickActionButton() {
+fun QuickActionButton(onClick: () -> Unit) {
     OutlinedButton(
-        onClick = { /* TODO */ },
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)

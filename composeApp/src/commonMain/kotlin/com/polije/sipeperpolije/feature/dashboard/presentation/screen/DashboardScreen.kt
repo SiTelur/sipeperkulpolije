@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -68,7 +69,6 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun MainScreen(
-
     modifier: Modifier = Modifier,
     onLogout: () -> Unit
 ) {
@@ -132,6 +132,8 @@ fun MainScreen(
 @Composable
 fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel(), onLogout: () -> Unit) {
 
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
     ObserveAsEvent(viewModel.events) { event ->
         when (event) {
             is DashboardEvent.LogoutSuccess -> {
@@ -149,15 +151,16 @@ fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel(), onLogout: (
             .fillMaxSize()
             .padding(bottom = 20.dp)
     ) {
-        item { HeaderSection(true) { viewModel.onAction(DashboardAction.OnLogoutPressed) } }
+        item { HeaderSection(state.isLogoutLoading) { viewModel.onAction(DashboardAction.OnLogoutPressed) } }
         item {
             SummaryStatisticsGrid(
-                dosenCount = 10,
-                matkulCount = 20
+                dosenCount = state.dosenCount,
+                matkulCount = state.matkulCount,
+                isLoading = state.isLoading
             )
         }
-        item { QuickActionButton() }
-        item { RecentActivitySection(true) }
+        item { QuickActionButton({}) }
+        item { RecentActivitySection(isLoading = state.isLoading) }
     }
 }
 
@@ -213,13 +216,14 @@ fun HeaderSection(isLogoutLoading: Boolean, onLogoutPressed: () -> Unit) {
 }
 
 @Composable
-fun SummaryStatisticsGrid(dosenCount: Int, matkulCount: Int) {
+fun SummaryStatisticsGrid(isLoading: Boolean, dosenCount: Int, matkulCount: Int) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             SummaryCard(
+                isLoading = isLoading,
                 title = "Dosen Aktif",
                 value = "$dosenCount",
                 icon = Icons.Default.Group,
@@ -228,6 +232,7 @@ fun SummaryStatisticsGrid(dosenCount: Int, matkulCount: Int) {
                 modifier = Modifier.weight(1f),
             )
             SummaryCard(
+                isLoading = isLoading,
                 title = "Mata Kuliah",
                 value = "$matkulCount",
                 icon = Icons.AutoMirrored.Filled.MenuBook,
