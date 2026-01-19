@@ -1,4 +1,5 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
+import org.jetbrains.compose.internal.utils.getLocalProperty
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -7,6 +8,9 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    kotlin("plugin.serialization") version "2.3.0"
+    alias(libs.plugins.buildkonfig)
+
 }
 
 kotlin {
@@ -15,18 +19,18 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     js {
         browser()
         binaries.executable()
     }
-    
+
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()
         binaries.executable()
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
@@ -44,10 +48,22 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.compose.navigation)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(project.dependencies.platform(libs.supabase))
+            implementation(libs.postgrest.kt)
+            implementation(libs.ktor.client.core)
+            implementation(libs.auth.kt)
+            implementation(libs.koin.core)
+            implementation(libs.koin.viewmodel)
+            implementation(libs.kermit)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+        jsMain.dependencies {
+            implementation("io.ktor:ktor-client-js:3.3.3")
+        }
+
     }
 }
 
@@ -61,6 +77,12 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+
+        val apiBaseUrl = getLocalProperty("API_BASE_URL")
+        val apiKey = getLocalProperty("API_KEY")
+
+        buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
+        buildConfigField("String", "API_KEY", "\"$apiKey\"")
     }
     packaging {
         resources {
@@ -72,11 +94,54 @@ android {
             isMinifyEnabled = false
         }
     }
+    buildFeatures {
+        buildConfig = true
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 }
+
+buildkonfig {
+    packageName = "com.polije.sipeperpolije"
+
+    val apiBaseUrl = getLocalProperty("API_BASE_URL")
+    val apiKey = getLocalProperty("API_KEY")
+
+    defaultConfigs {
+        buildConfigField(
+            type = STRING,
+            name = "API_BASE_URL",
+            value = apiBaseUrl
+        )
+
+        buildConfigField(
+            type = STRING,
+            name = "API_KEY",
+            value = apiKey
+        )
+    }
+
+    targetConfigs {
+        create("js") {
+            buildConfigField(
+                type = STRING,
+                name = "API_BASE_URL",
+                value = apiBaseUrl
+            )
+
+            buildConfigField(
+                type = STRING,
+                name = "API_KEY",
+                value = apiKey
+            )
+        }
+    }
+
+
+}
+
 
 dependencies {
     debugImplementation(compose.uiTooling)
