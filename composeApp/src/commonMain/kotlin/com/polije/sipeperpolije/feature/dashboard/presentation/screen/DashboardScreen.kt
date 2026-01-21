@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,22 +15,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
@@ -50,12 +51,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
+import com.polije.sipeperpolije.LocalSnackbarHostState
 import com.polije.sipeperpolije.feature.dashboard.presentation.component.ActivityItem
 import com.polije.sipeperpolije.feature.dashboard.presentation.component.QuickActionButton
+import com.polije.sipeperpolije.feature.dashboard.presentation.component.ShimmerActivityItem
 import com.polije.sipeperpolije.feature.dashboard.presentation.component.SummaryCard
 import com.polije.sipeperpolije.feature.dashboard.presentation.component.navigationItems
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardAction
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardEvent
+import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardLog
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardViewModel
 import com.polije.sipeperpolije.feature.master.presentation.screen.DosenScreen
 import com.polije.sipeperpolije.feature.master.presentation.screen.JadwalScreen
@@ -78,6 +82,7 @@ fun MainScreen(
     var selectedNavigationIndex by rememberSaveable {
         mutableIntStateOf(0)
     }
+
 
     NavigationSuiteScaffold(
         modifier = modifier,
@@ -133,35 +138,47 @@ fun MainScreen(
 fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel(), onLogout: () -> Unit) {
 
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackBarState = LocalSnackbarHostState.current
 
     ObserveAsEvent(viewModel.events) { event ->
         when (event) {
             is DashboardEvent.LogoutSuccess -> {
+                snackBarState.showSnackbar("User Logout")
                 onLogout()
             }
 
             is DashboardEvent.LogoutFailed -> {
                 print(event.message)
             }
+
+            is DashboardEvent.FetchDashboardFailed -> {
+                snackBarState.showSnackbar(event.message)
+            }
         }
     }
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = 20.dp)
-    ) {
-        item { HeaderSection(state.isLogoutLoading) { viewModel.onAction(DashboardAction.OnLogoutPressed) } }
-        item {
+    Scaffold(snackbarHost = { SnackbarHost(snackBarState) }) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 20.dp)
+        ) {
+            HeaderSection(state.isLogoutLoading) { viewModel.onAction(DashboardAction.OnLogoutPressed) }
+
             SummaryStatisticsGrid(
                 dosenCount = state.dosenCount,
                 matkulCount = state.matkulCount,
                 isLoading = state.isLoading
             )
+            QuickActionButton({})
+            RecentActivitySection(
+                isLoading = state.isLoading,
+                items = state.list,
+            )
         }
-        item { QuickActionButton({}) }
-        item { RecentActivitySection(isLoading = state.isLoading) }
     }
+
+
 }
 
 @Composable
@@ -309,8 +326,12 @@ fun ScheduleSummaryCard() {
 
 
 @Composable
-fun RecentActivitySection(isLoading: Boolean) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+fun RecentActivitySection(
+    items: List<DashboardLog>,
+    isLoading: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -333,28 +354,41 @@ fun RecentActivitySection(isLoading: Boolean) {
             )
         }
         Spacer(Modifier.height(8.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            ActivityItem(
-                icon = Icons.Default.CheckCircle,
-                iconColor = MaterialTheme.colorScheme.tertiary,
-                title = "Jadwal T. Informatika Fix",
-                subtitle = "Berhasil digenerate • 2 jam yang lalu",
-                isLoading = isLoading
-            )
-            ActivityItem(
-                icon = Icons.Default.PersonAdd,
-                iconColor = MaterialTheme.colorScheme.primary,
-                title = "Dosen Baru Ditambahkan",
-                subtitle = "Budi Santoso, M.Kom • 5 jam yang lalu",
-                isLoading = isLoading
-            )
-            ActivityItem(
-                icon = Icons.Outlined.Edit,
-                iconColor = MaterialTheme.colorScheme.secondary,
-                title = "Update Mata Kuliah",
-                subtitle = "Algoritma Pemrograman • Kemarin",
-                isLoading = isLoading
-            )
+        when {
+            isLoading -> {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(3) {
+                        ShimmerActivityItem(isLoading, contentAfterLoading = {})
+                    }
+                }
+            }
+
+            items.isEmpty() -> {
+                Text(
+                    text = "Belum ada aktivitas",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            else -> {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 8.dp)
+                ) {
+                    items(
+                        items = items,
+                        key = { it.id }
+                    ) { item ->
+                        ActivityItem(
+                            icon = item.icon,
+                            iconColor = MaterialTheme.colorScheme.primary,
+                            title = item.title,
+                            subtitle = item.subTitle
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -374,6 +408,13 @@ fun SummaryCardPreview() {
     }
 }
 
+@Preview
+@Composable
+fun DashboardRoutePreview() {
+    AppTheme {
+
+    }
+}
 
 sealed class DashboardRoute(val route: String) {
     object Dashboard : DashboardRoute("dashboard")

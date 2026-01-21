@@ -1,5 +1,6 @@
 package com.polije.sipeperpolije.di
 
+import androidx.compose.material3.SnackbarHostState
 import com.polije.sipeperpolije.BuildKonfig
 import com.polije.sipeperpolije.feature.dashboard.data.repository.DashboardRepositoryImpl
 import com.polije.sipeperpolije.feature.dashboard.domain.repository.DashboardRepository
@@ -36,6 +37,10 @@ fun appModule() = module {
             }
             defaultSerializer = KotlinXSerializer()
         }
+    }
+
+    single {
+        SnackbarHostState()
     }
 
     singleOf(::LoginRepositoryImpl) { bind<LoginRepository>() }

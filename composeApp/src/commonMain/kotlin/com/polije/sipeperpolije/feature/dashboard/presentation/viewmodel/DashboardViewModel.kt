@@ -51,10 +51,12 @@ class DashboardViewModel(
                 _state.value = _state.value.copy(
                     isLoading = false,
                     dosenCount = it.dosenActiveCount,
-                    matkulCount = it.matkulActiveCount
+                    matkulCount = it.matkulActiveCount,
+                    list = it.recentActivities.map { value -> value.toUI() }
                 )
             }.onFailure {
                 _state.value = _state.value.copy(isLoading = false)
+                _events.send(DashboardEvent.FetchDashboardFailed(it.message ?: "Unknown error"))
             }
         }
     }
@@ -65,5 +67,6 @@ data class DashboardState(
     val dosenCount: Int = 0,
     val matkulCount: Int = 0,
     val isLoading: Boolean = false,
-    val isLogoutLoading: Boolean = false
+    val isLogoutLoading: Boolean = false,
+    val list: List<DashboardLog> = emptyList()
 )

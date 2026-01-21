@@ -35,16 +35,14 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
 @Composable
-fun ActivityItem(
+fun ShimmerActivityItem(
     isLoading: Boolean,
-    icon: ImageVector,
-    iconColor: Color,
-    title: String,
-    subtitle: String
+    contentAfterLoading: @Composable () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     if (isLoading) {
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
@@ -59,7 +57,8 @@ fun ActivityItem(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(iconColor.copy(alpha = 0.1f)).shimmerEffect(),
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .shimmerEffect(),
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
@@ -80,56 +79,67 @@ fun ActivityItem(
             }
         }
     } else {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+        contentAfterLoading()
+    }
+}
+
+@Composable
+fun ActivityItem(
+    icon: ImageVector,
+    iconColor: Color,
+    title: String,
+    subtitle: String
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                modifier = Modifier.padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(iconColor.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(iconColor.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = title,
-                        tint = iconColor,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = title,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = subtitle,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 12.sp
-                    )
-                }
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    tint = iconColor,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = subtitle,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp
+                )
             }
         }
     }
 }
+
 
 @Composable
 @Preview
 fun ActivityItemLoadingPreview() {
     AppTheme {
         ActivityItem(
-            isLoading = true,
+
             icon = Icons.Default.CheckCircle,
             iconColor = MaterialTheme.colorScheme.tertiary,
             title = "Jadwal T. Informatika Fix",
@@ -143,7 +153,7 @@ fun ActivityItemLoadingPreview() {
 fun ActivityItemShowingPreview() {
     AppTheme {
         ActivityItem(
-            isLoading = false,
+
             icon = Icons.Default.CheckCircle,
             iconColor = MaterialTheme.colorScheme.tertiary,
             title = "Jadwal T. Informatika Fix",

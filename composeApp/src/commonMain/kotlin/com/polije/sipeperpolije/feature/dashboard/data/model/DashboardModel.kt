@@ -56,6 +56,7 @@ fun ActivityItemModel.toEntity(): ActivityItemEntity {
     )
 
     return ActivityItemEntity(
+        id = id,
         action = action,
         title = title,
         subTitle = subtitle,
@@ -66,6 +67,7 @@ fun ActivityItemModel.toEntity(): ActivityItemEntity {
 
 @Serializable
 data class ActivityItemModel(
+    val id: String,
     val action: String,
     @SerialName("changed_at")
     val changedAt: Instant,
@@ -73,8 +75,8 @@ data class ActivityItemModel(
     val dataOld: Map<String, JsonElement>? = null,
     @SerialName("data_new")
     val dataNew: Map<String, JsonElement>? = null,
-    @SerialName("change_column")
-    val changeColumn: List<String> = listOf(),
+    @SerialName("changed_columns")
+    val changeColumn: List<String>?,
     @SerialName("table_name")
     val tableName: String
 )
