@@ -130,8 +130,7 @@ private fun HeaderImage() {
             .fillMaxWidth()
             .height(180.dp)
     ) {
-        // Image loading from a URL requires a library like Coil, which is not available here.
-        // A placeholder background is used instead.
+
         Box(
             modifier = Modifier
                 .fillMaxSize()

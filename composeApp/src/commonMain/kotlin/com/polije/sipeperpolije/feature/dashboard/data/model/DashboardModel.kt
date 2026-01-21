@@ -4,11 +4,10 @@ import com.polije.sipeperpolije.feature.dashboard.domain.entity.ActivityAction
 import com.polije.sipeperpolije.feature.dashboard.domain.entity.ActivityItemEntity
 import com.polije.sipeperpolije.feature.dashboard.domain.entity.DashboardEntity
 import com.polije.sipeperpolije.utils.asReadableString
-import kotlinx.datetime.periodUntil
+import com.polije.sipeperpolije.utils.toRelativeTime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
-import kotlin.time.Clock
 import kotlin.time.Instant
 
 @Serializable
@@ -50,17 +49,14 @@ fun ActivityItemModel.toEntity(): ActivityItemEntity {
         ActivityAction.NONE -> dataNew?.getValue("nama")?.asReadableString() ?: ""
     }
 
-    val changeTime = changedAt.periodUntil(
-        Clock.System.now(),
-        timeZone = kotlinx.datetime.TimeZone.currentSystemDefault()
-    )
+    val changeTime = changedAt.toRelativeTime()
 
     return ActivityItemEntity(
         id = id,
         action = action,
         title = title,
         subTitle = subtitle,
-        changeTime = changeTime.toString()
+        changeTime = changeTime
     )
 
 }

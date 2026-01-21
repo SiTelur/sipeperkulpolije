@@ -56,6 +56,7 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.viewmodel)
             implementation(libs.kermit)
+            implementation(libs.androidx.paging.compose)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

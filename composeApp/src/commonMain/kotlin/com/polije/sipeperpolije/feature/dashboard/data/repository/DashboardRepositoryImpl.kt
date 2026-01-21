@@ -29,7 +29,6 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                 count(Count.EXACT)
                 head
             }.countOrNull()?.toInt()
-
         val recentActivities = supabase
             .from("audit_log")
             .select {

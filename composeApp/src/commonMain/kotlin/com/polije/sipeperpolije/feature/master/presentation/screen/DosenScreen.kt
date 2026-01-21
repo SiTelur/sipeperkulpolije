@@ -6,13 +6,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -41,7 +39,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.polije.sipeperpolije.feature.master.presentation.viewmodel.ListDosenViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 data class Dosen(val name: String, val nidn: String, val faculty: String, val initials: String)
 
@@ -54,9 +54,10 @@ val sampleDosenList = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
-fun DosenScreen() {
+fun DosenScreen(dosenListViewModel: ListDosenViewModel = koinViewModel()) {
     var searchQuery by remember { mutableStateOf("") }
+
+    val listDosen = dosenListViewModel.dosenPaging.collectAsLazyPagingItems()
 
     Scaffold(
         topBar = {
@@ -75,13 +76,8 @@ fun DosenScreen() {
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
             SearchBar(searchQuery) { searchQuery = it }
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                item {
-                    ListHeader(sampleDosenList.size)
-                }
-                items(sampleDosenList) { dosen ->
-                    DosenListItem(dosen)
-                }
+            LazyColumn {
+                item { ListHeader(listDosen.itemCount) }
             }
         }
     }
@@ -113,7 +109,7 @@ private fun ListHeader(count: Int) {
 }
 
 @Composable
-private fun DosenListItem(dosen: Dosen) {
+private fun DosenListItem(initials: String, name: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -129,7 +125,7 @@ private fun DosenListItem(dosen: Dosen) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = dosen.initials,
+                text = initials,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.primary
@@ -140,21 +136,21 @@ private fun DosenListItem(dosen: Dosen) {
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = dosen.name,
+                text = name,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(
-                text = "NIDN: ${dosen.nidn}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = dosen.faculty,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-            )
+//            Text(
+//                text = "NIDN: ${dosen.nidn}",
+//                style = MaterialTheme.typography.bodyMedium,
+//                color = MaterialTheme.colorScheme.onSurfaceVariant
+//            )
+//            Text(
+//                text = dosen.faculty,
+//                style = MaterialTheme.typography.bodySmall,
+//                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+//            )
         }
 
         IconButton(onClick = { /* TODO: Handle more options */ }) {

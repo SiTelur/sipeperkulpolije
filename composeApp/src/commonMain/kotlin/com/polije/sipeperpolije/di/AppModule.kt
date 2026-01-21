@@ -12,6 +12,10 @@ import com.polije.sipeperpolije.feature.login.domain.repository.LoginRepository
 import com.polije.sipeperpolije.feature.login.domain.usecase.IsLoginUseCase
 import com.polije.sipeperpolije.feature.login.domain.usecase.LoginUseCase
 import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginViewModel
+import com.polije.sipeperpolije.feature.master.data.repository.MasterRepositoryImpl
+import com.polije.sipeperpolije.feature.master.domain.repository.MasterRepository
+import com.polije.sipeperpolije.feature.master.domain.usecase.ListDosenPagingUseCase
+import com.polije.sipeperpolije.feature.master.presentation.viewmodel.ListDosenViewModel
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.FlowType
 import io.github.jan.supabase.createSupabaseClient
@@ -19,6 +23,7 @@ import io.github.jan.supabase.logging.LogLevel
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import org.koin.core.module.dsl.bind
+import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -53,5 +58,9 @@ fun appModule() = module {
     singleOf(::LogoutUseCase)
     singleOf(::FetchDashboardUseCase)
     viewModelOf(::DashboardViewModel)
+
+    singleOf(::MasterRepositoryImpl) { bind<MasterRepository>() }
+    factoryOf(::ListDosenPagingUseCase)
+    viewModelOf(::ListDosenViewModel)
 }
 
