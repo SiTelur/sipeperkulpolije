@@ -1,8 +1,15 @@
 package com.polije.sipeperpolije.feature.dashboard.data.model
 
+import com.polije.sipeperpolije.feature.dashboard.domain.entity.ActivityAction
 import com.polije.sipeperpolije.feature.dashboard.domain.entity.ActivityItemEntity
 import com.polije.sipeperpolije.feature.dashboard.domain.entity.DashboardEntity
+import com.polije.sipeperpolije.utils.asReadableString
+import kotlinx.datetime.periodUntil
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Serializable
 data class DashboardModel(
@@ -18,10 +25,57 @@ fun DashboardModel.toEntity(): DashboardEntity = DashboardEntity(
     this.isLastGeneratedScheduleSuccess,
     this.recentActivity.map { it.toEntity() })
 
-fun ActivityItemModel.toEntity(): ActivityItemEntity = ActivityItemEntity(this.title, this.subtitle)
+fun ActivityItemModel.toEntity(): ActivityItemEntity {
+    val action = when (this.action) {
+        "INSERT" -> ActivityAction.INSERT
+        "UPDATE" -> ActivityAction.UPDATE
+        "DELETE" -> ActivityAction.DELETE
+        else -> ActivityAction.NONE
+    }
+
+    val normalizeTableName =
+        tableName.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+    val title = when (action) {
+
+        ActivityAction.INSERT -> "$normalizeTableName Baru Ditambahkan"
+        ActivityAction.UPDATE -> "Update Data $normalizeTableName"
+        ActivityAction.DELETE -> "Data $normalizeTableName Dihapus"
+        ActivityAction.NONE -> normalizeTableName
+    }
+
+    val subtitle = when (action) {
+        ActivityAction.INSERT -> dataNew?.getValue("nama")?.asReadableString() ?: ""
+        ActivityAction.UPDATE -> dataOld?.getValue("nama")?.asReadableString() ?: ""
+        ActivityAction.DELETE -> dataOld?.getValue("nama")?.asReadableString() ?: ""
+        ActivityAction.NONE -> dataNew?.getValue("nama")?.asReadableString() ?: ""
+    }
+
+    val changeTime = changedAt.periodUntil(
+        Clock.System.now(),
+        timeZone = kotlinx.datetime.TimeZone.currentSystemDefault()
+    )
+
+    return ActivityItemEntity(
+        action = action,
+        title = title,
+        subTitle = subtitle,
+        changeTime = changeTime.toString()
+    )
+
+}
 
 @Serializable
 data class ActivityItemModel(
-    val title: String,
-    val subtitle: String
+    val action: String,
+    @SerialName("changed_at")
+    val changedAt: Instant,
+    @SerialName("data_old")
+    val dataOld: Map<String, JsonElement>? = null,
+    @SerialName("data_new")
+    val dataNew: Map<String, JsonElement>? = null,
+    @SerialName("change_column")
+    val changeColumn: List<String> = listOf(),
+    @SerialName("table_name")
+    val tableName: String
 )
+

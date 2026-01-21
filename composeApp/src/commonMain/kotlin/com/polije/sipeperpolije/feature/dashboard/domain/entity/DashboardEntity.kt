@@ -8,6 +8,12 @@ data class DashboardEntity(
 )
 
 data class ActivityItemEntity(
+    val action: ActivityAction,
     val title: String,
-    val subTitle: String
+    val subTitle: String,
+    val changeTime: String
 )
+
+enum class ActivityAction {
+    INSERT, UPDATE, DELETE, NONE
+}
