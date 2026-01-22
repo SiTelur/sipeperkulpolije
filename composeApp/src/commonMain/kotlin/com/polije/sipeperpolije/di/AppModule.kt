@@ -1,6 +1,5 @@
 package com.polije.sipeperpolije.di
 
-import androidx.compose.material3.SnackbarHostState
 import com.polije.sipeperpolije.BuildKonfig
 import com.polije.sipeperpolije.feature.dashboard.data.repository.DashboardRepositoryImpl
 import com.polije.sipeperpolije.feature.dashboard.domain.repository.DashboardRepository
@@ -15,7 +14,7 @@ import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginViewMo
 import com.polije.sipeperpolije.feature.master.data.repository.MasterRepositoryImpl
 import com.polije.sipeperpolije.feature.master.domain.repository.MasterRepository
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListDosenPagingUseCase
-import com.polije.sipeperpolije.feature.master.presentation.viewmodel.ListDosenViewModel
+import com.polije.sipeperpolije.feature.master.presentation.viewmodel.dosen.ListDosenViewModel
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.FlowType
 import io.github.jan.supabase.createSupabaseClient
@@ -44,23 +43,19 @@ fun appModule() = module {
         }
     }
 
-    single {
-        SnackbarHostState()
-    }
-
-    singleOf(::LoginRepositoryImpl) { bind<LoginRepository>() }
+    factoryOf(::LoginRepositoryImpl) { bind<LoginRepository>() }
     singleOf(::LoginUseCase)
     singleOf(::IsLoginUseCase)
     viewModelOf(::LoginViewModel)
 
 
-    singleOf(::DashboardRepositoryImpl) { bind<DashboardRepository>() }
+    factoryOf(::DashboardRepositoryImpl) { bind<DashboardRepository>() }
     singleOf(::LogoutUseCase)
     singleOf(::FetchDashboardUseCase)
     viewModelOf(::DashboardViewModel)
 
-    singleOf(::MasterRepositoryImpl) { bind<MasterRepository>() }
-    factoryOf(::ListDosenPagingUseCase)
+    factoryOf(::MasterRepositoryImpl) { bind<MasterRepository>() }
+    singleOf(::ListDosenPagingUseCase)
     viewModelOf(::ListDosenViewModel)
 }
 
