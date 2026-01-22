@@ -1,6 +1,5 @@
 package com.polije.sipeperpolije.feature.dashboard.data.repository
 
-import com.polije.sipeperpolije.core.log
 import com.polije.sipeperpolije.feature.dashboard.data.model.ActivityItemModel
 import com.polije.sipeperpolije.feature.dashboard.data.model.DashboardModel
 import com.polije.sipeperpolije.feature.dashboard.domain.repository.DashboardRepository
@@ -36,9 +35,6 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                 limit(3)
             }
             .decodeList<ActivityItemModel>()
-
-        log("dosenCount: $dosenCount, matkulCount: $matkulCount, recentActivities: $recentActivities")
-
 
         return Result.success(
             DashboardModel(

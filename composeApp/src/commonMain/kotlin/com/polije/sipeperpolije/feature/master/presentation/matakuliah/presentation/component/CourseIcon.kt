@@ -26,14 +26,14 @@ fun CourseIcon(code: String) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "CODE",
-                fontSize = 10.sp,
+                text = "KODE",
+                fontSize = 8.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
                 text = code,
-                fontSize = 14.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.primary
             )
