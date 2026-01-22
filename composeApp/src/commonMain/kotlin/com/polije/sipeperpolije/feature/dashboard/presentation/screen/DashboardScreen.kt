@@ -61,9 +61,9 @@ import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.Dashboa
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardEvent
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardLog
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardViewModel
-import com.polije.sipeperpolije.feature.master.presentation.screen.DosenScreen
+import com.polije.sipeperpolije.feature.master.presentation.dosen.screen.DosenScreen
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.screens.MataKuliahScreen
 import com.polije.sipeperpolije.feature.master.presentation.screen.JadwalScreen
-import com.polije.sipeperpolije.feature.master.presentation.screen.MataKuliahScreen
 import com.polije.sipeperpolije.feature.master.presentation.screen.SettingsScreen
 import com.polije.sipeperpolije.theme.AppTheme
 import com.polije.sipeperpolije.utils.ObserveAsEvent

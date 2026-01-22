@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.viewmodel.dosen
+package com.polije.sipeperpolije.feature.master.presentation.dosen.viewmodel.dosen
 
 import com.polije.sipeperpolije.feature.master.domain.entity.DosenEntity
 

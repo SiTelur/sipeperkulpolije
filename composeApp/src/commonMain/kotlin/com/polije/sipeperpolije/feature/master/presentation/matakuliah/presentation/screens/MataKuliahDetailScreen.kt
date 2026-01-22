@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.screen
+package com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
