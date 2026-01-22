@@ -37,13 +37,11 @@ import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,28 +53,26 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.polije.sipeperpolije.LocalSnackbarHostState
 import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginAction
 import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginEvent
 import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginViewModel
 import com.polije.sipeperpolije.utils.ObserveAsEvent
-import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LoginScreen(loginViewModel: LoginViewModel = koinViewModel(), onLoginSuccess: () -> Unit) {
 
     var passwordVisible by remember { mutableStateOf(false) }
-    val snackBarState = remember { SnackbarHostState() }
+    val snackBarState = LocalSnackbarHostState.current
     val state by loginViewModel.state.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
 
     ObserveAsEvent(loginViewModel.events) { event ->
         when (event) {
             is LoginEvent.LoginSuccess -> onLoginSuccess()
             is LoginEvent.LoginFailed -> {
-                scope.launch {
-                    snackBarState.showSnackbar(event.message)
-                }
+                snackBarState.showSnackbar(event.message)
+
             }
         }
     }
@@ -134,8 +130,7 @@ private fun HeaderImage() {
             .fillMaxWidth()
             .height(180.dp)
     ) {
-        // Image loading from a URL requires a library like Coil, which is not available here.
-        // A placeholder background is used instead.
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -201,8 +196,8 @@ private fun Headline() {
 
 @Composable
 private fun Form(
-    emailState : TextFieldState,
-    passwordState : TextFieldState,
+    emailState: TextFieldState,
+    passwordState: TextFieldState,
     passwordVisible: Boolean,
     onPasswordVisibilityChange: () -> Unit,
     isLoading: Boolean,
@@ -233,13 +228,13 @@ private fun Form(
             state = passwordState,
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Kata Sandi") },
-            placeholder = { Text("••••••••") },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Lock,
                     contentDescription = null
                 )
-            }, trailingIcon = {
+            },
+            trailingIcon = {
                 val image =
                     if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                 IconButton(onClick = onPasswordVisibilityChange) {

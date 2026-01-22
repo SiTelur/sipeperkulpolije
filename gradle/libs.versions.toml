@@ -16,11 +16,19 @@ kotlin = "2.3.0"
 compose-navigation = "2.9.1"
 kotlinxSerializationJson = "1.9.0"
 ktorClientAndroid = "3.3.3"
+pagingCompose = "3.4.0-rc01"
 supabase = "3.3.0"
 koin = "4.1.1"
 buildkonfig = "0.17.1"
+lazy-pagination-compose = "1.7.1"
+
 
 [libraries]
+androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "pagingCompose" }
+androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "pagingCompose" }
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktorClientAndroid" }
+lazyPaginationCompose = { module = "io.github.ahmad-hamwi:lazy-pagination-compose", version.ref = "lazy-pagination-compose" }
+
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 koin-core = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
 koin-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }

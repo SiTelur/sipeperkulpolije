@@ -61,7 +61,7 @@ kotlin {
             implementation(libs.kotlin.test)
         }
         jsMain.dependencies {
-            implementation("io.ktor:ktor-client-js:3.3.3")
+            implementation(libs.ktor.client.js)
         }
 
     }
