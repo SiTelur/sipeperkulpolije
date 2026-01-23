@@ -26,7 +26,7 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
             .from("mata_kuliah")
             .select {
                 count(Count.EXACT)
-                head
+                head = true
             }.countOrNull()?.toInt()
         val recentActivities = supabase
             .from("audit_log")

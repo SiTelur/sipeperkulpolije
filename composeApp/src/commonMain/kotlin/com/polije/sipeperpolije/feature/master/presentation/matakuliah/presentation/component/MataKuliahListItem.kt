@@ -31,7 +31,11 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 
-fun MataKuliahListItem(mataKuliah: MataKuliahUI, onItemClick: (MataKuliahUI) -> Unit) {
+fun MataKuliahListItem(
+    mataKuliah: MataKuliahUI,
+    onItemClick: (MataKuliahUI) -> Unit,
+    onItemSuccessUpdated: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -98,7 +102,10 @@ fun MataKuliahListItemPreview() {
                 jumlahSKS = 3,
                 namaPenampuPertama = "Dimas",
                 nama = "Pemrograman Mobile"
-            )
-        ) {}
+            ),
+
+            onItemClick = {},
+            onItemSuccessUpdated = {}
+        )
     }
 }

@@ -22,36 +22,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-@Preview
-@Composable
-fun LoginScreenPreview() {
-    AppTheme() {
-        LoginScreen(onLoginSuccess = {})
-    }
-}
-
-@Preview
-@Composable
-fun DosenListPreview() {
-    AppTheme() {
-        DosenScreen()
-    }
-}
-
-@Preview
-@Composable
-private fun JadwalListPreview() {
-    AppTheme() {
-        JadwalScreen()
-    }
-}
-
-@Preview
-@Composable
-private fun MatkulDetailScreenPreview() {
-    AppTheme(
-    ) {
-        MataKuliahDetailScreen()
-    }
-}

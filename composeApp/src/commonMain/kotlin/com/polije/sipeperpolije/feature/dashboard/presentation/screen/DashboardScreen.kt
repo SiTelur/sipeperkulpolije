@@ -152,7 +152,14 @@ fun MainScreen(
                     detailMataKuliah.nama,
                     detailMataKuliah.kode,
                     detailMataKuliah.sks,
-                    detailMataKuliah.namaPengampu
+                    detailMataKuliah.namaPengampu,
+                    onBackPressed = {
+                        navController.popBackStack()
+                    },
+                    onSuccessAction = {
+
+                    },
+                    onFailedAction = {}
                 )
             }
         }

@@ -1,6 +1,8 @@
 package com.polije.sipeperpolije.feature.master.presentation.dosen.screen
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -95,10 +97,12 @@ fun DosenScreen(dosenListViewModel: ListDosenViewModel = koinViewModel()) {
         }
         LazyColumn(
             state = lazyListState,
-            modifier = Modifier.fillMaxSize().padding(paddingValues)
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(state.dosens, key = { it.id }) {
-                DosenListItem(it.initial, name = it.nama)
+                DosenListItem(it.initial, name = it.nama, nidn = it.nidn)
             }
 
             if (state.isLoadingMore) {

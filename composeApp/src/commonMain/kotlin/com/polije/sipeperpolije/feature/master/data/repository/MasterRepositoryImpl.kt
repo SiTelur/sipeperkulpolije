@@ -20,7 +20,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
 
             val data = supabase
                 .from("dosen")
-                .select(columns = Columns.list("id", "nama")) {
+                .select(columns = Columns.list("id", "nama", "nidn")) {
                     range(
                         from = safeOffset.toLong(),
                         to = (safeOffset + safeLimit - 1).toLong()

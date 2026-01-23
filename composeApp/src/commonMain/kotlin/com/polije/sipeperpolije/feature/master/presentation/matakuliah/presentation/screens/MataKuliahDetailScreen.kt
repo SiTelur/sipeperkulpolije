@@ -18,12 +18,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,9 +50,19 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MataKuliahDetailScreen(nama: String, kode: String, sks: Int, pengampu: String) {
+fun MataKuliahDetailScreen(
+    nama: String,
+    kode: String,
+    sks: Int,
+    pengampu: String,
+    onBackPressed: () -> Unit,
+    onSuccessAction: () -> Unit,
+    onFailedAction: () -> Unit,
+    modifier: Modifier = Modifier
+) {
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
@@ -62,7 +74,7 @@ fun MataKuliahDetailScreen(nama: String, kode: String, sks: Int, pengampu: Strin
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* TODO: Handle back navigation */ }) {
+                    IconButton(onClick = onBackPressed) {
                         Icon(Icons.Default.ArrowBackIosNew, contentDescription = "Kembali")
                     }
                 },
@@ -75,14 +87,36 @@ fun MataKuliahDetailScreen(nama: String, kode: String, sks: Int, pengampu: Strin
             BottomAppBar(
                 containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
             ) {
-                Button(
-                    onClick = { /* TODO: Handle edit information */ },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(12.dp)
+                Row(
+                    Modifier.fillMaxWidth().padding(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(Icons.Default.Edit, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Edit Informasi", fontWeight = FontWeight.SemiBold)
+                    Button(
+                        onClick = { /* TODO: Handle edit information */ },
+                        modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonColors(
+                            containerColor = MaterialTheme.colorScheme.onErrorContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = MaterialTheme.colorScheme.onErrorContainer.copy(
+                                alpha = 0.5f
+                            ),
+                            disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                        )
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = "Edit")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Edit Data", fontWeight = FontWeight.SemiBold)
+                    }
+                    Button(
+                        onClick = { /* TODO: Handle edit information */ },
+                        modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(Icons.Default.Edit, contentDescription = "Hapus")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Hapus Data", fontWeight = FontWeight.SemiBold)
+                    }
                 }
             }
         }

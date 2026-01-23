@@ -42,9 +42,16 @@ fun ActivityItemModel.toEntity(): ActivityItemEntity {
         ActivityAction.NONE -> normalizeTableName
     }
 
+
     val subtitle = when (action) {
         ActivityAction.INSERT -> dataNew?.getValue("nama")?.asReadableString() ?: ""
-        ActivityAction.UPDATE -> dataOld?.getValue("nama")?.asReadableString() ?: ""
+        ActivityAction.UPDATE ->
+            when (changeColumn?.size) {
+                1 -> "Mengubah data ${changeColumn.first().uppercase()}"
+                else -> "Mengubah beberapa data"
+            }
+
+
         ActivityAction.DELETE -> dataOld?.getValue("nama")?.asReadableString() ?: ""
         ActivityAction.NONE -> dataNew?.getValue("nama")?.asReadableString() ?: ""
     }

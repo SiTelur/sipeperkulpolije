@@ -120,7 +120,7 @@ fun MataKuliahScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(state.mataKuliahs, key = { it.id }) { item ->
-                MataKuliahListItem(mataKuliah = item, onItemClick = onItemClick)
+                MataKuliahListItem(mataKuliah = item, onItemClick = onItemClick, {})
             }
 
             if (state.isLoadingMore) {
