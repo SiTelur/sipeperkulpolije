@@ -51,6 +51,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
+import androidx.navigation.toRoute
 import com.polije.sipeperpolije.LocalSnackbarHostState
 import com.polije.sipeperpolije.feature.dashboard.presentation.component.ActivityItem
 import com.polije.sipeperpolije.feature.dashboard.presentation.component.QuickActionButton
@@ -62,11 +63,13 @@ import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.Dashboa
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardLog
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardViewModel
 import com.polije.sipeperpolije.feature.master.presentation.dosen.screen.DosenScreen
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.screens.MataKuliahDetailScreen
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.screens.MataKuliahScreen
 import com.polije.sipeperpolije.feature.master.presentation.screen.JadwalScreen
 import com.polije.sipeperpolije.feature.master.presentation.screen.SettingsScreen
 import com.polije.sipeperpolije.theme.AppTheme
 import com.polije.sipeperpolije.utils.ObserveAsEvent
+import kotlinx.serialization.Serializable
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -118,7 +121,17 @@ fun MainScreen(
             }
 
             composable(DashboardRoute.MataKuliah.route) {
-                MataKuliahScreen()
+                MataKuliahScreen {
+                    navController.navigate(
+                        DetailMataKuliah(
+                            it.id,
+                            it.nama,
+                            it.kode,
+                            it.namaPenampuPertama,
+                            it.jumlahSKS
+                        )
+                    )
+                }
             }
 
             composable(DashboardRoute.Jadwal.route) {
@@ -127,6 +140,20 @@ fun MainScreen(
 
             composable(DashboardRoute.Settings.route) {
                 SettingsScreen()
+            }
+
+            composable<DetailDosen> { backStackEntry ->
+                val detailDosen: DetailDosen = backStackEntry.toRoute()
+            }
+
+            composable<DetailMataKuliah> { backStackEntry ->
+                val detailMataKuliah: DetailMataKuliah = backStackEntry.toRoute()
+                MataKuliahDetailScreen(
+                    detailMataKuliah.nama,
+                    detailMataKuliah.kode,
+                    detailMataKuliah.sks,
+                    detailMataKuliah.namaPengampu
+                )
             }
         }
 
@@ -423,3 +450,15 @@ sealed class DashboardRoute(val route: String) {
     object Jadwal : DashboardRoute("jadwal")
     object Settings : DashboardRoute("settings")
 }
+
+@Serializable
+data class DetailDosen(val id: Int, val nama: String)
+
+@Serializable
+data class DetailMataKuliah(
+    val id: Int,
+    val nama: String,
+    val kode: String,
+    val namaPengampu: String,
+    val sks: Int
+)

@@ -40,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.polije.sipeperpolije.LocalSnackbarHostState
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.component.MataKuliahListItem
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.viewmodel.ListMataKuliahViewModel
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.viewmodel.MataKuliahUI
 import com.polije.sipeperpolije.utils.ObserveAsEvent
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.viewmodel.koinViewModel
@@ -60,7 +61,10 @@ val sampleMataKuliahList = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MataKuliahScreen(viewmodel: ListMataKuliahViewModel = koinViewModel()) {
+fun MataKuliahScreen(
+    viewmodel: ListMataKuliahViewModel = koinViewModel(),
+    onItemClick: (MataKuliahUI) -> Unit
+) {
     var searchQuery by remember { mutableStateOf("") }
 
     val snackBarHost = LocalSnackbarHostState.current
@@ -116,7 +120,7 @@ fun MataKuliahScreen(viewmodel: ListMataKuliahViewModel = koinViewModel()) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(state.mataKuliahs, key = { it.id }) { item ->
-                MataKuliahListItem(mataKuliah = item)
+                MataKuliahListItem(mataKuliah = item, onItemClick = onItemClick)
             }
 
             if (state.isLoadingMore) {

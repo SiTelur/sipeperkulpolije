@@ -31,7 +31,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 
-fun MataKuliahListItem(mataKuliah: MataKuliahUI) {
+fun MataKuliahListItem(mataKuliah: MataKuliahUI, onItemClick: (MataKuliahUI) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -40,7 +40,7 @@ fun MataKuliahListItem(mataKuliah: MataKuliahUI) {
     ) {
         Row(
             modifier = Modifier
-                .clickable { /* TODO: Handle item click */ }
+                .clickable { onItemClick(mataKuliah) }
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -73,7 +73,7 @@ fun MataKuliahListItem(mataKuliah: MataKuliahUI) {
             }
 
             IconButton(
-                onClick = { /* TODO: Handle more options */ },
+                onClick = { },
                 modifier = Modifier.size(24.dp)
             ) {
                 Icon(
@@ -89,8 +89,16 @@ fun MataKuliahListItem(mataKuliah: MataKuliahUI) {
 
 @Composable
 @Preview
-fun MataKuliahListItemPreview(){
+fun MataKuliahListItemPreview() {
     AppTheme {
-        MataKuliahListItem(mataKuliah = MataKuliahUI(kode = "TIF120706", id = 1, jumlahSKS = 3, namaPenampuPertama = "Dimas", nama = "Pemrograman Mobile"))
+        MataKuliahListItem(
+            mataKuliah = MataKuliahUI(
+                kode = "TIF120706",
+                id = 1,
+                jumlahSKS = 3,
+                namaPenampuPertama = "Dimas",
+                nama = "Pemrograman Mobile"
+            )
+        ) {}
     }
 }

@@ -18,12 +18,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
@@ -48,32 +45,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
-data class MataKuliahDetails(
-    val name: String,
-    val code: String,
-    val sks: Int,
-    val type: String,
-    val lecturer: String,
-    val schedule: String,
-    val room: String,
-    val description: String
-)
-
-val sampleMataKuliahDetail = MataKuliahDetails(
-    name = "Algoritma & Struktur Data",
-    code = "IF-2024",
-    sks = 3,
-    type = "Wajib",
-    lecturer = "Dr. Budi Santoso, M.Kom",
-    schedule = "Senin, 08:00 - 10:30 WIB",
-    room = "Gedung A, Lab. Komputer 3",
-    description = "Mata kuliah ini mempelajari konsep dasar algoritma dan struktur data, termasuk array, linked list, stack, queue, tree, dan graph. Mahasiswa akan belajar menganalisis kompleksitas waktu dan ruang dari algoritma yang dibuat serta penerapannya dalam penyelesaian masalah pemrograman yang efisien."
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MataKuliahDetailScreen() {
-    val matkul = sampleMataKuliahDetail
+fun MataKuliahDetailScreen(nama: String, kode: String, sks: Int, pengampu: String) {
 
     Scaffold(
         topBar = {
@@ -113,16 +88,16 @@ fun MataKuliahDetailScreen() {
         }
     ) { paddingValues ->
         LazyColumn(contentPadding = paddingValues) {
-            item { HeroSection(matkul) }
-            item { QuickStats(matkul) }
-            item { InfoSection(matkul) }
+            item { HeroSection(nama) }
+            item { QuickStats(kode, sks) }
+            item { InfoSection(pengampu) }
 
         }
     }
 }
 
 @Composable
-private fun HeroSection(matkul: MataKuliahDetails) {
+private fun HeroSection(name: String) {
     Box(
         modifier = Modifier
             .padding(16.dp)
@@ -154,7 +129,7 @@ private fun HeroSection(matkul: MataKuliahDetails) {
         ) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = matkul.name,
+                text = name,
                 style = MaterialTheme.typography.headlineSmall,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -164,7 +139,7 @@ private fun HeroSection(matkul: MataKuliahDetails) {
 }
 
 @Composable
-private fun QuickStats(matkul: MataKuliahDetails) {
+private fun QuickStats(kode: String, sks: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -174,13 +149,13 @@ private fun QuickStats(matkul: MataKuliahDetails) {
         StatCard(
             modifier = Modifier.weight(1f),
             label = "Kode",
-            value = matkul.code,
+            value = kode,
             icon = Icons.Default.Fingerprint
         )
         StatCard(
             modifier = Modifier.weight(1f),
             label = "Kredit",
-            value = "${matkul.sks} SKS",
+            value = "$sks SKS",
             icon = Icons.Default.School
         )
     }
@@ -232,7 +207,7 @@ private fun StatCard(
 }
 
 @Composable
-private fun InfoSection(matkul: MataKuliahDetails) {
+private fun InfoSection(pengampu: String) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -242,37 +217,8 @@ private fun InfoSection(matkul: MataKuliahDetails) {
             iconBackgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
             iconColor = MaterialTheme.colorScheme.primary,
             label = "Dosen Pengampu",
-            value = matkul.lecturer
-        ) {
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(
-                    Icons.Default.ChatBubble,
-                    contentDescription = "Chat Dosen",
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
-        InfoRow(
-            icon = Icons.Default.Schedule,
-            iconBackgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-            iconColor = MaterialTheme.colorScheme.onTertiaryContainer,
-            label = "Jadwal Kuliah",
-            value = matkul.schedule
+            value = pengampu
         )
-        InfoRow(
-            icon = Icons.Default.LocationOn,
-            iconBackgroundColor = MaterialTheme.colorScheme.secondaryContainer,
-            iconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            label = "Ruangan",
-            value = matkul.room
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(width = 64.dp, height = 40.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) { /* Placeholder for map */ }
-        }
     }
 }
 
@@ -283,7 +229,6 @@ private fun InfoRow(
     iconColor: Color,
     label: String,
     value: String,
-    trailingContent: (@Composable () -> Unit)? = null
 ) {
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -317,9 +262,7 @@ private fun InfoRow(
                     fontWeight = FontWeight.SemiBold
                 )
             }
-            if (trailingContent != null) {
-                trailingContent()
-            }
+
         }
     }
 }
