@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.component
+package com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

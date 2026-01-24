@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.screens
+package com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,9 +38,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.polije.sipeperpolije.LocalSnackbarHostState
-import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.component.MataKuliahListItem
-import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.viewmodel.ListMataKuliahViewModel
-import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.viewmodel.MataKuliahUI
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.component.MataKuliahListItem
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahViewModel
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.MataKuliahUI
 import com.polije.sipeperpolije.utils.ObserveAsEvent
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.viewmodel.koinViewModel

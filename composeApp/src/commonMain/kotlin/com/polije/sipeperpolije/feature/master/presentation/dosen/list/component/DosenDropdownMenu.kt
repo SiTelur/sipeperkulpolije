@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.dosen.component
+package com.polije.sipeperpolije.feature.master.presentation.dosen.list.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding

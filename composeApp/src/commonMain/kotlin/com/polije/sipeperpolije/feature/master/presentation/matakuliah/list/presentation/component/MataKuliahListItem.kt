@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.component
+package com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.viewmodel.MataKuliahUI
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.MataKuliahUI
 import com.polije.sipeperpolije.theme.AppTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 

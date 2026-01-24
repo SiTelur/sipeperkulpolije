@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.dosen.viewmodel.dosen
+package com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen
 
 sealed class ListDosenEvent {
     class OnLoadError(message: String) : ListDosenEvent()

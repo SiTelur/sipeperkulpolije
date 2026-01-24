@@ -63,10 +63,9 @@ import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.Dashboa
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardEvent
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardLog
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardViewModel
-import com.polije.sipeperpolije.feature.master.presentation.dosen.screen.DosenScreen
-import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.screens.MataKuliahDetailScreen
-import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.screens.MataKuliahScreen
-import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.viewmodel.MataKuliahUI
+import com.polije.sipeperpolije.feature.master.presentation.dosen.list.screen.DosenScreen
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.screen.MataKuliahDetailScreen
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.screens.MataKuliahScreen
 import com.polije.sipeperpolije.feature.master.presentation.screen.JadwalScreen
 import com.polije.sipeperpolije.feature.master.presentation.screen.SettingsScreen
 import com.polije.sipeperpolije.theme.AppTheme
@@ -133,9 +132,15 @@ fun MainScreen(
 
                 MataKuliahScreen(resultFromDetail = result?.value) {
                     navController.navigate(
-                        DetailMataKuliah(it)
+                        DetailMataKuliah(
+                            it.id,
+                            it.nama,
+                            it.kode,
+                            it.namaPenampuPertama,
+                            it.jumlahSKS,
+                            it.semester
                         )
-
+                    )
                 }
             }
 
@@ -154,11 +159,11 @@ fun MainScreen(
             composable<DetailMataKuliah> { backStackEntry ->
                 val detailMataKuliah: DetailMataKuliah = backStackEntry.toRoute()
                 MataKuliahDetailScreen(
-                    detailMataKuliah.matakuliahUI.nama,
-                    detailMataKuliah.matakuliahUI.kode,
-                    detailMataKuliah.matakuliahUI.jumlahSKS,
-                    detailMataKuliah.matakuliahUI.namaPenampuPertama,
-                    detailMataKuliah.matakuliahUI.semester,
+                    detailMataKuliah.nama,
+                    detailMataKuliah.kode,
+                    detailMataKuliah.sks,
+                    detailMataKuliah.namaPengampu,
+                    detailMataKuliah.semester,
                     onBackPressed = {
                         navController.popBackStack()
                     },
@@ -479,5 +484,10 @@ data class DetailDosen(val id: Int, val nama: String)
 
 @Serializable
 data class DetailMataKuliah(
-    val matakuliahUI: MataKuliahUI
+    val id: Int,
+    val nama: String,
+    val kode: String,
+    val namaPengampu: String,
+    val sks: Int,
+    val semester: Int
 )

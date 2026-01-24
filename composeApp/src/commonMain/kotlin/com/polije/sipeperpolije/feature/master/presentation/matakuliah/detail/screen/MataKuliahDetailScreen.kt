@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.screens
+package com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.screen
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -317,6 +317,6 @@ private fun InfoRow(
 @Preview
 fun HeroSectionPreview() {
     AppTheme {
-        HeroSection("Logika dan bisnis",3)
+        HeroSection("Logika dan bisnis", 3)
     }
 }

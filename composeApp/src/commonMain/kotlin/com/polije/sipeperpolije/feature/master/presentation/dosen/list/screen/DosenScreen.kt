@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.dosen.screen
+package com.polije.sipeperpolije.feature.master.presentation.dosen.list.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,9 +37,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.polije.sipeperpolije.LocalSnackbarHostState
-import com.polije.sipeperpolije.feature.master.presentation.dosen.component.DosenListItem
-import com.polije.sipeperpolije.feature.master.presentation.dosen.viewmodel.dosen.ListDosenEvent
-import com.polije.sipeperpolije.feature.master.presentation.dosen.viewmodel.dosen.ListDosenViewModel
+import com.polije.sipeperpolije.feature.master.presentation.dosen.list.component.DosenListItem
+import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.ListDosenEvent
+import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.ListDosenViewModel
 import com.polije.sipeperpolije.utils.ObserveAsEvent
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.viewmodel.koinViewModel

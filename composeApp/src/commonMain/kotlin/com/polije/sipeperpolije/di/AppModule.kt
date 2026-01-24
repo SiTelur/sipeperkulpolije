@@ -15,8 +15,8 @@ import com.polije.sipeperpolije.feature.master.data.repository.MasterRepositoryI
 import com.polije.sipeperpolije.feature.master.domain.repository.MasterRepository
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListDosenPagingUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListMataKuliahPagingUseCase
-import com.polije.sipeperpolije.feature.master.presentation.dosen.viewmodel.dosen.ListDosenViewModel
-import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.viewmodel.ListMataKuliahViewModel
+import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.ListDosenViewModel
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahViewModel
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.FlowType
 import io.github.jan.supabase.createSupabaseClient
