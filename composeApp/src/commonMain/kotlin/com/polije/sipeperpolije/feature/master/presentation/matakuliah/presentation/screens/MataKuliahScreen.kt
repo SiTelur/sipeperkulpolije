@@ -63,6 +63,7 @@ val sampleMataKuliahList = listOf(
 @Composable
 fun MataKuliahScreen(
     viewmodel: ListMataKuliahViewModel = koinViewModel(),
+    resultFromDetail: Boolean? = null,
     onItemClick: (MataKuliahUI) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -73,6 +74,12 @@ fun MataKuliahScreen(
 
     ObserveAsEvent(viewmodel.events) {
 
+    }
+
+    LaunchedEffect(resultFromDetail) {
+        if (resultFromDetail == true) {
+            viewmodel.resetItems()
+        }
     }
 
     val lazyListState = rememberLazyListState()
@@ -120,7 +127,7 @@ fun MataKuliahScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(state.mataKuliahs, key = { it.id }) { item ->
-                MataKuliahListItem(mataKuliah = item, onItemClick = onItemClick, {})
+                MataKuliahListItem(mataKuliah = item, onItemClick = { onItemClick(item) })
             }
 
             if (state.isLoadingMore) {

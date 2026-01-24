@@ -4,6 +4,7 @@ data class MataKuliahEntity(
     val id: Int,
     val kode: String,
     val nama: String,
+    val semester: Int,
     val jumlahSKS: Int,
     val idPengampuPertama: Int?,
     val namaPengampuPertama: String?,

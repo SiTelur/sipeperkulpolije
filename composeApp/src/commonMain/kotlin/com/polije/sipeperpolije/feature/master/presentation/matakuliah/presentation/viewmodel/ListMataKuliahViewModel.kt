@@ -57,4 +57,10 @@ class ListMataKuliahViewModel(private val listMataKuliahPagingUseCase: ListMataK
             paginator.loadNextItems()
         }
     }
+
+    fun resetItems() {
+        viewModelScope.launch {
+            paginator.reset()
+        }
+    }
 }

@@ -46,6 +46,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.polije.sipeperpolije.theme.AppTheme
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,6 +57,7 @@ fun MataKuliahDetailScreen(
     kode: String,
     sks: Int,
     pengampu: String,
+    semester: Int,
     onBackPressed: () -> Unit,
     onSuccessAction: () -> Unit,
     onFailedAction: () -> Unit,
@@ -92,7 +95,7 @@ fun MataKuliahDetailScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Button(
-                        onClick = { /* TODO: Handle edit information */ },
+                        onClick = onFailedAction,
                         modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonColors(
@@ -104,25 +107,25 @@ fun MataKuliahDetailScreen(
                             disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
                         )
                     ) {
-                        Icon(Icons.Default.Delete, contentDescription = "Edit")
+                        Icon(Icons.Default.Edit, contentDescription = "Edit")
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Edit Data", fontWeight = FontWeight.SemiBold)
                     }
                     Button(
-                        onClick = { /* TODO: Handle edit information */ },
+                        onClick = onSuccessAction,
                         modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Icon(Icons.Default.Edit, contentDescription = "Hapus")
+                        Icon(Icons.Default.Delete, contentDescription = "Simpan")
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Hapus Data", fontWeight = FontWeight.SemiBold)
+                        Text("Simpan Data", fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
         }
     ) { paddingValues ->
         LazyColumn(contentPadding = paddingValues) {
-            item { HeroSection(nama) }
+            item { HeroSection(nama, semester = semester) }
             item { QuickStats(kode, sks) }
             item { InfoSection(pengampu) }
 
@@ -131,7 +134,7 @@ fun MataKuliahDetailScreen(
 }
 
 @Composable
-private fun HeroSection(name: String) {
+private fun HeroSection(name: String, semester: Int) {
     Box(
         modifier = Modifier
             .padding(16.dp)
@@ -162,12 +165,21 @@ private fun HeroSection(name: String) {
                 .padding(16.dp)
         ) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = name,
-                style = MaterialTheme.typography.headlineSmall,
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Semester $semester",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
         }
     }
 }
@@ -298,5 +310,13 @@ private fun InfoRow(
             }
 
         }
+    }
+}
+
+@Composable
+@Preview
+fun HeroSectionPreview() {
+    AppTheme {
+        HeroSection("Logika dan bisnis",3)
     }
 }

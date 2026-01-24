@@ -34,6 +34,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -65,6 +66,7 @@ import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.Dashboa
 import com.polije.sipeperpolije.feature.master.presentation.dosen.screen.DosenScreen
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.screens.MataKuliahDetailScreen
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.screens.MataKuliahScreen
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.presentation.viewmodel.MataKuliahUI
 import com.polije.sipeperpolije.feature.master.presentation.screen.JadwalScreen
 import com.polije.sipeperpolije.feature.master.presentation.screen.SettingsScreen
 import com.polije.sipeperpolije.theme.AppTheme
@@ -121,16 +123,19 @@ fun MainScreen(
             }
 
             composable(DashboardRoute.MataKuliah.route) {
-                MataKuliahScreen {
+                val savedStateHandle = navController.currentBackStackEntry
+                    ?.savedStateHandle
+
+                val result = savedStateHandle
+                    ?.getStateFlow("detail_result", false)
+                    ?.collectAsState()
+
+
+                MataKuliahScreen(resultFromDetail = result?.value) {
                     navController.navigate(
-                        DetailMataKuliah(
-                            it.id,
-                            it.nama,
-                            it.kode,
-                            it.namaPenampuPertama,
-                            it.jumlahSKS
+                        DetailMataKuliah(it)
                         )
-                    )
+
                 }
             }
 
@@ -149,17 +154,28 @@ fun MainScreen(
             composable<DetailMataKuliah> { backStackEntry ->
                 val detailMataKuliah: DetailMataKuliah = backStackEntry.toRoute()
                 MataKuliahDetailScreen(
-                    detailMataKuliah.nama,
-                    detailMataKuliah.kode,
-                    detailMataKuliah.sks,
-                    detailMataKuliah.namaPengampu,
+                    detailMataKuliah.matakuliahUI.nama,
+                    detailMataKuliah.matakuliahUI.kode,
+                    detailMataKuliah.matakuliahUI.jumlahSKS,
+                    detailMataKuliah.matakuliahUI.namaPenampuPertama,
+                    detailMataKuliah.matakuliahUI.semester,
                     onBackPressed = {
                         navController.popBackStack()
                     },
                     onSuccessAction = {
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("detail_result", true)
 
+                        navController.popBackStack()
                     },
-                    onFailedAction = {}
+                    onFailedAction = {
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("detail_result", false)
+
+                        navController.popBackStack()
+                    }
                 )
             }
         }
@@ -463,9 +479,5 @@ data class DetailDosen(val id: Int, val nama: String)
 
 @Serializable
 data class DetailMataKuliah(
-    val id: Int,
-    val nama: String,
-    val kode: String,
-    val namaPengampu: String,
-    val sks: Int
+    val matakuliahUI: MataKuliahUI
 )
