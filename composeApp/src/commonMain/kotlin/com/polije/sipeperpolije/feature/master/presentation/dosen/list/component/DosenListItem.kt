@@ -29,7 +29,13 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
 @Composable
-fun DosenListItem(initials: String, name: String, nidn: String, modifier: Modifier = Modifier) {
+fun DosenListItem(
+    initials: String,
+    name: String,
+    nidn: String,
+    modifier: Modifier = Modifier,
+    onItemClick: () -> Unit
+) {
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -38,7 +44,7 @@ fun DosenListItem(initials: String, name: String, nidn: String, modifier: Modifi
     ) {
         Row(
             modifier = Modifier
-                .clickable { /* TODO: Handle item click */ }
+                .clickable(onClick = onItemClick)
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -87,6 +93,6 @@ fun DosenListItem(initials: String, name: String, nidn: String, modifier: Modifi
 @Composable
 fun DosenListItemPreview() {
     AppTheme {
-        DosenListItem(initials = "A", name = "Ahmad Dina", nidn = "29023042")
+        DosenListItem(initials = "A", name = "Ahmad Dina", nidn = "29023042", onItemClick = {})
     }
 }

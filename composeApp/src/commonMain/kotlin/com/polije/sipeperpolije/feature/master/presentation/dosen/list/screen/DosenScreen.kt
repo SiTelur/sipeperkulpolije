@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.polije.sipeperpolije.LocalSnackbarHostState
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.component.DosenListItem
+import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.DosenUI
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.ListDosenEvent
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.ListDosenViewModel
 import com.polije.sipeperpolije.utils.ObserveAsEvent
@@ -55,7 +56,10 @@ val sampleDosenList = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DosenScreen(dosenListViewModel: ListDosenViewModel = koinViewModel()) {
+fun DosenScreen(
+    dosenListViewModel: ListDosenViewModel = koinViewModel(),
+    onListItemClick: (DosenUI) -> Unit
+) {
     var searchQuery by remember { mutableStateOf("") }
     val snackBarState = LocalSnackbarHostState.current
     val state by dosenListViewModel.state.collectAsStateWithLifecycle()
@@ -102,7 +106,9 @@ fun DosenScreen(dosenListViewModel: ListDosenViewModel = koinViewModel()) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(state.dosens, key = { it.id }) {
-                DosenListItem(it.initial, name = it.nama, nidn = it.nidn)
+                DosenListItem(it.initial, name = it.nama, nidn = it.nidn) {
+                    onListItemClick(it)
+                }
             }
 
             if (state.isLoadingMore) {

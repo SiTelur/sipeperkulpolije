@@ -3,7 +3,6 @@ package com.polije.sipeperpolije.feature.master.presentation.dosen.detail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ContactPhone
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Button
@@ -33,23 +33,37 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.component.UpdateDosenModal
+import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.DosenUI
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailDosenScreen() {
+fun DetailDosenScreen(dosenUI: DosenUI, onNavigateBack: () -> Unit) {
+
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val modalBottomSheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Detail Dosen", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = { /* TODO: Handle back */ }) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
@@ -60,20 +74,39 @@ fun DetailDosenScreen() {
                 modifier = Modifier.fillMaxWidth(),
                 shadowElevation = 8.dp
             ) {
-                Button(
-                    onClick = { /* TODO: Handle edit */ },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = "Edit",
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text("Ubah Data Dosen", fontWeight = FontWeight.Bold)
+                Row {
+                    Button(
+                        onClick = { showBottomSheet = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(16.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Edit",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text("Ubah Data Dosen", fontWeight = FontWeight.Bold)
+                    }
+                    Button(
+                        onClick = { /* TODO: Handle edit */ },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(16.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Hapus",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text("Hapus Data Dosen", fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
@@ -83,14 +116,14 @@ fun DetailDosenScreen() {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            item { ProfileHeader() }
+            item { ProfileHeader(dosenUI.nama) }
             item {
                 Spacer(
                     modifier = Modifier.height(8.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                 )
             }
-            item { AcademicInfoSection() }
+            item { AcademicInfoSection(dosenUI.nidn) }
             item {
                 Spacer(
                     modifier = Modifier.height(8.dp)
@@ -99,11 +132,23 @@ fun DetailDosenScreen() {
             }
             item { MataKuliahSection() }
         }
+
+        if (showBottomSheet) {
+            UpdateDosenModal(modalBottomSheetState, onDismissRequest = {
+                scope.launch {
+                    modalBottomSheetState.hide()
+                }.invokeOnCompletion {
+                    if (!modalBottomSheetState.isVisible) {
+                        showBottomSheet = false
+                    }
+                }
+            })
+        }
     }
 }
 
 @Composable
-private fun ProfileHeader() {
+private fun ProfileHeader(nama: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -116,7 +161,7 @@ private fun ProfileHeader() {
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                text = "Dr. Budi Santoso, M.Kom",
+                text = nama,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -130,7 +175,7 @@ private fun ProfileHeader() {
 }
 
 @Composable
-private fun AcademicInfoSection() {
+private fun AcademicInfoSection(nidn: String) {
     Column(modifier = Modifier.padding(16.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -148,10 +193,10 @@ private fun AcademicInfoSection() {
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        InfoRow("NIDN", "0412098801")
-        InfoRow("Program Studi", "Teknik Informatika")
-        InfoRow("Jabatan Fungsional", "Lektor Kepala")
-        InfoRow("Pendidikan Terakhir", "S3 Ilmu Komputer")
+        InfoRow("NIDN", nidn)
+//        InfoRow("Program Studi", "Teknik Informatika")
+//        InfoRow("Jabatan Fungsional", "Lektor Kepala")
+//        InfoRow("Pendidikan Terakhir", "S3 Ilmu Komputer")
     }
 }
 
@@ -242,6 +287,13 @@ fun MataKuliahDosenItem(
 @Preview(showBackground = true)
 @Composable
 fun DetailDosenScreenPreview() {
-    DetailDosenScreen()
+    DetailDosenScreen(
+        DosenUI(
+            id = 1,
+            nama = "Dr. Budi Santoso",
+            nidn = "12345678",
+        ),
+        onNavigateBack = {})
+
 }
 

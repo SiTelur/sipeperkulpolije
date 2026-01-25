@@ -60,5 +60,35 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
         return Result.success(response)
     }
 
+    override suspend fun updateDosen(dosen: DosenEntity): Result<Boolean> {
+        return try {
+            supabase.from("dosen").update(
+                {
+                    set("name", dosen.nama)
+                    set("nidn", dosen.nidn)
+                }
+            ) {
+                filter {
+                    eq("id", dosen.id)
+                }
+            }
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateMataKuliah(mataKuliah: MataKuliahEntity): Result<Boolean> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteDosen(id: Int): Result<Boolean> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteMataKuliah(id: Int): Result<Boolean> {
+        TODO("Not yet implemented")
+    }
+
 
 }

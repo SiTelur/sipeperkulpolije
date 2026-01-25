@@ -63,7 +63,9 @@ import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.Dashboa
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardEvent
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardLog
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardViewModel
+import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.DetailDosenScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.screen.DosenScreen
+import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.DosenUI
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.screen.MataKuliahDetailScreen
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.screens.MataKuliahScreen
 import com.polije.sipeperpolije.feature.master.presentation.screen.JadwalScreen
@@ -118,7 +120,9 @@ fun MainScreen(
             }
 
             composable(DashboardRoute.Dosen.route) {
-                DosenScreen()
+                DosenScreen() {
+                    navController.navigate(DetailDosen(it.id, it.nama, it.nidn))
+                }
             }
 
             composable(DashboardRoute.MataKuliah.route) {
@@ -154,6 +158,14 @@ fun MainScreen(
 
             composable<DetailDosen> { backStackEntry ->
                 val detailDosen: DetailDosen = backStackEntry.toRoute()
+                DetailDosenScreen(
+                    DosenUI(
+                        detailDosen.id,
+                        detailDosen.nama,
+                        nidn = detailDosen.nidn
+                    ), onNavigateBack = {
+                        navController.popBackStack()
+                    })
             }
 
             composable<DetailMataKuliah> { backStackEntry ->
@@ -480,7 +492,7 @@ sealed class DashboardRoute(val route: String) {
 }
 
 @Serializable
-data class DetailDosen(val id: Int, val nama: String)
+data class DetailDosen(val id: Int, val nama: String, val nidn: String)
 
 @Serializable
 data class DetailMataKuliah(
