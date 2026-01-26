@@ -63,7 +63,7 @@ import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.Dashboa
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardEvent
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardLog
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardViewModel
-import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.DetailDosenScreen
+import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.screen.DetailDosenScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.screen.DosenScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.DosenUI
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.screen.MataKuliahDetailScreen
@@ -120,7 +120,14 @@ fun MainScreen(
             }
 
             composable(DashboardRoute.Dosen.route) {
-                DosenScreen() {
+                val savedStateHandle = navController.currentBackStackEntry
+                    ?.savedStateHandle
+
+                val result = savedStateHandle
+                    ?.getStateFlow("detail_result_dosen", false)
+                    ?.collectAsState()
+
+                DosenScreen(resultFromDetail = result?.value) {
                     navController.navigate(DetailDosen(it.id, it.nama, it.nidn))
                 }
             }
@@ -164,6 +171,18 @@ fun MainScreen(
                         detailDosen.nama,
                         nidn = detailDosen.nidn
                     ), onNavigateBack = {
+                        navController.popBackStack()
+                    }, onSuccessAction = {
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("detail_result_dosen", true)
+
+                        navController.popBackStack()
+                    }, onFailereAction = {
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("detail_result_dosen", false)
+
                         navController.popBackStack()
                     })
             }

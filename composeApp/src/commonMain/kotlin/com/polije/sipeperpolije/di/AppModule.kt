@@ -13,8 +13,11 @@ import com.polije.sipeperpolije.feature.login.domain.usecase.LoginUseCase
 import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginViewModel
 import com.polije.sipeperpolije.feature.master.data.repository.MasterRepositoryImpl
 import com.polije.sipeperpolije.feature.master.domain.repository.MasterRepository
+import com.polije.sipeperpolije.feature.master.domain.usecase.DeleteDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListDosenPagingUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListMataKuliahPagingUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.UpdateDosenUseCase
+import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.viewmodel.DetailDosenViewModel
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.ListDosenViewModel
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahViewModel
 import io.github.jan.supabase.auth.Auth
@@ -57,10 +60,15 @@ fun appModule() = module {
     viewModelOf(::DashboardViewModel)
 
     factoryOf(::MasterRepositoryImpl) { bind<MasterRepository>() }
+
     singleOf(::ListDosenPagingUseCase)
     viewModelOf(::ListDosenViewModel)
 
     singleOf(::ListMataKuliahPagingUseCase)
     viewModelOf(::ListMataKuliahViewModel)
+
+    singleOf(::UpdateDosenUseCase)
+    singleOf(::DeleteDosenUseCase)
+    viewModelOf(::DetailDosenViewModel)
 }
 

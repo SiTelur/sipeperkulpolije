@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Close
@@ -35,8 +36,11 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdateDosenModal(
+    namaDosenTextState: TextFieldState,
+    nidnTextState: TextFieldState,
     modalBottomSheetState: SheetState,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    onSaveAction: (String, String) -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -63,8 +67,7 @@ fun UpdateDosenModal(
             Spacer(modifier = Modifier.height(16.dp))
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
-                    value = "Dr. Budi Santoso, M.Kom",
-                    onValueChange = {},
+                    state = namaDosenTextState,
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("Nama Dosen") },
                     leadingIcon = {
@@ -73,8 +76,7 @@ fun UpdateDosenModal(
                     shape = RoundedCornerShape(12.dp)
                 )
                 OutlinedTextField(
-                    value = "0412098801",
-                    onValueChange = {},
+                    state = nidnTextState,
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("NIDN") },
                     leadingIcon = {
@@ -99,7 +101,12 @@ fun UpdateDosenModal(
                 }
                 Box(modifier = Modifier.weight(1f)) {
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            onSaveAction(
+                                namaDosenTextState.text.toString(),
+                                nidnTextState.text.toString()
+                            )
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -116,6 +123,12 @@ fun UpdateDosenModal(
 @Composable
 fun UpdateDosenModalPreview() {
     AppTheme {
-        UpdateDosenModal(rememberModalBottomSheetState(), onDismissRequest = {})
+        UpdateDosenModal(
+            TextFieldState(),
+            TextFieldState(),
+            rememberModalBottomSheetState(),
+            onDismissRequest = {},
+            onSaveAction = { _, _ -> }
+        )
     }
 }

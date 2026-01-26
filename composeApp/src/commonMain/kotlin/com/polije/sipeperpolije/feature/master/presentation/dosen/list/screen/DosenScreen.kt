@@ -45,19 +45,11 @@ import com.polije.sipeperpolije.utils.ObserveAsEvent
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.viewmodel.koinViewModel
 
-data class Dosen(val name: String, val nidn: String, val faculty: String, val initials: String)
-
-val sampleDosenList = listOf(
-    Dosen("Dr. Budi Santoso", "12345678", "Fakultas Ilmu Komputer", "BS"),
-    Dosen("Prof. Siti Aminah", "87654321", "Fakultas Ekonomi", "SA"),
-    Dosen("Andi Pratama, M.Kom", "11223344", "Fakultas Teknik", "AP"),
-    Dosen("Joko Susilo, Ph.D", "99887766", "Fakultas Hukum", "JS"),
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DosenScreen(
     dosenListViewModel: ListDosenViewModel = koinViewModel(),
+    resultFromDetail: Boolean?,
     onListItemClick: (DosenUI) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -69,6 +61,12 @@ fun DosenScreen(
             is ListDosenEvent.OnLoadError -> {
                 snackBarState.showSnackbar(it.toString())
             }
+        }
+    }
+
+    LaunchedEffect(resultFromDetail) {
+        if (resultFromDetail == true) {
+            dosenListViewModel.resetItems()
         }
     }
 
@@ -91,14 +89,15 @@ fun DosenScreen(
         val lazyListState = rememberLazyListState()
 
         LaunchedEffect(state.dosens) {
-            snapshotFlow { lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }.distinctUntilChanged()
-                .collect { lastVisibleIndex ->
-                    if (lastVisibleIndex == state.dosens.lastIndex) {
-                        dosenListViewModel.loadNextItems()
-                    }
+            snapshotFlow {
+                lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+            }.distinctUntilChanged().collect {
+                if (it == state.dosens.lastIndex) {
+                    dosenListViewModel.loadNextItems()
                 }
-
+            }
         }
+
         LazyColumn(
             state = lazyListState,
             modifier = Modifier.fillMaxSize().padding(paddingValues),

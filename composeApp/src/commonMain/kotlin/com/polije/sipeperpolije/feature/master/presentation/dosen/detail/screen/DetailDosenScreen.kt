@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.dosen.detail
+package com.polije.sipeperpolije.feature.master.presentation.dosen.detail.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
@@ -31,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -45,20 +47,63 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.polije.sipeperpolije.LocalSnackbarHostState
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.component.UpdateDosenModal
+import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.viewmodel.DetailDosenAction
+import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.viewmodel.DetailDosenEvent
+import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.viewmodel.DetailDosenViewModel
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.DosenUI
+import com.polije.sipeperpolije.utils.ObserveAsEvent
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailDosenScreen(dosenUI: DosenUI, onNavigateBack: () -> Unit) {
+fun DetailDosenScreen(
+    dosenUI: DosenUI,
+    detailDosenViewModel: DetailDosenViewModel = koinViewModel(),
+    onNavigateBack: () -> Unit,
+    onSuccessAction: () -> Unit,
+    onFailereAction: () -> Unit
+) {
 
     var showBottomSheet by remember { mutableStateOf(false) }
     val modalBottomSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
+    val snackbarHostState = LocalSnackbarHostState.current
+
+    ObserveAsEvent(detailDosenViewModel.events) { event ->
+        when (event) {
+            is DetailDosenEvent.OnDosenSuccessAction -> {
+                snackbarHostState.showSnackbar("Berhasil mengubah atau menghapus data dosen")
+                scope.launch {
+                    modalBottomSheetState.hide()
+                }.invokeOnCompletion {
+                    if (!modalBottomSheetState.isVisible) {
+                        showBottomSheet = false
+                    }
+                }
+                onSuccessAction()
+            }
+
+            is DetailDosenEvent.OnDosenFailedAction -> {
+                scope.launch {
+                    modalBottomSheetState.hide()
+                }.invokeOnCompletion {
+                    if (!modalBottomSheetState.isVisible) {
+                        showBottomSheet = false
+                    }
+                }
+                snackbarHostState.showSnackbar("Gagal mengubah atau menghapus data dosen")
+                onFailereAction()
+            }
+
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Detail Dosen", fontWeight = FontWeight.Bold) },
@@ -134,15 +179,28 @@ fun DetailDosenScreen(dosenUI: DosenUI, onNavigateBack: () -> Unit) {
         }
 
         if (showBottomSheet) {
-            UpdateDosenModal(modalBottomSheetState, onDismissRequest = {
-                scope.launch {
-                    modalBottomSheetState.hide()
-                }.invokeOnCompletion {
-                    if (!modalBottomSheetState.isVisible) {
-                        showBottomSheet = false
+            UpdateDosenModal(
+                namaDosenTextState = TextFieldState(initialText = dosenUI.nama),
+                nidnTextState = TextFieldState(initialText = dosenUI.nidn),
+                modalBottomSheetState, onDismissRequest = {
+                    scope.launch {
+                        modalBottomSheetState.hide()
+                    }.invokeOnCompletion {
+                        if (!modalBottomSheetState.isVisible) {
+                            showBottomSheet = false
+                        }
                     }
-                }
-            })
+                }, onSaveAction = { newNama, newNIDN ->
+                    detailDosenViewModel.onAction(
+                        DetailDosenAction.OnDosenUpdate(
+                            DosenUI(
+                                dosenUI.id,
+                                newNama,
+                                newNIDN
+                            )
+                        )
+                    )
+                })
         }
     }
 }
@@ -293,7 +351,7 @@ fun DetailDosenScreenPreview() {
             nama = "Dr. Budi Santoso",
             nidn = "12345678",
         ),
-        onNavigateBack = {})
+        onNavigateBack = {}, onSuccessAction = {}, onFailereAction = {})
 
 }
 

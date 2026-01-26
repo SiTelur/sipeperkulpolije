@@ -12,3 +12,5 @@ fun DosenEntity.toUI() =
         this.nama,
         nidn
     )
+
+fun DosenUI.toEntity() = DosenEntity(id, nama, nidn)

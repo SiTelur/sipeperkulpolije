@@ -56,4 +56,11 @@ class ListDosenViewModel(val listDosenPagingUseCase: ListDosenPagingUseCase) : V
             paginator.loadNextItems()
         }
     }
+
+    fun resetItems() {
+        viewModelScope.launch {
+            paginator.reset()
+            _state.update { it.copy(dosens = emptyList()) }
+        }
+    }
 }
