@@ -48,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.polije.sipeperpolije.LocalSnackbarHostState
+import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.component.DeleteConfirmationDialog
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.component.UpdateDosenModal
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.viewmodel.DetailDosenAction
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.viewmodel.DetailDosenEvent
@@ -69,6 +70,7 @@ fun DetailDosenScreen(
 ) {
 
     var showBottomSheet by remember { mutableStateOf(false) }
+    var showConfirmationDialog by remember { mutableStateOf(false) }
     val modalBottomSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     val snackbarHostState = LocalSnackbarHostState.current
@@ -77,24 +79,10 @@ fun DetailDosenScreen(
         when (event) {
             is DetailDosenEvent.OnDosenSuccessAction -> {
                 snackbarHostState.showSnackbar("Berhasil mengubah atau menghapus data dosen")
-                scope.launch {
-                    modalBottomSheetState.hide()
-                }.invokeOnCompletion {
-                    if (!modalBottomSheetState.isVisible) {
-                        showBottomSheet = false
-                    }
-                }
                 onSuccessAction()
             }
 
             is DetailDosenEvent.OnDosenFailedAction -> {
-                scope.launch {
-                    modalBottomSheetState.hide()
-                }.invokeOnCompletion {
-                    if (!modalBottomSheetState.isVisible) {
-                        showBottomSheet = false
-                    }
-                }
                 snackbarHostState.showSnackbar("Gagal mengubah atau menghapus data dosen")
                 onFailereAction()
             }
@@ -137,7 +125,7 @@ fun DetailDosenScreen(
                         Text("Ubah Data Dosen", fontWeight = FontWeight.Bold)
                     }
                     Button(
-                        onClick = { /* TODO: Handle edit */ },
+                        onClick = { showConfirmationDialog = true },
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
@@ -178,30 +166,57 @@ fun DetailDosenScreen(
             item { MataKuliahSection() }
         }
 
-        if (showBottomSheet) {
-            UpdateDosenModal(
-                namaDosenTextState = TextFieldState(initialText = dosenUI.nama),
-                nidnTextState = TextFieldState(initialText = dosenUI.nidn),
-                modalBottomSheetState, onDismissRequest = {
-                    scope.launch {
-                        modalBottomSheetState.hide()
-                    }.invokeOnCompletion {
-                        if (!modalBottomSheetState.isVisible) {
-                            showBottomSheet = false
+        when {
+            showBottomSheet -> {
+                UpdateDosenModal(
+                    namaDosenTextState = TextFieldState(initialText = dosenUI.nama),
+                    nidnTextState = TextFieldState(initialText = dosenUI.nidn),
+                    modalBottomSheetState, onDismissRequest = {
+                        scope.launch {
+                            modalBottomSheetState.hide()
+                        }.invokeOnCompletion {
+                            if (!modalBottomSheetState.isVisible) {
+                                showBottomSheet = false
+                            }
                         }
-                    }
-                }, onSaveAction = { newNama, newNIDN ->
-                    detailDosenViewModel.onAction(
-                        DetailDosenAction.OnDosenUpdate(
-                            DosenUI(
-                                dosenUI.id,
-                                newNama,
-                                newNIDN
+                    }, onSaveAction = { newNama, newNIDN ->
+                        scope.launch {
+                            modalBottomSheetState.hide()
+                        }.invokeOnCompletion {
+                            if (!modalBottomSheetState.isVisible) {
+                                showBottomSheet = false
+                            }
+                        }
+
+                        detailDosenViewModel.onAction(
+                            DetailDosenAction.OnDosenUpdate(
+                                DosenUI(
+                                    dosenUI.id,
+                                    newNama,
+                                    newNIDN
+                                )
                             )
                         )
-                    )
-                })
+                    })
+            }
+
+            showConfirmationDialog -> {
+                DeleteConfirmationDialog(
+                    onDismissRequest = { showConfirmationDialog = false },
+                    onConfirm = {
+                        showConfirmationDialog = false
+                        detailDosenViewModel.onAction(
+                            DetailDosenAction.OnDosenDelete(
+                                dosenUI.id
+                            )
+
+                        )
+                    },
+                    title = "Hapus", message = "Apakah anda ingin menghapus data dosen ini"
+                )
+            }
         }
+
     }
 }
 
