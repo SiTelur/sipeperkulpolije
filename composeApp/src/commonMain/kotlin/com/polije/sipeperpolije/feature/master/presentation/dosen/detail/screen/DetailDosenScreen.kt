@@ -1,7 +1,6 @@
 package com.polije.sipeperpolije.feature.master.presentation.dosen.detail.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
@@ -33,10 +34,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.polije.sipeperpolije.LocalSnackbarHostState
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.component.DeleteConfirmationDialog
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.component.UpdateDosenModal
@@ -54,6 +58,7 @@ import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.viewmod
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.viewmodel.DetailDosenEvent
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.viewmodel.DetailDosenViewModel
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.DosenUI
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.MataKuliahUI
 import com.polije.sipeperpolije.utils.ObserveAsEvent
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -73,7 +78,13 @@ fun DetailDosenScreen(
     var showConfirmationDialog by remember { mutableStateOf(false) }
     val modalBottomSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
+
+    val state by detailDosenViewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = LocalSnackbarHostState.current
+
+    LaunchedEffect(dosenUI) {
+        detailDosenViewModel.onAction(DetailDosenAction.OnInitial(dosenUI.id))
+    }
 
     ObserveAsEvent(detailDosenViewModel.events) { event ->
         when (event) {
@@ -85,6 +96,23 @@ fun DetailDosenScreen(
             is DetailDosenEvent.OnDosenFailedAction -> {
                 snackbarHostState.showSnackbar("Gagal mengubah atau menghapus data dosen")
                 onFailereAction()
+            }
+
+            is DetailDosenEvent.OnMataKuliahFetchFailed -> {
+                val result = snackbarHostState.showSnackbar(
+                    "Gagal mengambil data mata kuliah untuk dosen ${dosenUI.nama}",
+                    actionLabel = "Muat Ulang"
+                )
+
+                when (result) {
+                    SnackbarResult.ActionPerformed -> {
+                        detailDosenViewModel.onAction(DetailDosenAction.OnInitial(dosenUI.id))
+                    }
+
+                    SnackbarResult.Dismissed -> {
+
+                    }
+                }
             }
 
         }
@@ -163,7 +191,7 @@ fun DetailDosenScreen(
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                 )
             }
-            item { MataKuliahSection() }
+            item { MataKuliahSection(state.listMataKuliah) }
         }
 
         when {
@@ -293,8 +321,11 @@ private fun InfoRow(label: String, value: String) {
 }
 
 @Composable
-private fun MataKuliahSection() {
-    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+private fun MataKuliahSection(list: List<MataKuliahUI>) {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -311,19 +342,20 @@ private fun MataKuliahSection() {
             )
         }
         Spacer(modifier = Modifier.height(0.dp))
+        list.forEach {
+            MataKuliahDosenItem(it.kode, it.nama)
+        }
     }
 }
 
 @Composable
 fun MataKuliahDosenItem(
-    label: String,
-    value: String,
-    onClick: () -> Unit
+    kode: String,
+    nama: String,
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -335,12 +367,12 @@ fun MataKuliahDosenItem(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    label,
+                    kode,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    value,
+                    nama,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
@@ -357,16 +389,9 @@ fun MataKuliahDosenItem(
     }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-fun DetailDosenScreenPreview() {
-    DetailDosenScreen(
-        DosenUI(
-            id = 1,
-            nama = "Dr. Budi Santoso",
-            nidn = "12345678",
-        ),
-        onNavigateBack = {}, onSuccessAction = {}, onFailereAction = {})
-
+fun MataKuliahDosenItemPreview() {
+    MataKuliahDosenItem(kode = "Mata Kuliah", nama = "Algoritma dan Pemrograman")
 }
 

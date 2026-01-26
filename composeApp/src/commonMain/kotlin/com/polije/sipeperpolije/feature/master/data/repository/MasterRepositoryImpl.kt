@@ -35,6 +35,21 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
         return Result.success(response)
     }
 
+    override suspend fun getDetailDosenMataKuliah(id: Int): Result<List<MataKuliahEntity>> {
+        val response = try {
+            val data = supabase.from("mata_kuliah_view").select {
+                filter {
+                    MataKuliahModel::id eq id
+                }
+            }.decodeList<MataKuliahModel>().map { it.toEntity() }
+            data
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive();
+            return Result.failure(e)
+        }
+        return Result.success(response)
+    }
+
     override suspend fun getMataKuliahPaging(
         offset: Int,
         limit: Int
