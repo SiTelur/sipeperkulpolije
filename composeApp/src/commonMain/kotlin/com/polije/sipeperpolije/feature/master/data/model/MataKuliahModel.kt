@@ -6,20 +6,20 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class MataKuliahModel(
-    val id: Int,
+    val id: Int = 0,
     val kode: String,
     val nama: String,
     val semester: Int,
     @SerialName("jumlah_sks")
     val jumlahSKS: Int,
     @SerialName("id_pengampu_pertama")
-    val idPengampuPertama: Int?,
+    val idPengampuPertama: Int? = null,
     @SerialName("nama_pengampu_pertama")
-    val namaPengampuPertama: String?,
+    val namaPengampuPertama: String? = null,
     @SerialName("id_pengampu_kedua")
-    val idPenampuKedua: Int?,
+    val idPenampuKedua: Int? = null,
     @SerialName("nama_pengampu_kedua")
-    val namaPengampuKedua: String?
+    val namaPengampuKedua: String? = null
 )
 
 fun MataKuliahModel.toEntity() = MataKuliahEntity(

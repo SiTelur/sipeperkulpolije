@@ -5,6 +5,7 @@ import com.polije.sipeperpolije.feature.master.data.model.MataKuliahModel
 import com.polije.sipeperpolije.feature.master.data.model.toEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.DosenEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.MataKuliahEntity
+import com.polije.sipeperpolije.feature.master.domain.entity.toModel
 import com.polije.sipeperpolije.feature.master.domain.repository.MasterRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
@@ -133,6 +134,28 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                 }
             }
             Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun insertDosen(dosen: DosenEntity): Result<Boolean> {
+        return try {
+            supabase.from("dosen").insert(dosen.toModel())
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun insertMataKuliah(mataKuliah: MataKuliahEntity): Result<MataKuliahEntity> {
+        return try {
+            val data = supabase.from("matakuliah").insert(mataKuliah.toModel()) {
+                select()
+                single()
+            }
+                .decodeSingle<MataKuliahModel>().toEntity()
+            Result.success(data)
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.dosen.detail.component
+package com.polije.sipeperpolije.feature.master.presentation.dosen.list.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,24 +24,23 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.polije.sipeperpolije.theme.AppTheme
-import org.jetbrains.compose.ui.tooling.preview.Preview
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpdateDosenModal(
-    namaDosenTextState: TextFieldState,
-    nidnTextState: TextFieldState,
+fun InsertDosenModal(
     modalBottomSheetState: SheetState,
     onDismissRequest: () -> Unit,
     onSaveAction: (String, String) -> Unit
 ) {
+
+    val namaDosenTextState = TextFieldState()
+    val nidnTextState = TextFieldState()
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = modalBottomSheetState,
@@ -56,7 +55,7 @@ fun UpdateDosenModal(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Ubah Data Dosen",
+                    "Tambah Data Dosen",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -110,25 +109,10 @@ fun UpdateDosenModal(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Simpan Perubahan", fontWeight = FontWeight.Bold)
+                        Text("Tambah Data", fontWeight = FontWeight.Bold)
                     }
                 }
             }
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview
-@Composable
-fun UpdateDosenModalPreview() {
-    AppTheme {
-        UpdateDosenModal(
-            TextFieldState(),
-            TextFieldState(),
-            rememberModalBottomSheetState(),
-            onDismissRequest = {},
-            onSaveAction = { _, _ -> }
-        )
     }
 }

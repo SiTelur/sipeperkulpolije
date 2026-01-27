@@ -3,7 +3,7 @@ package com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.pre
 import com.polije.sipeperpolije.feature.master.domain.entity.MataKuliahEntity
 
 data class MataKuliahUI(
-    val id: Int,
+    val id: Int = 0,
     val kode: String,
     val nama: String,
     val semester: Int,
@@ -21,3 +21,16 @@ fun MataKuliahEntity.toUI() = MataKuliahUI(
     this.idPengampuPertama,
     this.namaPengampuPertama ?: "Belum ditentukan"
 )
+
+fun MataKuliahUI.toEntity() =
+    MataKuliahEntity(
+        this.id,
+        this.kode,
+        this.nama,
+        this.semester,
+        this.jumlahSKS,
+        null,
+        null,
+        idPenampuKedua = null,
+        null
+    )

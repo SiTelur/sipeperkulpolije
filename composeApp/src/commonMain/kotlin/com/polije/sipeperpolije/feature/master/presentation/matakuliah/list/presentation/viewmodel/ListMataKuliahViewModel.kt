@@ -2,6 +2,7 @@ package com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.pre
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.polije.sipeperpolije.feature.master.domain.usecase.InsertMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListMataKuliahPagingUseCase
 import com.polije.sipeperpolije.utils.Paginator
 import kotlinx.coroutines.channels.Channel
@@ -11,7 +12,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ListMataKuliahViewModel(private val listMataKuliahPagingUseCase: ListMataKuliahPagingUseCase) :
+class ListMataKuliahViewModel(
+    private val listMataKuliahPagingUseCase: ListMataKuliahPagingUseCase,
+    private val insertMataKuliahUseCase: InsertMataKuliahUseCase
+) :
     ViewModel() {
     private val _state = MutableStateFlow(ListMataKuliahState())
     val state = _state.asStateFlow()
@@ -61,6 +65,33 @@ class ListMataKuliahViewModel(private val listMataKuliahPagingUseCase: ListMataK
     fun resetItems() {
         viewModelScope.launch {
             paginator.reset()
+        }
+    }
+
+    fun onAction(listMataKuliahAction: ListMataKuliahAction) {
+        when (listMataKuliahAction) {
+            is ListMataKuliahAction.OnSaveMataKuliah -> {
+                viewModelScope.launch {
+                    insertMataKuliahUseCase(
+                        MataKuliahUI(
+                            nama = listMataKuliahAction.nama,
+                            kode = listMataKuliahAction.kode,
+                            semester = listMataKuliahAction.semester,
+                            jumlahSKS = listMataKuliahAction.sks,
+                            idPengampu = null,
+                            namaPenampuPertama = ""
+                        ).toEntity()
+                    ).onSuccess {
+                        _event.send(ListMataKuliahEvent.OnSaveSuccess(it.toUI()))
+                    }.onFailure {
+                        _event.send(
+                            ListMataKuliahEvent.OnSaveFailure(
+                                it.message ?: "Terjadi error"
+                            )
+                        )
+                    }
+                }
+            }
         }
     }
 }

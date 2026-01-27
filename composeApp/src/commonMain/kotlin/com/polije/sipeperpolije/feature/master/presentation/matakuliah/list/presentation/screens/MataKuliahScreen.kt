@@ -25,11 +25,13 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -38,11 +40,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.polije.sipeperpolije.LocalSnackbarHostState
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.component.InsertMataKuliahModal
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.component.MataKuliahListItem
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahAction
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahEvent
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahViewModel
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.MataKuliahUI
 import com.polije.sipeperpolije.utils.ObserveAsEvent
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 data class MataKuliah(
@@ -62,23 +68,38 @@ val sampleMataKuliahList = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MataKuliahScreen(
-    viewmodel: ListMataKuliahViewModel = koinViewModel(),
+    listMataKuliahViewModel: ListMataKuliahViewModel = koinViewModel(),
     resultFromDetail: Boolean? = null,
     onItemClick: (MataKuliahUI) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
-
+    var showInsertModal by remember { mutableStateOf(false) }
+    val modalBottomSheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
     val snackBarHost = LocalSnackbarHostState.current
 
-    val state by viewmodel.state.collectAsStateWithLifecycle()
+    val state by listMataKuliahViewModel.state.collectAsStateWithLifecycle()
 
-    ObserveAsEvent(viewmodel.events) {
+    ObserveAsEvent(listMataKuliahViewModel.events) { event ->
+        when (event) {
+            is ListMataKuliahEvent.OnSaveSuccess -> {
+                snackBarHost.showSnackbar("Mata kuliah berhasil ditambahkan")
+                onItemClick(event.data)
+            }
 
+            is ListMataKuliahEvent.OnLoadError -> {
+                snackBarHost.showSnackbar(event.message)
+            }
+
+            is ListMataKuliahEvent.OnSaveFailure -> {
+                snackBarHost.showSnackbar(event.message)
+            }
+        }
     }
 
     LaunchedEffect(resultFromDetail) {
         if (resultFromDetail == true) {
-            viewmodel.resetItems()
+            listMataKuliahViewModel.resetItems()
         }
     }
 
@@ -89,7 +110,7 @@ fun MataKuliahScreen(
             lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
         }.distinctUntilChanged().collect {
             if (it == state.mataKuliahs.lastIndex) {
-                viewmodel.loadNextItems()
+                listMataKuliahViewModel.loadNextItems()
             }
         }
     }
@@ -103,7 +124,7 @@ fun MataKuliahScreen(
             TopAppBar(
                 title = { Text("Daftar Mata Kuliah", fontWeight = FontWeight.Bold) },
                 actions = {
-                    IconButton(onClick = { /* TODO: Handle add action */ }) {
+                    IconButton(onClick = { showInsertModal = true }) {
                         Icon(
                             Icons.Default.Add,
                             contentDescription = "Tambah Mata Kuliah",
@@ -136,6 +157,41 @@ fun MataKuliahScreen(
                         CircularProgressIndicator()
                     }
                 }
+            }
+        }
+
+        when {
+            showInsertModal -> {
+                InsertMataKuliahModal(
+                    modalBottomSheetState = modalBottomSheetState,
+                    onDismiss = {
+                        scope.launch {
+                            modalBottomSheetState.hide()
+                        }.invokeOnCompletion {
+                            if (!modalBottomSheetState.isVisible) {
+                                showInsertModal = false
+                            }
+                        }
+                    },
+                    onSave = { nama, kode, sks, semester ->
+                        listMataKuliahViewModel.onAction(
+                            ListMataKuliahAction.OnSaveMataKuliah(
+                                nama,
+                                kode,
+                                sks,
+                                semester
+                            )
+                        )
+
+                        scope.launch {
+                            modalBottomSheetState.hide()
+                        }.invokeOnCompletion {
+                            if (!modalBottomSheetState.isVisible) {
+                                showInsertModal = false
+                            }
+                        }
+                    }
+                )
             }
         }
     }

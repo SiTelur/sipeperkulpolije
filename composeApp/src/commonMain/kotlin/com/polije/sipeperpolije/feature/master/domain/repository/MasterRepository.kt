@@ -11,5 +11,6 @@ interface MasterRepository {
     suspend fun updateMataKuliah(mataKuliah: MataKuliahEntity): Result<Boolean>
     suspend fun deleteDosen(id: Int): Result<Boolean>
     suspend fun deleteMataKuliah(id: Int): Result<Boolean>
-
+    suspend fun insertDosen(dosen: DosenEntity): Result<Boolean>
+    suspend fun insertMataKuliah(mataKuliah: MataKuliahEntity): Result<MataKuliahEntity>
 }

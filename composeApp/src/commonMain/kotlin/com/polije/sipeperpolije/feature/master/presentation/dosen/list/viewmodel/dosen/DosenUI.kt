@@ -2,7 +2,7 @@ package com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmode
 
 import com.polije.sipeperpolije.feature.master.domain.entity.DosenEntity
 
-data class DosenUI(val id: Int, val nama: String, val nidn: String) {
+data class DosenUI(val id: Int = 0, val nama: String, val nidn: String) {
     val initial = nama.split(" ").take(2).map { it.first() }.joinToString("").uppercase()
 }
 

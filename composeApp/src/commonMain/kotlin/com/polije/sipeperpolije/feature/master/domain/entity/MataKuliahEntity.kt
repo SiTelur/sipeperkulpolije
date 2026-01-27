@@ -1,5 +1,7 @@
 package com.polije.sipeperpolije.feature.master.domain.entity
 
+import com.polije.sipeperpolije.feature.master.data.model.MataKuliahModel
+
 data class MataKuliahEntity(
     val id: Int,
     val kode: String,
@@ -10,4 +12,11 @@ data class MataKuliahEntity(
     val namaPengampuPertama: String?,
     val idPenampuKedua: Int?,
     val namaPengampuKedua: String?
+)
+
+fun MataKuliahEntity.toModel() = MataKuliahModel(
+    id = id,
+    kode = kode,
+    nama = nama,
+    semester = semester, jumlahSKS = jumlahSKS, idPengampuPertama = idPengampuPertama
 )

@@ -15,6 +15,8 @@ import com.polije.sipeperpolije.feature.master.data.repository.MasterRepositoryI
 import com.polije.sipeperpolije.feature.master.domain.repository.MasterRepository
 import com.polije.sipeperpolije.feature.master.domain.usecase.DeleteDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.DetailDosenUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.InsertDosenUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.InsertMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListDosenPagingUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListMataKuliahPagingUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.UpdateDosenUseCase
@@ -66,11 +68,13 @@ fun appModule() = module {
     viewModelOf(::ListDosenViewModel)
 
     singleOf(::ListMataKuliahPagingUseCase)
+    singleOf(::InsertMataKuliahUseCase)
     viewModelOf(::ListMataKuliahViewModel)
 
     singleOf(::UpdateDosenUseCase)
     singleOf(::DeleteDosenUseCase)
     singleOf(::DetailDosenUseCase)
+    singleOf(::InsertDosenUseCase)
     viewModelOf(::DetailDosenViewModel)
 }
 
