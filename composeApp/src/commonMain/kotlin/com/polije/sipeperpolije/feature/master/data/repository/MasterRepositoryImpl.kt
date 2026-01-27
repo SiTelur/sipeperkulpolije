@@ -150,9 +150,8 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
 
     override suspend fun insertMataKuliah(mataKuliah: MataKuliahEntity): Result<MataKuliahEntity> {
         return try {
-            val data = supabase.from("matakuliah").insert(mataKuliah.toModel()) {
-                select()
-                single()
+            val data = supabase.from("mata_kuliah").insert(mataKuliah.toModel()) {
+                select(Columns.list("id", "kode", "nama", "semester", "jumlah_sks"))
             }
                 .decodeSingle<MataKuliahModel>().toEntity()
             Result.success(data)
