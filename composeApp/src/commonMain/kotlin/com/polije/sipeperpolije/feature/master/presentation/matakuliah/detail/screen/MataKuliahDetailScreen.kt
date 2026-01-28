@@ -94,8 +94,21 @@ fun MataKuliahDetailScreen(
                     Modifier.fillMaxWidth().padding(12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+
                     Button(
-                        onClick = onFailedAction,
+                        onClick = {
+
+                        },
+                        modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Edit Data", fontWeight = FontWeight.SemiBold)
+                    }
+
+                    Button(
+                        onClick = {},
                         modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonColors(
@@ -107,18 +120,9 @@ fun MataKuliahDetailScreen(
                             disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
                         )
                     ) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                        Icon(Icons.Default.Delete, contentDescription = "Hapus")
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Edit Data", fontWeight = FontWeight.SemiBold)
-                    }
-                    Button(
-                        onClick = onSuccessAction,
-                        modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(Icons.Default.Delete, contentDescription = "Simpan")
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Simpan Data", fontWeight = FontWeight.SemiBold)
+                        Text("Hapus Data", fontWeight = FontWeight.SemiBold)
                     }
                 }
             }

@@ -151,13 +151,35 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
     override suspend fun insertMataKuliah(mataKuliah: MataKuliahEntity): Result<MataKuliahEntity> {
         return try {
             val data = supabase.from("mata_kuliah").insert(mataKuliah.toModel()) {
-                select(Columns.list("id", "kode", "nama", "semester", "jumlah_sks"))
+                select(
+                    Columns.list(
+                        "id",
+                        "kode",
+                        "nama",
+                        "semester",
+                        "jumlah_sks",
+                        "id_pengampu_pertama"
+                    )
+                )
             }
                 .decodeSingle<MataKuliahModel>().toEntity()
             Result.success(data)
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    override suspend fun searchDosen(): Result<List<DosenEntity>> {
+        val response = try {
+            val data = supabase.from("dosen").select(Columns.list("id", "nama", "nidn")) {
+
+            }.decodeList<DosenModel>().map { it.toEntity() }
+            data
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive();
+            return Result.failure(e)
+        }
+        return Result.success(response)
     }
 
 

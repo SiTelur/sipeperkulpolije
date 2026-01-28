@@ -29,7 +29,7 @@ fun MataKuliahUI.toEntity() =
         this.nama,
         this.semester,
         this.jumlahSKS,
-        null,
+        this.idPengampu,
         null,
         idPenampuKedua = null,
         null

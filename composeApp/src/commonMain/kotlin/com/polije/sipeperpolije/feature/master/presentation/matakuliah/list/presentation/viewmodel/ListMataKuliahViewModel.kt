@@ -4,7 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.polije.sipeperpolije.feature.master.domain.usecase.InsertMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListMataKuliahPagingUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.SearchDosenUseCase
+import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.toUI
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahEvent.OnSaveFailure
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahEvent.OnSaveSuccess
 import com.polije.sipeperpolije.utils.Paginator
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,14 +17,15 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@OptIn(FlowPreview::class)
 class ListMataKuliahViewModel(
     private val listMataKuliahPagingUseCase: ListMataKuliahPagingUseCase,
-    private val insertMataKuliahUseCase: InsertMataKuliahUseCase
+    private val insertMataKuliahUseCase: InsertMataKuliahUseCase,
+    val searchDosenUseCase: SearchDosenUseCase
 ) :
     ViewModel() {
     private val _state = MutableStateFlow(ListMataKuliahState())
     val state = _state.asStateFlow()
-
     private val _event = Channel<ListMataKuliahEvent>()
     val events = _event.receiveAsFlow()
 
@@ -54,6 +60,7 @@ class ListMataKuliahViewModel(
 
     init {
         loadNextItems()
+        initiateDosenList()
     }
 
     fun loadNextItems() {
@@ -68,6 +75,14 @@ class ListMataKuliahViewModel(
         }
     }
 
+    private fun initiateDosenList() {
+        viewModelScope.launch {
+            searchDosenUseCase().onSuccess { response ->
+                _state.update { it.copy(result = response.map { value -> value.toUI() }) }
+            }
+        }
+    }
+
     fun onAction(listMataKuliahAction: ListMataKuliahAction) {
         when (listMataKuliahAction) {
             is ListMataKuliahAction.OnSaveMataKuliah -> {
@@ -78,19 +93,23 @@ class ListMataKuliahViewModel(
                             kode = listMataKuliahAction.kode,
                             semester = listMataKuliahAction.semester,
                             jumlahSKS = listMataKuliahAction.sks,
-                            idPengampu = null,
+                            idPengampu = listMataKuliahAction.dosenID,
                             namaPenampuPertama = ""
                         ).toEntity()
                     ).onSuccess {
-                        _event.send(ListMataKuliahEvent.OnSaveSuccess(it.toUI()))
+                        _event.send(OnSaveSuccess(it.toUI()))
                     }.onFailure {
                         _event.send(
-                            ListMataKuliahEvent.OnSaveFailure(
+                            OnSaveFailure(
                                 it.message ?: "Terjadi error"
                             )
                         )
                     }
                 }
+            }
+
+            is ListMataKuliahAction.OnSearcDosen -> {
+
             }
         }
     }
