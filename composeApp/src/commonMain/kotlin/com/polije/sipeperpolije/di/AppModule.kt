@@ -23,6 +23,7 @@ import com.polije.sipeperpolije.feature.master.domain.usecase.SearchDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.UpdateDosenUseCase
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.viewmodel.DetailDosenViewModel
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.ListDosenViewModel
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.viewmodel.DetailMataKuliahViewModel
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahViewModel
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.FlowType
@@ -72,6 +73,7 @@ fun appModule() = module {
     singleOf(::InsertMataKuliahUseCase)
     singleOf(::SearchDosenUseCase)
     viewModelOf(::ListMataKuliahViewModel)
+    viewModelOf(::DetailMataKuliahViewModel)
 
     singleOf(::UpdateDosenUseCase)
     singleOf(::DeleteDosenUseCase)

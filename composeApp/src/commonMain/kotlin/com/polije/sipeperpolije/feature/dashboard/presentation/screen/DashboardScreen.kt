@@ -147,6 +147,7 @@ fun MainScreen(
                             it.id,
                             it.nama,
                             it.kode,
+                            it.idPengampu,
                             it.namaPenampuPertama,
                             it.jumlahSKS,
                             it.semester
@@ -193,6 +194,7 @@ fun MainScreen(
                     detailMataKuliah.nama,
                     detailMataKuliah.kode,
                     detailMataKuliah.sks,
+                    detailMataKuliah.id,
                     detailMataKuliah.namaPengampu,
                     detailMataKuliah.semester,
                     onBackPressed = {
@@ -518,6 +520,7 @@ data class DetailMataKuliah(
     val id: Int,
     val nama: String,
     val kode: String,
+    val idPengampu: Int? = null,
     val namaPengampu: String,
     val sks: Int,
     val semester: Int

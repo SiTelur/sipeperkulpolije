@@ -36,7 +36,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,8 +52,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.component.UpdateMataKuliahModal
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.viewmodel.DetailMataKuliahViewModel
 import com.polije.sipeperpolije.theme.AppTheme
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,13 +67,21 @@ fun MataKuliahDetailScreen(
     nama: String,
     kode: String,
     sks: Int,
+    idPengampu: Int? = null,
     pengampu: String,
     semester: Int,
+    detailMataKuliahViewModel: DetailMataKuliahViewModel = koinViewModel(),
     onBackPressed: () -> Unit,
     onSuccessAction: () -> Unit,
     onFailedAction: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    var isShowEditModal by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+
+    val state = detailMataKuliahViewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier,
@@ -97,7 +116,7 @@ fun MataKuliahDetailScreen(
 
                     Button(
                         onClick = {
-
+                            isShowEditModal = true
                         },
                         modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
                         shape = RoundedCornerShape(12.dp)
@@ -108,7 +127,7 @@ fun MataKuliahDetailScreen(
                     }
 
                     Button(
-                        onClick = {},
+                        onClick = { },
                         modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonColors(
@@ -133,6 +152,33 @@ fun MataKuliahDetailScreen(
             item { QuickStats(kode, sks) }
             item { InfoSection(pengampu) }
 
+        }
+
+        when {
+            isShowEditModal -> {
+                UpdateMataKuliahModal(
+                    listDosen = state.value.result,
+                    modalBottomSheetState = sheetState,
+                    onDismiss = {
+                        scope.launch {
+                            sheetState.hide()
+                        }.invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                isShowEditModal = false
+                            }
+                        }
+                    },
+                    initialMataKuliah = nama,
+                    initialKodeMataKuliah = kode,
+                    initialNamaDosen = pengampu,
+                    initialJumlahSKS = sks,
+                    initialSemester = semester,
+                    initialIDDosen = idPengampu,
+                    onSave = { nama, kode, sks, semester, idDosen ->
+
+                    }
+                )
+            }
         }
     }
 }
