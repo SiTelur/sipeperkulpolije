@@ -96,7 +96,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
 
     override suspend fun updateMataKuliah(mataKuliah: MataKuliahEntity): Result<Boolean> {
         return try {
-            supabase.from("matakuliah").update({
+            supabase.from("mata_kuliah").update({
                 set("kode", mataKuliah.kode)
                 set("nama", mataKuliah.nama)
                 set("semester", mataKuliah.semester)
@@ -128,7 +128,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
 
     override suspend fun deleteMataKuliah(id: Int): Result<Boolean> {
         return try {
-            supabase.from("matakuliah").delete {
+            supabase.from("mata_kuliah").delete {
                 filter {
                     eq("id", id)
                 }

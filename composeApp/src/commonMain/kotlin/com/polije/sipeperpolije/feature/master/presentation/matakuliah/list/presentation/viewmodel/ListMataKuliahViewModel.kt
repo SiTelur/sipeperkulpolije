@@ -72,6 +72,7 @@ class ListMataKuliahViewModel(
     fun resetItems() {
         viewModelScope.launch {
             paginator.reset()
+            _state.update { it.copy(mataKuliahs = emptyList()) }
         }
     }
 

@@ -191,6 +191,7 @@ fun MainScreen(
             composable<DetailMataKuliah> { backStackEntry ->
                 val detailMataKuliah: DetailMataKuliah = backStackEntry.toRoute()
                 MataKuliahDetailScreen(
+                    detailMataKuliah.id,
                     detailMataKuliah.nama,
                     detailMataKuliah.kode,
                     detailMataKuliah.sks,

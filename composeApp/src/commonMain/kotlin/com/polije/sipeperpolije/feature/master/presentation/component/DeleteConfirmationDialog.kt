@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.dosen.detail.component
+package com.polije.sipeperpolije.feature.master.presentation.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete

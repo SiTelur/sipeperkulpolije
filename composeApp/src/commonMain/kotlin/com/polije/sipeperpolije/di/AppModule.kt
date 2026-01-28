@@ -14,6 +14,7 @@ import com.polije.sipeperpolije.feature.login.presentation.viewmodel.LoginViewMo
 import com.polije.sipeperpolije.feature.master.data.repository.MasterRepositoryImpl
 import com.polije.sipeperpolije.feature.master.domain.repository.MasterRepository
 import com.polije.sipeperpolije.feature.master.domain.usecase.DeleteDosenUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.DeleteMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.DetailDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.InsertDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.InsertMataKuliahUseCase
@@ -21,6 +22,7 @@ import com.polije.sipeperpolije.feature.master.domain.usecase.ListDosenPagingUse
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListMataKuliahPagingUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.SearchDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.UpdateDosenUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.UpdateMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.viewmodel.DetailDosenViewModel
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.ListDosenViewModel
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.viewmodel.DetailMataKuliahViewModel
@@ -72,6 +74,8 @@ fun appModule() = module {
     singleOf(::ListMataKuliahPagingUseCase)
     singleOf(::InsertMataKuliahUseCase)
     singleOf(::SearchDosenUseCase)
+    singleOf(::UpdateMataKuliahUseCase)
+    singleOf(::DeleteMataKuliahUseCase)
     viewModelOf(::ListMataKuliahViewModel)
     viewModelOf(::DetailMataKuliahViewModel)
 

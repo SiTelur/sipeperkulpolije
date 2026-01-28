@@ -53,9 +53,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.polije.sipeperpolije.feature.master.presentation.component.DeleteConfirmationDialog
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.component.UpdateMataKuliahModal
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.viewmodel.DetailMataKuliahAction
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.viewmodel.DetailMataKuliahEvent
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.viewmodel.DetailMataKuliahViewModel
 import com.polije.sipeperpolije.theme.AppTheme
+import com.polije.sipeperpolije.utils.ObserveAsEvent
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -64,6 +68,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MataKuliahDetailScreen(
+    id: Int,
     nama: String,
     kode: String,
     sks: Int,
@@ -77,11 +82,32 @@ fun MataKuliahDetailScreen(
     modifier: Modifier = Modifier
 ) {
 
-    var isShowEditModal by remember { mutableStateOf(false) }
+    var showEditModal by remember { mutableStateOf(false) }
+    var showConfirmationDelete by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
     val state = detailMataKuliahViewModel.state.collectAsStateWithLifecycle()
+
+    ObserveAsEvent(detailMataKuliahViewModel.events) { event ->
+        when (event) {
+            is DetailMataKuliahEvent.OnFailureDeleteMataKuliah -> {
+                onSuccessAction()
+            }
+
+            is DetailMataKuliahEvent.OnFailureUpdateMataKuliah -> {
+                onFailedAction()
+            }
+
+            DetailMataKuliahEvent.OnSuccessDeleteMataKuliah -> {
+                onSuccessAction()
+            }
+
+            DetailMataKuliahEvent.OnSuccessUpdateMataKuliah -> {
+                onFailedAction()
+            }
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -116,7 +142,7 @@ fun MataKuliahDetailScreen(
 
                     Button(
                         onClick = {
-                            isShowEditModal = true
+                            showEditModal = true
                         },
                         modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
                         shape = RoundedCornerShape(12.dp)
@@ -127,7 +153,7 @@ fun MataKuliahDetailScreen(
                     }
 
                     Button(
-                        onClick = { },
+                        onClick = { showConfirmationDelete = true },
                         modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonColors(
@@ -155,7 +181,7 @@ fun MataKuliahDetailScreen(
         }
 
         when {
-            isShowEditModal -> {
+            showEditModal -> {
                 UpdateMataKuliahModal(
                     listDosen = state.value.result,
                     modalBottomSheetState = sheetState,
@@ -164,7 +190,7 @@ fun MataKuliahDetailScreen(
                             sheetState.hide()
                         }.invokeOnCompletion {
                             if (!sheetState.isVisible) {
-                                isShowEditModal = false
+                                showEditModal = false
                             }
                         }
                     },
@@ -175,10 +201,43 @@ fun MataKuliahDetailScreen(
                     initialSemester = semester,
                     initialIDDosen = idPengampu,
                     onSave = { nama, kode, sks, semester, idDosen ->
+                        detailMataKuliahViewModel.onAction(
+                            DetailMataKuliahAction.OnDetailMataKuliahUpdate(
+                                id = id,
+                                nama = nama,
+                                kode = kode,
+                                sks = sks,
+                                semester = semester,
+                                idDosen = idDosen
+                            )
+                        )
 
+                        scope.launch {
+                            sheetState.hide()
+                        }.invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                showEditModal = false
+                            }
+                        }
                     }
                 )
             }
+
+            showConfirmationDelete -> {
+                DeleteConfirmationDialog(
+                    onDismissRequest = { showConfirmationDelete = false },
+                    onConfirm = {
+                        showConfirmationDelete = false
+                        detailMataKuliahViewModel.onAction(
+                            DetailMataKuliahAction.OnDetailMataKuliahDelete(
+                                id
+                            )
+                        )
+                    },
+                    title = "Hapus", message = "Apakah anda ingin menghapus data mata kuliah ini"
+                )
+            }
+
         }
     }
 }
