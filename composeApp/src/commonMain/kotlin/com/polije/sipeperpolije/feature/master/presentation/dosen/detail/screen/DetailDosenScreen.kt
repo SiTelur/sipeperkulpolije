@@ -69,7 +69,7 @@ fun DetailDosenScreen(
     detailDosenViewModel: DetailDosenViewModel = koinViewModel(),
     onNavigateBack: () -> Unit,
     onSuccessAction: () -> Unit,
-    onFailereAction: () -> Unit
+    onFailureAction: () -> Unit
 ) {
 
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -93,7 +93,7 @@ fun DetailDosenScreen(
 
             is DetailDosenEvent.OnDosenFailedAction -> {
                 snackbarHostState.showSnackbar("Gagal mengubah atau menghapus data dosen")
-                onFailereAction()
+                onFailureAction()
             }
 
             is DetailDosenEvent.OnMataKuliahFetchFailed -> {

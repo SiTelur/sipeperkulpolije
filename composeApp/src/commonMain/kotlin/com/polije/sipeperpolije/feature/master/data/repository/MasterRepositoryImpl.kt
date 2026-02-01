@@ -102,6 +102,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                 set("semester", mataKuliah.semester)
                 set("jumlah_sks", mataKuliah.jumlahSKS)
                 set("id_pengampu_pertama", mataKuliah.idPengampuPertama)
+                set("is_workshop", mataKuliah.isWorkshop)
             }) {
                 filter {
                     eq("id", mataKuliah.id)
@@ -158,7 +159,8 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                         "nama",
                         "semester",
                         "jumlah_sks",
-                        "id_pengampu_pertama"
+                        "id_pengampu_pertama",
+                        "is_workshop"
                     )
                 )
             }

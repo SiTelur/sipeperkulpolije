@@ -19,7 +19,9 @@ class MataKuliahModel(
     @SerialName("id_pengampu_kedua")
     val idPenampuKedua: Int? = null,
     @SerialName("nama_pengampu_kedua")
-    val namaPengampuKedua: String? = null
+    val namaPengampuKedua: String? = null,
+    @SerialName("is_workshop")
+    val isWorkshop: Boolean
 )
 
 fun MataKuliahModel.toEntity() = MataKuliahEntity(
@@ -31,6 +33,7 @@ fun MataKuliahModel.toEntity() = MataKuliahEntity(
     namaPengampuPertama = namaPengampuPertama,
     idPenampuKedua = idPenampuKedua,
     namaPengampuKedua = namaPengampuKedua,
-    semester = semester
+    semester = semester,
+    isWorkshop = isWorkshop
 )
 

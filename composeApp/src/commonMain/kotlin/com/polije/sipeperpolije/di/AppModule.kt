@@ -4,6 +4,7 @@ import com.polije.sipeperpolije.BuildKonfig
 import com.polije.sipeperpolije.feature.dashboard.data.repository.DashboardRepositoryImpl
 import com.polije.sipeperpolije.feature.dashboard.domain.repository.DashboardRepository
 import com.polije.sipeperpolije.feature.dashboard.domain.usecase.FetchDashboardUseCase
+import com.polije.sipeperpolije.feature.dashboard.domain.usecase.GenerateJadwalUseCase
 import com.polije.sipeperpolije.feature.dashboard.domain.usecase.LogoutUseCase
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardViewModel
 import com.polije.sipeperpolije.feature.login.data.repository.LoginRepositoryImpl
@@ -64,6 +65,7 @@ fun appModule() = module {
     factoryOf(::DashboardRepositoryImpl) { bind<DashboardRepository>() }
     singleOf(::LogoutUseCase)
     singleOf(::FetchDashboardUseCase)
+    singleOf(::GenerateJadwalUseCase)
     viewModelOf(::DashboardViewModel)
 
     factoryOf(::MasterRepositoryImpl) { bind<MasterRepository>() }

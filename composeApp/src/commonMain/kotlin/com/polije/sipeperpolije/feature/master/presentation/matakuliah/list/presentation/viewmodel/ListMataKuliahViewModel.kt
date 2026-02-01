@@ -95,7 +95,8 @@ class ListMataKuliahViewModel(
                             semester = listMataKuliahAction.semester,
                             jumlahSKS = listMataKuliahAction.sks,
                             idPengampu = listMataKuliahAction.dosenID,
-                            namaPenampuPertama = ""
+                            namaPenampuPertama = "",
+                            isWorkshop = listMataKuliahAction.isWorkshop
                         ).toEntity()
                     ).onSuccess {
                         _event.send(OnSaveSuccess(it.toUI()))

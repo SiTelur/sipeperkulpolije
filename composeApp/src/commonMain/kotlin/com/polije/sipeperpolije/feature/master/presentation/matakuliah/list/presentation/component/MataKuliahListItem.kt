@@ -102,7 +102,8 @@ fun MataKuliahListItemPreview() {
                 namaPenampuPertama = "Dimas",
                 nama = "Pemrograman Mobile",
                 semester = 2,
-                idPengampu = 1
+                idPengampu = 1,
+                isWorkshop = false
             ),
 
             onItemClick = {},

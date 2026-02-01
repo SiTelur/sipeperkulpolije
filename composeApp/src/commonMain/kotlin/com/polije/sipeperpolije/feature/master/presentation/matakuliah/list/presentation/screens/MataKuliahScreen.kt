@@ -18,6 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -65,7 +66,7 @@ val sampleMataKuliahList = listOf(
 @Composable
 fun MataKuliahScreen(
     listMataKuliahViewModel: ListMataKuliahViewModel = koinViewModel(),
-    resultFromDetail: Boolean? = null,
+    resultFromDetail: Boolean?,
     onItemClick: (MataKuliahUI) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -79,8 +80,19 @@ fun MataKuliahScreen(
     ObserveAsEvent(listMataKuliahViewModel.events) { event ->
         when (event) {
             is ListMataKuliahEvent.OnSaveSuccess -> {
-                snackBarHost.showSnackbar("Mata kuliah berhasil ditambahkan")
-                onItemClick(event.data)
+                val snackBar = snackBarHost.showSnackbar(
+                    "Mata kuliah berhasil ditambahkan",
+                    actionLabel = "Lihat Data"
+                )
+                when (snackBar) {
+                    SnackbarResult.ActionPerformed -> {
+                        onItemClick(event.data)
+                    }
+
+                    SnackbarResult.Dismissed -> {
+
+                    }
+                }
             }
 
             is ListMataKuliahEvent.OnLoadError -> {
@@ -169,14 +181,14 @@ fun MataKuliahScreen(
                             }
                         }
                     },
-                    onSave = { nama, kode, sks, semester, dosenID ->
+                    onSave = { nama, kode, sks, semester, dosenID, isWorkshop ->
                         listMataKuliahViewModel.onAction(
                             ListMataKuliahAction.OnSaveMataKuliah(
                                 nama,
                                 kode,
                                 sks,
                                 semester,
-                                dosenID
+                                dosenID, isWorkshop
                             )
                         )
 

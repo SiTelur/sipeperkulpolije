@@ -150,7 +150,8 @@ fun MainScreen(
                             it.idPengampu,
                             it.namaPenampuPertama,
                             it.jumlahSKS,
-                            it.semester
+                            it.semester,
+                            it.isWorkshop
                         )
                     )
                 }
@@ -179,7 +180,7 @@ fun MainScreen(
                             ?.set("detail_result_dosen", true)
 
                         navController.popBackStack()
-                    }, onFailereAction = {
+                    }, onFailureAction = {
                         navController.previousBackStackEntry
                             ?.savedStateHandle
                             ?.set("detail_result_dosen", false)
@@ -195,9 +196,10 @@ fun MainScreen(
                     detailMataKuliah.nama,
                     detailMataKuliah.kode,
                     detailMataKuliah.sks,
-                    detailMataKuliah.id,
+                    detailMataKuliah.idPengampu,
                     detailMataKuliah.namaPengampu,
-                    detailMataKuliah.semester,
+                    semester = detailMataKuliah.semester,
+                    isWorkshop = detailMataKuliah.isWorkshop,
                     onBackPressed = {
                         navController.popBackStack()
                     },
@@ -243,6 +245,14 @@ fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel(), onLogout: (
             is DashboardEvent.FetchDashboardFailed -> {
                 snackBarState.showSnackbar(event.message)
             }
+
+            DashboardEvent.GenerateJadwalFailed -> {
+                snackBarState.showSnackbar("Berhasil membuat jadwal")
+            }
+
+            DashboardEvent.GenerateJadwalSuccess -> {
+                snackBarState.showSnackbar("Gagal ")
+            }
         }
     }
 
@@ -259,7 +269,9 @@ fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel(), onLogout: (
                 matkulCount = state.matkulCount,
                 isLoading = state.isLoading
             )
-            QuickActionButton({})
+            QuickActionButton {
+                viewModel.onAction(DashboardAction.OnGenerateJadwal)
+            }
             RecentActivitySection(
                 isLoading = state.isLoading,
                 items = state.list,
@@ -524,5 +536,6 @@ data class DetailMataKuliah(
     val idPengampu: Int? = null,
     val namaPengampu: String,
     val sks: Int,
-    val semester: Int
+    val semester: Int,
+    val isWorkshop: Boolean
 )

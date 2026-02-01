@@ -10,6 +10,7 @@ data class MataKuliahUI(
     val jumlahSKS: Int,
     val idPengampu: Int?,
     val namaPenampuPertama: String,
+    val isWorkshop: Boolean
 )
 
 fun MataKuliahEntity.toUI() = MataKuliahUI(
@@ -19,7 +20,8 @@ fun MataKuliahEntity.toUI() = MataKuliahUI(
     this.semester,
     this.jumlahSKS,
     this.idPengampuPertama,
-    this.namaPengampuPertama ?: "Belum ditentukan"
+    this.namaPengampuPertama ?: "Belum ditentukan",
+    this.isWorkshop
 )
 
 fun MataKuliahUI.toEntity() =
@@ -31,6 +33,7 @@ fun MataKuliahUI.toEntity() =
         this.jumlahSKS,
         this.idPengampu,
         null,
-        idPenampuKedua = null,
-        null
+        null,
+        null,
+        this.isWorkshop
     )

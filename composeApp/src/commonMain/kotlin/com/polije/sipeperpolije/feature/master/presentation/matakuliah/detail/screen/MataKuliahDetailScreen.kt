@@ -33,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -53,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.polije.sipeperpolije.LocalSnackbarHostState
 import com.polije.sipeperpolije.feature.master.presentation.component.DeleteConfirmationDialog
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.component.UpdateMataKuliahModal
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.viewmodel.DetailMataKuliahAction
@@ -74,6 +76,7 @@ fun MataKuliahDetailScreen(
     sks: Int,
     idPengampu: Int? = null,
     pengampu: String,
+    isWorkshop: Boolean,
     semester: Int,
     detailMataKuliahViewModel: DetailMataKuliahViewModel = koinViewModel(),
     onBackPressed: () -> Unit,
@@ -85,6 +88,7 @@ fun MataKuliahDetailScreen(
     var showEditModal by remember { mutableStateOf(false) }
     var showConfirmationDelete by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+    val snackbarHost = LocalSnackbarHostState.current
     val scope = rememberCoroutineScope()
 
     val state = detailMataKuliahViewModel.state.collectAsStateWithLifecycle()
@@ -92,25 +96,30 @@ fun MataKuliahDetailScreen(
     ObserveAsEvent(detailMataKuliahViewModel.events) { event ->
         when (event) {
             is DetailMataKuliahEvent.OnFailureDeleteMataKuliah -> {
-                onSuccessAction()
+                snackbarHost.showSnackbar("Gagal menghapus mata kuliah")
+                onFailedAction()
             }
 
             is DetailMataKuliahEvent.OnFailureUpdateMataKuliah -> {
+                snackbarHost.showSnackbar("Gagal mengupdate mata kuliah")
                 onFailedAction()
             }
 
             DetailMataKuliahEvent.OnSuccessDeleteMataKuliah -> {
+                snackbarHost.showSnackbar("Berhasil menghapus mata kuliah")
                 onSuccessAction()
             }
 
             DetailMataKuliahEvent.OnSuccessUpdateMataKuliah -> {
-                onFailedAction()
+                snackbarHost.showSnackbar("Berhasil mengupdate mata kuliah")
+                onSuccessAction()
             }
         }
     }
 
     Scaffold(
         modifier = modifier,
+        snackbarHost = { SnackbarHost(snackbarHost) },
         topBar = {
             TopAppBar(
                 title = {
@@ -176,7 +185,7 @@ fun MataKuliahDetailScreen(
         LazyColumn(contentPadding = paddingValues) {
             item { HeroSection(nama, semester = semester) }
             item { QuickStats(kode, sks) }
-            item { InfoSection(pengampu) }
+            item { InfoSection(pengampu, isWorkshop = isWorkshop) }
 
         }
 
@@ -200,7 +209,8 @@ fun MataKuliahDetailScreen(
                     initialJumlahSKS = sks,
                     initialSemester = semester,
                     initialIDDosen = idPengampu,
-                    onSave = { nama, kode, sks, semester, idDosen ->
+                    initialIsWorkshop = isWorkshop,
+                    onSave = { nama, kode, sks, semester, idDosen, isWorkshop ->
                         detailMataKuliahViewModel.onAction(
                             DetailMataKuliahAction.OnDetailMataKuliahUpdate(
                                 id = id,
@@ -208,7 +218,8 @@ fun MataKuliahDetailScreen(
                                 kode = kode,
                                 sks = sks,
                                 semester = semester,
-                                idDosen = idDosen
+                                idDosen = idDosen,
+                                isWorkshop
                             )
                         )
 
@@ -362,7 +373,7 @@ private fun StatCard(
 }
 
 @Composable
-private fun InfoSection(pengampu: String) {
+private fun InfoSection(pengampu: String, isWorkshop: Boolean) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -374,6 +385,15 @@ private fun InfoSection(pengampu: String) {
             label = "Dosen Pengampu",
             value = pengampu
         )
+
+        InfoRow(
+            icon = Icons.Default.Person,
+            iconBackgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+            iconColor = MaterialTheme.colorScheme.primary,
+            label = "Workshop",
+            value = if (isWorkshop) "Iya" else "Tidak"
+        )
+
     }
 }
 

@@ -55,7 +55,7 @@ data class Jadwal(
     val listJadwal: Map<String, List<JadwalDataItem>>
 )
 
-class WelchPowellAlgoritm {
+class WelchPowellAlgorithm {
     private lateinit var daftarHari: List<Hari>
     private lateinit var daftarMataKuliah: List<MataKuliah>
 

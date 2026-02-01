@@ -13,21 +13,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.setTextAndSelectAll
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,7 +45,7 @@ fun InsertMataKuliahModal(
     onDismiss: () -> Unit,
     onDosenSearch: (String) -> Unit,
     listDosen: List<DosenUI>,
-    onSave: (nama: String, kode: String, sks: Int, semester: Int, idDosen: Int?) -> Unit
+    onSave: (nama: String, kode: String, sks: Int, semester: Int, idDosen: Int?, isWorkshop: Boolean) -> Unit
 ) {
     val namaMataKuliahState = TextFieldState()
     val kodeMataKuliahState = TextFieldState()
@@ -59,6 +57,7 @@ fun InsertMataKuliahModal(
     var expandedDosen by remember { mutableStateOf(false) }
     val sksOptions = listOf(1, 2, 3, 4, 6)
     val semesterOptions = (1..8)
+    var isWorkshopSelected by remember { mutableStateOf(false) }
 
     var sks = 0
     var semester = 0
@@ -71,25 +70,20 @@ fun InsertMataKuliahModal(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight(),
+                .wrapContentHeight().padding(top = 8.dp),
             shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
-            color = MaterialTheme.colorScheme.surface
         ) {
             Column(
                 modifier = Modifier
                     .padding(horizontal = 24.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row {
                     Text(
                         text = "Tambah Mata Kuliah",
                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
-
-                    IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, contentDescription = "Close")
-                    }
                 }
                 Text(
                     text = "Lengkapi detail mata kuliah baru di bawah ini.",
@@ -194,7 +188,16 @@ fun InsertMataKuliahModal(
                         }
                     }
 
-
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Workshop")
+                        Switch(
+                            checked = isWorkshopSelected,
+                            onCheckedChange = { checked -> isWorkshopSelected = checked })
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -205,7 +208,8 @@ fun InsertMataKuliahModal(
                             namaMataKuliahState.text.toString(),
                             kodeMataKuliahState.text.toString(),
                             sks,
-                            semester, idDosen
+                            semester, idDosen,
+                            isWorkshopSelected
                         )
                     },
                     modifier = Modifier
@@ -218,6 +222,7 @@ fun InsertMataKuliahModal(
                         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 }
+                Spacer(modifier = Modifier.height(16.dp))
                 TextButton(
                     onClick = onDismiss,
                     modifier = Modifier

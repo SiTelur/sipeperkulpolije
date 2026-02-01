@@ -28,6 +28,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -50,10 +52,11 @@ fun UpdateMataKuliahModal(
     initialJumlahSKS: Int,
     initialSemester: Int,
     initialIDDosen: Int?,
+    initialIsWorkshop: Boolean,
     modalBottomSheetState: SheetState,
     onDismiss: () -> Unit,
     listDosen: List<DosenUI>,
-    onSave: (nama: String, kode: String, sks: Int, semester: Int, idDosen: Int?) -> Unit
+    onSave: (nama: String, kode: String, sks: Int, semester: Int, idDosen: Int?, isWorkshop: Boolean) -> Unit
 ) {
     val namaMataKuliahState = TextFieldState(initialText = initialMataKuliah)
     val kodeMataKuliahState = TextFieldState(initialText = initialKodeMataKuliah)
@@ -63,6 +66,7 @@ fun UpdateMataKuliahModal(
     var expandedSks by remember { mutableStateOf(false) }
     var expandedSemester by remember { mutableStateOf(false) }
     var expandedDosen by remember { mutableStateOf(false) }
+    var isWorkshop by remember { mutableStateOf(initialIsWorkshop) }
     val sksOptions = listOf(1, 2, 3, 4, 6)
     val semesterOptions = (1..8)
 
@@ -200,6 +204,17 @@ fun UpdateMataKuliahModal(
                         }
                     }
 
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Workshop")
+                        Switch(
+                            checked = isWorkshop,
+                            onCheckedChange = { checked -> isWorkshop = checked })
+                    }
+
 
                 }
 
@@ -211,7 +226,7 @@ fun UpdateMataKuliahModal(
                             namaMataKuliahState.text.toString(),
                             kodeMataKuliahState.text.toString(),
                             sks,
-                            semester, idDosen
+                            semester, idDosen, isWorkshop
                         )
                     },
                     modifier = Modifier
