@@ -653,9 +653,12 @@ class WelchPowellAlgorithm {
                 .associate { it.key to it.value }
                 .mapValues { (_, jadwalRuangan) ->
                     jadwalRuangan.map { value ->
+                        val formattedJamMulai =
+                            value.slot.jamMulai.toString().padStart(2, '0')
+                        val formattedJamSelesai = value.slot.jamSelesai.toString().padStart(2, '0')
                         JadwalDataItem(
                             value.mataKuliah.nama,
-                            jam = "${value.slot.jamMulai}-${value.slot.jamSelesai}",
+                            jam = "$formattedJamMulai:00-$formattedJamSelesai:00",
                             namaDosen = value.mataKuliah.dosen.nama
                         )
                     }
