@@ -71,6 +71,7 @@ fun DosenScreen(
             }
 
             is ListDosenEvent.OnSaveError -> {}
+
             ListDosenEvent.OnSaveSuccess -> {
                 dosenListViewModel.resetItems()
             }
@@ -78,8 +79,10 @@ fun DosenScreen(
     }
 
     LaunchedEffect(resultFromDetail) {
-        if (resultFromDetail == true) {
-            dosenListViewModel.resetItems()
+        resultFromDetail?.let {
+            if (it) {
+                dosenListViewModel.resetItems()
+            }
         }
     }
 

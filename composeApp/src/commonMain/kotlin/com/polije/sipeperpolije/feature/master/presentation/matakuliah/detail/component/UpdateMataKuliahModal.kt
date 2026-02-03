@@ -60,7 +60,7 @@ fun UpdateMataKuliahModal(
 ) {
     val namaMataKuliahState = TextFieldState(initialText = initialMataKuliah)
     val kodeMataKuliahState = TextFieldState(initialText = initialKodeMataKuliah)
-    val namaDosenState = TextFieldState(initialText = initialNamaDosen)
+    val namaDosenState = TextFieldState()
     val sksState = TextFieldState("$initialJumlahSKS SKS")
     val semesterState = TextFieldState("Semester ke $initialSemester")
     var expandedSks by remember { mutableStateOf(false) }
@@ -126,6 +126,7 @@ fun UpdateMataKuliahModal(
                         namaDosenState,
                         items = listDosen,
                         label = "Dosen Pengampu",
+                        initialText = initialNamaDosen,
                         onItemSelected = {
                             idDosen = it.id
                             namaDosenState.setTextAndSelectAll(it.nama)

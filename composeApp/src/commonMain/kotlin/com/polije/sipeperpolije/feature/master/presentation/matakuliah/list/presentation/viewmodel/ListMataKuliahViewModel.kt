@@ -73,6 +73,7 @@ class ListMataKuliahViewModel(
         viewModelScope.launch {
             paginator.reset()
             _state.update { it.copy(mataKuliahs = emptyList()) }
+            paginator.loadNextItems()
         }
     }
 
@@ -95,11 +96,14 @@ class ListMataKuliahViewModel(
                             semester = listMataKuliahAction.semester,
                             jumlahSKS = listMataKuliahAction.sks,
                             idPengampu = listMataKuliahAction.dosenID,
-                            namaPenampuPertama = "",
+                            namaPenampuPertama = listMataKuliahAction.namaDosen
+                                ?: "Belum ditentukan",
                             isWorkshop = listMataKuliahAction.isWorkshop
                         ).toEntity()
                     ).onSuccess {
+                        resetItems()
                         _event.send(OnSaveSuccess(it.toUI()))
+                        loadNextItems()
                     }.onFailure {
                         _event.send(
                             OnSaveFailure(

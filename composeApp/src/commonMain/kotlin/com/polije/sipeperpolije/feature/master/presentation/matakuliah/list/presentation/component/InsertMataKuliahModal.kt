@@ -45,7 +45,7 @@ fun InsertMataKuliahModal(
     onDismiss: () -> Unit,
     onDosenSearch: (String) -> Unit,
     listDosen: List<DosenUI>,
-    onSave: (nama: String, kode: String, sks: Int, semester: Int, idDosen: Int?, isWorkshop: Boolean) -> Unit
+    onSave: (nama: String, kode: String, sks: Int, semester: Int, idDosen: Int?, isWorkshop: Boolean, namaDosen: String?) -> Unit
 ) {
     val namaMataKuliahState = TextFieldState()
     val kodeMataKuliahState = TextFieldState()
@@ -208,8 +208,10 @@ fun InsertMataKuliahModal(
                             namaMataKuliahState.text.toString(),
                             kodeMataKuliahState.text.toString(),
                             sks,
-                            semester, idDosen,
-                            isWorkshopSelected
+                            semester,
+                            idDosen,
+                            isWorkshopSelected,
+                            namaDosenState.text.toString(),
                         )
                     },
                     modifier = Modifier

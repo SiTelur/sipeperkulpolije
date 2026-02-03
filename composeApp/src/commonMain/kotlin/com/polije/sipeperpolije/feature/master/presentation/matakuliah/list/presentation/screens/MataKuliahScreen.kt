@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
@@ -82,7 +83,8 @@ fun MataKuliahScreen(
             is ListMataKuliahEvent.OnSaveSuccess -> {
                 val snackBar = snackBarHost.showSnackbar(
                     "Mata kuliah berhasil ditambahkan",
-                    actionLabel = "Lihat Data"
+                    actionLabel = "Lihat Data",
+                    duration = SnackbarDuration.Long
                 )
                 when (snackBar) {
                     SnackbarResult.ActionPerformed -> {
@@ -106,8 +108,10 @@ fun MataKuliahScreen(
     }
 
     LaunchedEffect(resultFromDetail) {
-        if (resultFromDetail == true) {
-            listMataKuliahViewModel.resetItems()
+        resultFromDetail?.let {
+            if (it) {
+                listMataKuliahViewModel.resetItems()
+            }
         }
     }
 
@@ -181,14 +185,14 @@ fun MataKuliahScreen(
                             }
                         }
                     },
-                    onSave = { nama, kode, sks, semester, dosenID, isWorkshop ->
+                    onSave = { nama, kode, sks, semester, dosenID, isWorkshop, namaDosen ->
                         listMataKuliahViewModel.onAction(
                             ListMataKuliahAction.OnSaveMataKuliah(
                                 nama,
                                 kode,
                                 sks,
                                 semester,
-                                dosenID, isWorkshop
+                                dosenID, namaDosen = namaDosen, isWorkshop
                             )
                         )
 

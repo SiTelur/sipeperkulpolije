@@ -40,7 +40,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
         val response = try {
             val data = supabase.from("mata_kuliah_view").select {
                 filter {
-                    MataKuliahModel::id eq id
+                    MataKuliahModel::idPengampuPertama eq id
                 }
             }.decodeList<MataKuliahModel>().map { it.toEntity() }
             data

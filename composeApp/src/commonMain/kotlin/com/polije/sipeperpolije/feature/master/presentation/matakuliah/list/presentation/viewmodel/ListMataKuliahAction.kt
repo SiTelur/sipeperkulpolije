@@ -7,6 +7,7 @@ sealed class ListMataKuliahAction {
         val sks: Int,
         val semester: Int,
         val dosenID: Int?,
+        val namaDosen: String?,
         val isWorkshop: Boolean
     ) : ListMataKuliahAction()
 

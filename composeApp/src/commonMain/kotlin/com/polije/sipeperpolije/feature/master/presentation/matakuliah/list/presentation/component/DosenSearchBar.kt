@@ -24,6 +24,7 @@ fun DosenSearchBar(
     namaDosenState: TextFieldState,
     items: List<DosenUI>,
     label: String,
+    initialText: String = "",
     modifier: Modifier = Modifier,
     onItemSelected: (DosenUI) -> Unit
 ) {
@@ -48,7 +49,8 @@ fun DosenSearchBar(
             onValueChange = {
                 namaDosenState.edit { replace(0, length, it) }
             },
-            label = { Text("Nama Dosen") },
+            label = { Text(label) },
+            placeholder = { Text(initialText) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             },
