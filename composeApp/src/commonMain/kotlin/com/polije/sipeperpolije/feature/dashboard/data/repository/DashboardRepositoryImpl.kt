@@ -135,24 +135,23 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
         val hari = listOf(
             Hari(
                 "Senin",
-                jamPelajaran = listOf(8, 9, 10, 11, 12, 13, 14, 15, 16),
+                jamMulai = 8, jamSelesai = 17,
             ),
             Hari(
                 "Selasa",
-                jamPelajaran = listOf(8, 9, 10, 11, 12, 13, 14, 15, 16),
+                jamMulai = 8, jamSelesai = 17,
             ),
             Hari(
                 "Rabu",
-                jamPelajaran = listOf(8, 9, 10, 11, 12, 13, 14, 15, 16),
+                jamMulai = 8, jamSelesai = 17,
             ),
             Hari(
                 "Kamis",
-                jamPelajaran = listOf(8, 9, 10, 11, 12, 13, 14, 15, 16),
+                jamMulai = 8, jamSelesai = 17,
             ),
             Hari(
                 "Jumat",
-                jamPelajaran = listOf(7, 8, 9, 10, 13, 14, 15, 16),
-                jamIstirahat = listOf(11..12)
+                jamMulai = 8, jamSelesai = 17, jamIstirahat = 11..<12
             )
         )
 

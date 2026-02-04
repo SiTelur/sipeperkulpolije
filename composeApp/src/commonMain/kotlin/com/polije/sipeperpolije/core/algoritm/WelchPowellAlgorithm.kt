@@ -25,9 +25,12 @@ data class Ruangan(val nama: String, val canWorkshop: Boolean)
 
 data class Hari(
     val nama: String,
-    val jamPelajaran: List<Int>,
-    val jamIstirahat: List<IntRange> = emptyList()
-)
+    val jamMulai: Int,
+    val jamSelesai: Int,
+    val jamIstirahat: IntRange = IntRange.EMPTY
+) {
+    val jamPelajaran: List<Int> = (jamMulai..<jamSelesai).toList().filterNot { it in jamIstirahat }
+}
 
 data class JadwalItem(
     val mataKuliah: MataKuliah,
@@ -131,9 +134,8 @@ class WelchPowellAlgorithm {
         val slots = mutableListOf<Slot>()
 
         daftarHari.forEach { hariData ->
-            val hari = hariData.nama
             val jamList = hariData.jamPelajaran.sorted()
-            val breakRanges = hariData.jamIstirahat
+            val breakRange = hariData.jamIstirahat
 
             for (i in 0..jamList.size - durasi) {
                 val window = jamList.subList(i, i + durasi)
@@ -147,9 +149,10 @@ class WelchPowellAlgorithm {
                 val jamSelesai = window.last() + 1
 
                 // cek bentrok istirahat
-                val overlapsBreak = breakRanges.any { br ->
-                    jamMulai < br.last && jamSelesai > br.first
-                }
+                val overlapsBreak =
+                    breakRange != IntRange.EMPTY &&
+                            jamMulai < breakRange.last + 1 &&
+                            jamSelesai > breakRange.first
 
                 // ⬅️ INI YANG BENAR
                 if (!overlapsBreak) {
@@ -303,7 +306,7 @@ class WelchPowellAlgorithm {
 
             // Potong jam istirahat
             val breakCut = slot.hari.jamIstirahat.sumOf { breakRange ->
-                (maxOf(currentEnd, breakRange.first)..<minOf(nextStart, breakRange.last + 1))
+                (maxOf(currentEnd, breakRange)..<minOf(nextStart, breakRange + 1))
                     .count()
             }
 
@@ -329,9 +332,9 @@ class WelchPowellAlgorithm {
         }
 
         // 7. Penalti untuk melewati jam istirahat
-        val breakRanges = slot.hari.jamIstirahat
+        val breakRange = slot.hari.jamIstirahat
 
-        for (breakRange in breakRanges) {
+        if (breakRange != IntRange.EMPTY) {
             val overlap =
                 slot.jamMulai < breakRange.last + 1 &&
                         slot.jamSelesai > breakRange.first
@@ -556,16 +559,16 @@ class WelchPowellAlgorithm {
         val gaps = mutableListOf<Triple<Int, Int, Int>>() // start, end, duration
 
         val jamMulaiHari = hari.jamPelajaran.first()
-        val jamAkhirHari = 17
+        val jamAkhirHari = hari.jamPelajaran.last()
 
         // Break opsional
 
-        val breakRange: IntRange? = hari.jamIstirahat.firstOrNull()
+        val breakRange: IntRange = hari.jamIstirahat
 
         fun addGapConsideringBreak(start: Int, end: Int) {
             if (start >= end) return
 
-            if (breakRange != null &&
+            if (breakRange != IntRange.EMPTY &&
                 start < breakRange.last &&
                 end > breakRange.first
             ) {
@@ -641,7 +644,7 @@ class WelchPowellAlgorithm {
         val totalSpan = lastEnd - firstStart
 
         val breakTimeInSpan =
-            if (breakRange != null &&
+            if (breakRange != IntRange.EMPTY &&
                 firstStart < breakRange.last &&
                 lastEnd > breakRange.first
             ) {
