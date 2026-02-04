@@ -10,6 +10,7 @@ import com.polije.sipeperpolije.feature.master.domain.repository.MasterRepositor
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 
@@ -66,6 +67,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                         from = safeOffset.toLong(),
                         to = (safeOffset + safeLimit - 1).toLong()
                     )
+                    order("nama", Order.ASCENDING)
                 }
                 .decodeList<MataKuliahModel>().map { it.toEntity() }
             data

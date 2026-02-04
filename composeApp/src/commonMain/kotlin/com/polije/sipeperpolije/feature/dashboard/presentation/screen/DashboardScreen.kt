@@ -246,12 +246,12 @@ fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel(), onLogout: (
                 snackBarState.showSnackbar(event.message)
             }
 
-            DashboardEvent.GenerateJadwalFailed -> {
-                snackBarState.showSnackbar("Berhasil membuat jadwal")
+            is DashboardEvent.GenerateJadwalFailed -> {
+                snackBarState.showSnackbar("Gagal ${event.message}")
             }
 
             DashboardEvent.GenerateJadwalSuccess -> {
-                snackBarState.showSnackbar("Gagal ")
+                snackBarState.showSnackbar("Berhasil membuat jadwal")
             }
         }
     }

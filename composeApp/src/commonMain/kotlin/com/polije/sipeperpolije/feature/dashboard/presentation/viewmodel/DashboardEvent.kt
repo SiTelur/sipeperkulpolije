@@ -5,7 +5,7 @@ sealed class DashboardEvent {
     data class LogoutFailed(val message: String) : DashboardEvent()
     data class FetchDashboardFailed(val message: String) : DashboardEvent()
     object GenerateJadwalSuccess : DashboardEvent()
-    object GenerateJadwalFailed : DashboardEvent()
+    data class GenerateJadwalFailed(val message: String) : DashboardEvent()
 
 
 }

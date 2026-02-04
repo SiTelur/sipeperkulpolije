@@ -6,5 +6,5 @@ import com.polije.sipeperpolije.feature.dashboard.data.model.DashboardModel
 interface DashboardRepository {
     suspend fun logout()
     suspend fun fetchDashboard(): Result<DashboardModel>
-    suspend fun generateJadwal(semester: Semester): Result<Unit>
+    suspend fun generateJadwal(semester: Semester): Result<Boolean>
 }

@@ -47,13 +47,22 @@ class DashboardViewModel(
 
             is DashboardAction.OnGenerateJadwal -> {
                 viewModelScope.launch {
-                    runCatching {
-                        generateJadwalUseCase(Semester.GENAP)
-                    }.onSuccess {
-                        _events.send(DashboardEvent.GenerateJadwalSuccess)
-                    }.onFailure {
-                        _events.send(DashboardEvent.GenerateJadwalFailed)
-                    }
+
+                    generateJadwalUseCase(Semester.GANJIL)
+                        .onSuccess {
+                            if (it) {
+                                _events.send(DashboardEvent.GenerateJadwalSuccess)
+                            } else {
+                                _events.send(DashboardEvent.GenerateJadwalFailed("Gagal generate jadwal"))
+                            }
+                        }
+                        .onFailure {
+                            _events.send(
+                                DashboardEvent.GenerateJadwalFailed(
+                                    it.message ?: "Unknown error"
+                                )
+                            )
+                        }
                 }
             }
 

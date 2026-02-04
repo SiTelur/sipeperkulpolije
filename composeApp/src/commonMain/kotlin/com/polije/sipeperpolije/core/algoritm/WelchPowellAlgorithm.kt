@@ -55,6 +55,18 @@ data class Jadwal(
     val listJadwal: Map<String, List<JadwalDataItem>>
 )
 
+data class MKDegree(
+    val mk: MataKuliah,
+    val pertemuan: Int,
+    val degree: Int
+)
+
+data class SlotPriority(
+    val slot: Slot,
+    val priority: Int
+)
+
+
 class WelchPowellAlgorithm {
     private lateinit var daftarHari: List<Hari>
     private lateinit var daftarMataKuliah: List<MataKuliah>
@@ -160,16 +172,23 @@ class WelchPowellAlgorithm {
         ruangan2: Ruangan
     ): Boolean {
         // Konflik dosen yang sama di waktu yang sama
+        // 1. Workshop tidak boleh di hari yang sama
+        if (mk1 == mk2 && mk1.isWorkshop && slot1.hari == slot2.hari) {
+            return true
+        }
+
+        // 2. Konflik dosen
         if (mk1.dosen == mk2.dosen && isTimeOverlap(slot1, slot2)) {
             return true
         }
 
-        // Konflik ruangan yang sama di waktu yang sama
+        // 3. Konflik ruangan
         if (ruangan1 == ruangan2 && isTimeOverlap(slot1, slot2)) {
             return true
         }
 
         return false
+
     }
 
     // Cek apakah dua slot waktu tumpang tindih
@@ -235,10 +254,11 @@ class WelchPowellAlgorithm {
                 prioritas -= 20
             }
         }
+        val jadwalPerHari = jadwal.groupBy { it.slot.hari }
 
         // 3. PRIORITAS TINGGI: Minimisasi celah waktu
         val jadwalHariIni2 =
-            jadwal.filter { it.slot.hari == slot.hari }.sortedBy { it.slot.jamMulai }
+            jadwalPerHari[slot.hari] ?: emptyList()
 
         // Bonus besar jika slot ini bisa mengisi celah atau menempel dengan slot existing
         var adjacencyBonus = 0
@@ -269,7 +289,8 @@ class WelchPowellAlgorithm {
         // 5. Penalti untuk membuat celah
         // Hitung berapa celah yang akan terbentuk jika slot ini digunakan
         val simulatedSchedule = jadwalHariIni2.toMutableList()
-        simulatedSchedule.add(JadwalItem(mataKuliah, Ruangan(nama = "", true), slot, pertemuanKe))
+        val dummyRuangan = Ruangan("", true)
+        simulatedSchedule.add(JadwalItem(mataKuliah, dummyRuangan, slot, pertemuanKe))
         val sortedSimulated = simulatedSchedule.sortedBy { it.slot.jamMulai }
 
         var gapPenalty = 0
@@ -342,8 +363,8 @@ class WelchPowellAlgorithm {
 
         // Step 1: Hitung degree dan urutkan mata kuliah (descending)
         val mataKuliahDenganDegree = expandedMataKuliah.map { (mk, pertemuan) ->
-            Triple(mk, pertemuan, hitungDegree(mk, daftarMataKuliah))
-        }.sortedByDescending { it.third }
+            MKDegree(mk, pertemuan, hitungDegree(mk, daftarMataKuliah))
+        }.sortedByDescending { it.degree }
 
         println("Urutan mata kuliah berdasarkan degree:")
         mataKuliahDenganDegree.forEach { (mk, pertemuan, degree) ->
@@ -365,8 +386,8 @@ class WelchPowellAlgorithm {
             // Hitung prioritas untuk setiap slot
             val slotsWithPriority = availableSlots.map { slot ->
                 val prioritas = hitungPrioritasSlot(slot, jadwal, mataKuliah, pertemuanKe)
-                Pair(slot, prioritas)
-            }.sortedByDescending { it.second }
+                SlotPriority(slot, prioritas)
+            }.sortedByDescending { it.priority }
 
             // Coba setiap slot dengan prioritas tertinggi
             for ((slot, prioritas) in slotsWithPriority) {
@@ -656,9 +677,10 @@ class WelchPowellAlgorithm {
                         val formattedJamMulai =
                             value.slot.jamMulai.toString().padStart(2, '0')
                         val formattedJamSelesai = value.slot.jamSelesai.toString().padStart(2, '0')
+                        val hari = value.slot.hari.nama
                         JadwalDataItem(
                             value.mataKuliah.nama,
-                            jam = "$formattedJamMulai:00-$formattedJamSelesai:00",
+                            jam = "$hari, $formattedJamMulai:00-$formattedJamSelesai:00",
                             namaDosen = value.mataKuliah.dosen.nama
                         )
                     }
