@@ -27,9 +27,27 @@ data class Hari(
     val nama: String,
     val jamMulai: Int,
     val jamSelesai: Int,
-    val jamIstirahat: IntRange = IntRange.EMPTY
+    val jamIstirahatMulai: Int? = null,
+    val jamIstirahatSelesai: Int? = null
 ) {
-    val jamPelajaran: List<Int> = (jamMulai..<jamSelesai).toList().filterNot { it in jamIstirahat }
+
+    init {
+        require(
+            (jamIstirahatMulai == null && jamIstirahatSelesai == null) ||
+                    (jamIstirahatMulai != null && jamIstirahatSelesai != null)
+        ) {
+            "Jam istirahat harus diisi lengkap atau tidak sama sekali"
+        }
+    }
+
+    val jamIstirahat: IntRange =
+        if (jamIstirahatMulai != null && jamIstirahatSelesai != null)
+            jamIstirahatMulai..jamIstirahatSelesai
+        else IntRange.EMPTY
+    val jamPelajaran: List<Int> =
+        (jamMulai..<jamSelesai).filterNot { jam ->
+            jamIstirahat.contains(jam)
+        }
 }
 
 data class JadwalItem(
@@ -55,7 +73,8 @@ data class Jadwal(
     @SerialName("is_success")
     val isSuccess: Boolean,
     @SerialName("jadwal")
-    val listJadwal: Map<String, List<JadwalDataItem>>
+    val listJadwal: Map<String, List<JadwalDataItem>>,
+    val semester: String
 )
 
 data class MKDegree(
@@ -668,7 +687,7 @@ class WelchPowellAlgorithm {
     }
 
 
-    fun jadwalToJson(isSuccess: Boolean, jadwal: List<JadwalItem>): Jadwal {
+    fun jadwalToJson(isSuccess: Boolean, jadwal: List<JadwalItem>, semester: String): Jadwal {
         val groupedJadwal: Map<String, List<JadwalDataItem>> =
             jadwal
                 .groupBy { it.ruangan.nama } // Aula, RSI, dll
@@ -689,6 +708,6 @@ class WelchPowellAlgorithm {
                     }
                 }
 
-        return Jadwal(isSuccess, groupedJadwal)
+        return Jadwal(isSuccess, groupedJadwal, semester)
     }
 }

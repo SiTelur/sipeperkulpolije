@@ -151,7 +151,9 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
             ),
             Hari(
                 "Jumat",
-                jamMulai = 8, jamSelesai = 17, jamIstirahat = 11..<12
+                jamMulai = 8, jamSelesai = 17,
+                jamIstirahatMulai = 11,
+                jamIstirahatSelesai = 12
             )
         )
 
@@ -161,7 +163,13 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
 
         try {
             supabase.from("jadwal")
-                .insert(welchPowellAlgorithm.jadwalToJson(jadwal.first, jadwal.second))
+                .insert(
+                    welchPowellAlgorithm.jadwalToJson(
+                        jadwal.first,
+                        jadwal.second,
+                        "SEMESTER ${semester.name}"
+                    )
+                )
             return Result.success(jadwal.first)
         } catch (e: Exception) {
             return Result.failure(e)

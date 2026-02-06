@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.screen
+package com.polije.sipeperpolije.feature.master.presentation.jadwal
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -64,7 +64,6 @@ val sampleLogs = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
 fun JadwalScreen() {
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf<GenerationStatus?>(null) }
