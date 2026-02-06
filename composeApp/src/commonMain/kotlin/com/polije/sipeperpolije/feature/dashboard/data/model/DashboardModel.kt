@@ -3,6 +3,7 @@ package com.polije.sipeperpolije.feature.dashboard.data.model
 import com.polije.sipeperpolije.feature.dashboard.domain.entity.ActivityAction
 import com.polije.sipeperpolije.feature.dashboard.domain.entity.ActivityItemEntity
 import com.polije.sipeperpolije.feature.dashboard.domain.entity.DashboardEntity
+import com.polije.sipeperpolije.utils.asBoolean
 import com.polije.sipeperpolije.utils.asReadableString
 import com.polije.sipeperpolije.utils.toRelativeTime
 import kotlinx.serialization.SerialName
@@ -25,11 +26,30 @@ fun DashboardModel.toEntity(): DashboardEntity = DashboardEntity(
     this.recentActivity.map { it.toEntity() })
 
 fun ActivityItemModel.toEntity(): ActivityItemEntity {
+
+
     val action = when (this.action) {
         "INSERT" -> ActivityAction.INSERT
         "UPDATE" -> ActivityAction.UPDATE
         "DELETE" -> ActivityAction.DELETE
         else -> ActivityAction.NONE
+    }
+
+    val changeTime = changedAt.toRelativeTime()
+
+    if (tableName == "jadwal") {
+        
+        val isSuccess = dataNew?.getValue("is_success")?.asBoolean() ?: false
+        val semester = (dataNew?.getValue("semester")?.asReadableString()
+            ?: "").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+
+        return ActivityItemEntity(
+            id = id,
+            action = action,
+            title = "Jadwal $semester",
+            subTitle = if (isSuccess) "Jadwal Baru Ditambahkan" else "Gagal menambahkan jadwal",
+            changeTime = changeTime
+        )
     }
 
     val normalizeTableName =
@@ -56,7 +76,7 @@ fun ActivityItemModel.toEntity(): ActivityItemEntity {
         ActivityAction.NONE -> dataNew?.getValue("nama")?.asReadableString() ?: ""
     }
 
-    val changeTime = changedAt.toRelativeTime()
+
 
     return ActivityItemEntity(
         id = id,

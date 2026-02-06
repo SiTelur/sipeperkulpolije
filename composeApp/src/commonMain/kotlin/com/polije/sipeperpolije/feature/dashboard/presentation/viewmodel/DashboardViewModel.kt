@@ -2,7 +2,6 @@ package com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.polije.sipeperpolije.core.Semester
 import com.polije.sipeperpolije.feature.dashboard.domain.usecase.FetchDashboardUseCase
 import com.polije.sipeperpolije.feature.dashboard.domain.usecase.GenerateJadwalUseCase
 import com.polije.sipeperpolije.feature.dashboard.domain.usecase.LogoutUseCase
@@ -48,7 +47,7 @@ class DashboardViewModel(
             is DashboardAction.OnGenerateJadwal -> {
                 viewModelScope.launch {
 
-                    generateJadwalUseCase(Semester.GANJIL)
+                    generateJadwalUseCase(dashboardAction.semester)
                         .onSuccess {
                             if (it) {
                                 _events.send(DashboardEvent.GenerateJadwalSuccess)

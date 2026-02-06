@@ -30,12 +30,13 @@ fun GenerateJadwalDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: (Semester) -> Unit
 ) {
-    val options = listOf(
-        mapOf(Semester.GANJIL to "Semester Ganjil"),
-        mapOf(Semester.GENAP to "Semester Genap")
-    );
+    val options =
+        mapOf(Semester.GANJIL to "Semester Ganjil", Semester.GENAP to "Semester Genap")
+
     var expanded by remember { mutableStateOf(false) }
     var selectedOptionSemester: Semester by remember { mutableStateOf(Semester.GANJIL) }
+    val semesterTextFieldState = TextFieldState()
+
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -55,7 +56,7 @@ fun GenerateJadwalDialog(
                             ExposedDropdownMenuAnchorType.PrimaryEditable,
                             true
                         ).fillMaxWidth(),
-                        state = TextFieldState(),
+                        state = semesterTextFieldState,
                         readOnly = true,
                         label = { Text("Semester") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -66,9 +67,16 @@ fun GenerateJadwalDialog(
                     ) {
                         options.forEach { selectionOption ->
                             DropdownMenuItem(
-                                text = { Text(selectionOption.entries.toString()) },
+                                text = { Text(selectionOption.value) },
                                 onClick = {
-                                    selectedOptionSemester = selectionOption.keys.first()
+                                    selectedOptionSemester = selectionOption.key
+                                    semesterTextFieldState.edit {
+                                        replace(
+                                            0,
+                                            length,
+                                            selectionOption.value
+                                        )
+                                    }
                                     expanded = false
                                 },
                             )
