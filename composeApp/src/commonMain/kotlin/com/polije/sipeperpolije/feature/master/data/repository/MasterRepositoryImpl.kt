@@ -1,9 +1,11 @@
 package com.polije.sipeperpolije.feature.master.data.repository
 
 import com.polije.sipeperpolije.feature.master.data.model.DosenModel
+import com.polije.sipeperpolije.feature.master.data.model.JadwalModel
 import com.polije.sipeperpolije.feature.master.data.model.MataKuliahModel
 import com.polije.sipeperpolije.feature.master.data.model.toEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.DosenEntity
+import com.polije.sipeperpolije.feature.master.domain.entity.JadwalEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.MataKuliahEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.toModel
 import com.polije.sipeperpolije.feature.master.domain.repository.MasterRepository
@@ -178,6 +180,20 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
             val data = supabase.from("dosen").select(Columns.list("id", "nama", "nidn")) {
 
             }.decodeList<DosenModel>().map { it.toEntity() }
+            data
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive();
+            return Result.failure(e)
+        }
+        return Result.success(response)
+    }
+
+    override suspend fun getJadwal(): Result<List<JadwalEntity>> {
+        val response = try {
+            val data = supabase.from("jadwal")
+                .select(Columns.list("id", "is_success", "jadwal", "jadwal")) {
+
+                }.decodeList<JadwalModel>().map { it.toEntity() }
             data
         } catch (e: Exception) {
             currentCoroutineContext().ensureActive();

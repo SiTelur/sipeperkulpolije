@@ -1,0 +1,7 @@
+package com.polije.sipeperpolije.feature.master.presentation.jadwal.viewmodel
+
+data class ListJadwalState(
+    val isLoading: Boolean = false,
+    val jadwal: List<JadwalUI> = emptyList(),
+    val error: String? = null
+)
