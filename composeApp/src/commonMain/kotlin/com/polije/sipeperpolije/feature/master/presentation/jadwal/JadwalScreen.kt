@@ -47,19 +47,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.viewmodel.JadwalViewModel
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.viewmodel.ListJadwalAction
 import org.koin.compose.viewmodel.koinViewModel
 
 enum class GenerationStatus(val displayName: String, val status: Boolean?) {
+    SEMUA("Semua", null),
     SUKSES("Sukses", true),
     GAGAL("Gagal", false),
-    SEMUA("Semua", null)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JadwalScreen(jadwalViewModel: JadwalViewModel = koinViewModel()) {
 
-    val state = jadwalViewModel.state.collectAsStateWithLifecycle()
+    val state by jadwalViewModel.state.collectAsStateWithLifecycle()
     var selectedFilter by remember { mutableStateOf(GenerationStatus.SEMUA) }
     var searchQuery by remember { mutableStateOf("") }
 
@@ -84,18 +85,26 @@ fun JadwalScreen(jadwalViewModel: JadwalViewModel = koinViewModel()) {
             }
 
 
-//            item {
-//                FilterChips(
-//                    selectedFilter = selectedFilter,
-//                    onFilterSelected = { selectedFilter = it }
-//                )
-//            }
-//            item {
-//                ListHeader(count = filteredLogs.size)
-//            }
-//            items(filteredLogs) { log ->
-//                LogListItem(log = log, onClick = { /* TODO: Handle item click */ })
-//            }
+            item {
+                FilterChips(
+                    selectedFilter = selectedFilter,
+                    onFilterSelected = {
+                        selectedFilter = it
+                        jadwalViewModel.onAction(ListJadwalAction.ChangeGenerationStatus(it.status))
+                    }
+                )
+            }
+            item {
+                ListHeader(count = state.filteredJadwal.size)
+            }
+            items(state.filteredJadwal) { log ->
+                LogListItem(
+                    title = log.semester,
+                    semester = log.semester,
+                    status = log.isSuccess,
+                    onClick = {}
+                )
+            }
         }
     }
 }
@@ -117,10 +126,10 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
 
 @Composable
 private fun FilterChips(
-    selectedFilter: GenerationStatus?,
-    onFilterSelected: (GenerationStatus?) -> Unit
+    selectedFilter: GenerationStatus,
+    onFilterSelected: (GenerationStatus) -> Unit
 ) {
-    val filters = listOf(null) + GenerationStatus.entries.toTypedArray()
+    val filters = emptyList<GenerationStatus>() + GenerationStatus.entries.toTypedArray()
 
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp),
@@ -131,7 +140,7 @@ private fun FilterChips(
             FilterChip(
                 selected = isSelected,
                 onClick = { onFilterSelected(filter) },
-                label = { Text(filter?.displayName ?: "Semua") },
+                label = { Text(filter.displayName) },
                 shape = RoundedCornerShape(50),
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = MaterialTheme.colorScheme.primary,

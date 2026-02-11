@@ -1,5 +1,7 @@
 package com.polije.sipeperpolije.feature.master.data.repository
 
+import com.polije.sipeperpolije.core.log
+import com.polije.sipeperpolije.core.logList
 import com.polije.sipeperpolije.feature.master.data.model.DosenModel
 import com.polije.sipeperpolije.feature.master.data.model.JadwalModel
 import com.polije.sipeperpolije.feature.master.data.model.MataKuliahModel
@@ -191,12 +193,14 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
     override suspend fun getJadwal(): Result<List<JadwalEntity>> {
         val response = try {
             val data = supabase.from("jadwal")
-                .select(Columns.list("id", "is_success", "jadwal", "jadwal")) {
+                .select(Columns.list("id", "is_success", "jadwal", "semester")) {
 
                 }.decodeList<JadwalModel>().map { it.toEntity() }
+            logList("jadwal", data);
             data
         } catch (e: Exception) {
             currentCoroutineContext().ensureActive();
+            log("error ${e.message}")
             return Result.failure(e)
         }
         return Result.success(response)

@@ -6,7 +6,7 @@ import com.polije.sipeperpolije.feature.master.presentation.jadwal.viewmodel.Jad
 data class JadwalEntity(
     val id: Int,
     val isSuccess: Boolean,
-    val jadwal: Map<String, JadwalItemEntity>,
+    val jadwal: Map<String, List<JadwalItemEntity>>,
     val semester: String
 )
 
@@ -21,5 +21,5 @@ private fun JadwalItemEntity.toUI() = JadwalItemUI(
 )
 
 fun JadwalEntity.toUI() = JadwalUI(
-    id, isSuccess, jadwal.mapValues { it.value.toUI() }, semester
+    id, isSuccess, jadwal.mapValues { it -> it.value.map { it.toUI() } }, semester
 )
