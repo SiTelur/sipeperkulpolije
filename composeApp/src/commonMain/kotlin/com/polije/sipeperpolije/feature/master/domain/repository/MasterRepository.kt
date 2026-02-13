@@ -16,5 +16,5 @@ interface MasterRepository {
     suspend fun insertMataKuliah(mataKuliah: MataKuliahEntity): Result<MataKuliahEntity>
     suspend fun searchDosen(): Result<List<DosenEntity>>
     suspend fun getJadwal(): Result<List<JadwalEntity>>
-
+    suspend fun getJadwalDetail(id: Int): Result<JadwalEntity>
 }

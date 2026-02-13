@@ -1,31 +1,41 @@
 [versions]
-agp = "8.11.2"
+agp = "9.0.0"
 android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
-androidx-activity = "1.12.2"
+androidx-activity = "1.12.4"
 androidx-appcompat = "1.7.1"
 androidx-core = "1.17.0"
 androidx-espresso = "3.7.0"
 androidx-lifecycle = "2.9.6"
 androidx-testExt = "1.3.0"
-composeMultiplatform = "1.10.0"
+componentsResources = "1.10.1"
+composeMultiplatform = "1.10.1"
+foundation = "1.10.1"
 junit = "4.13.2"
 kermit = "2.0.8"
-kotlin = "2.3.0"
-compose-navigation = "2.9.1"
+kotlin = "2.3.10"
+compose-navigation = "2.9.2"
 kotlinxSerializationJson = "1.10.0"
-ktorClientAndroid = "3.3.3"
-pagingCompose = "3.4.0-rc01"
+ktorClientAndroid = "3.4.0"
+material3 = "1.9.0"
+materialIconsExtended = "1.7.3"
+pagingCompose = "3.4.1"
+runtime = "1.10.1"
 supabase = "3.3.0"
 koin = "4.1.1"
 buildkonfig = "0.17.1"
 lazy-pagination-compose = "1.7.1"
+ui = "1.10.1"
+uiTooling = "1.10.1"
+uiToolingPreview = "1.10.1"
 
 
 [libraries]
 androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "pagingCompose" }
 androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "pagingCompose" }
+components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "componentsResources" }
+foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "foundation" }
 ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktorClientAndroid" }
 lazyPaginationCompose = { module = "io.github.ahmad-hamwi:lazy-pagination-compose", version.ref = "lazy-pagination-compose" }
 
@@ -46,9 +56,16 @@ compose-navigation = { module = "org.jetbrains.androidx.navigation:navigation-co
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktorClientAndroid" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientAndroid" }
+material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
+material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
+material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version.ref = "material3" }
 postgrest-kt = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
 auth-kt = { module = "io.github.jan-tennert.supabase:auth-kt" }
+runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "runtime" }
 supabase = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabase" }
+ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "ui" }
+ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "uiTooling" }
+ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

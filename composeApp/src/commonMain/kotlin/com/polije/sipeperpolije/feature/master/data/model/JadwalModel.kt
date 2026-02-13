@@ -10,19 +10,28 @@ data class JadwalModel(
     val id: Int,
     @SerialName("is_success")
     val isSuccess: Boolean,
-    val jadwal: Map<String, List<JadwalItemModel>>,
+    val jadwal: Map<String, List<JadwalItemModel>> = emptyMap(),
+    @SerialName("jadwal_view")
+    val listJadwalView: Map<String, List<JadwalItemModel>> = emptyMap(),
     val semester: String
 )
 
 @Serializable
 data class JadwalItemModel(
-    val jam: String,
+    val namaJadwal: String,
+    val hari: String,
+    val jamMulai: Int,
+    val jamSelesai: Int,
     val namaDosen: String,
-    val namaJadwal: String
+    val semester: Int, val namaRuangan: String, val sks: Int
 )
 
 private fun JadwalItemModel.toEntity() = JadwalItemEntity(
-    jam = jam, namaDosen = namaDosen, namaJadwal = namaJadwal
+    jamMulai = jamMulai,
+    jamSelesai = jamSelesai,
+    namaDosen = namaDosen,
+    namaJadwal = namaJadwal,
+    semester = semester, hari = hari, namaRuangan = namaRuangan, sks = sks
 )
 
 fun JadwalModel.toEntity() = JadwalEntity(
@@ -31,4 +40,4 @@ fun JadwalModel.toEntity() = JadwalEntity(
     semester = semester,
     jadwal = jadwal.mapValues { entry ->
         entry.value.map { it.toEntity() }
-    })
+    }, jadwalView = jadwal.mapValues { entry -> entry.value.map { it.toEntity() } })

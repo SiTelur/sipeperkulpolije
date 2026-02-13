@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,114 +31,36 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.polije.sipeperpolije.theme.AppTheme
-import org.jetbrains.compose.ui.tooling.preview.Preview
-
-data class Jadwal(
-    val jam: String,
-    val sks: String,
-    val mataKuliah: String,
-    val dosen: String,
-    val ruangan: String,
-    val semester: Int
-)
-
-data class JadwalHarian(
-    val hari: String,
-    val jadwal: List<Jadwal>
-)
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalAction
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalItemUI
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalListUI
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailJadwalScreen() {
-    val jadwalHarian = listOf(
-        JadwalHarian(
-            "Senin", listOf(
-                Jadwal(
-                    "08.00 - 10.30",
-                    "3 SKS",
-                    "Pengantar Teknologi Informasi",
-                    "Dr. Budi Santoso, M.Kom",
-                    "Ruang Kelas 101",
-                    1
-                ),
-                Jadwal(
-                    "10.30 - 13.00",
-                    "4 SKS",
-                    "Struktur Data & Algoritma",
-                    "Siti Aminah, S.T., M.T.",
-                    "Lab RSI",
-                    3
-                ),
-                Jadwal(
-                    "13.30 - 16.00",
-                    "3 SKS",
-                    "Pengembangan Aplikasi Mobile",
-                    "Andi Pratama, M.Cs",
-                    "Lab Mobile",
-                    5
-                )
-            )
-        ),
-        JadwalHarian(
-            "Selasa", listOf(
-                Jadwal(
-                    "08.00 - 10.30",
-                    "3 SKS",
-                    "Basis Data Lanjut",
-                    "Rina Wulandari, M.Kom",
-                    "Lab SKK",
-                    3
-                ),
-                Jadwal(
-                    "10.30 - 13.00",
-                    "3 SKS",
-                    "Kecerdasan Buatan",
-                    "Prof. Dr. Bambang",
-                    "Kelas 305",
-                    5
-                )
-            )
-        ),
-        JadwalHarian(
-            "Rabu",
-            listOf(
-                Jadwal(
-                    "08.00 - 09.40",
-                    "2 SKS",
-                    "Bahasa Inggris I",
-                    "Sarah Jones, M.Ed",
-                    "Lab Bahasa",
-                    1
-                )
-            )
-        ),
-        JadwalHarian("Kamis", emptyList()),
-        JadwalHarian(
-            "Jumat",
-            listOf(
-                Jadwal(
-                    "08.00 - 11.20",
-                    "4 SKS",
-                    "Proyek Perangkat Lunak",
-                    "Team Teaching",
-                    "Lab Proyek",
-                    5
-                )
-            )
-        )
-    )
+fun DetailJadwalScreen(
+    id: Int,
+    detailJadwalViewModel: DetailJadwalViewModel = koinViewModel()
+) {
+
+    val state = detailJadwalViewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(id) {
+        detailJadwalViewModel.onAction(DetailJadwalAction.OnDetailInitial(id))
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Jadwal Akademik", fontWeight = FontWeight.SemiBold) },
+                title = { Text("Detail Jadwal Akademik", fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = { /*TODO*/ }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -164,15 +85,6 @@ fun DetailJadwalScreen() {
         ) {
             item {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Jadwal Kegiatan Perkuliahan dan Praktikum Semester Ganjil Tahun Akademik 2025-2026",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.5.sp
-                        ),
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         LegendChip(semester = 1)
                         LegendChip(semester = 3)
@@ -181,9 +93,9 @@ fun DetailJadwalScreen() {
                 }
             }
 
-            items(jadwalHarian) { harian ->
-                DaySchedule(harian)
-            }
+//            items(detailJadwals) { harian ->
+//                DaySchedule(harian)
+//            }
         }
     }
 }
@@ -217,7 +129,7 @@ fun LegendChip(semester: Int) {
 }
 
 @Composable
-fun DaySchedule(jadwalHarian: JadwalHarian) {
+fun DaySchedule(jadwalHarian: DetailJadwalListUI) {
     Column(modifier = Modifier.padding(bottom = 8.dp)) {
         Row(
             modifier = Modifier
@@ -227,14 +139,14 @@ fun DaySchedule(jadwalHarian: JadwalHarian) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(jadwalHarian.hari, fontWeight = FontWeight.Bold)
+            Text(jadwalHarian.nama, fontWeight = FontWeight.Bold)
             Text(
-                "${jadwalHarian.jadwal.size} Mata Kuliah",
+                "${jadwalHarian.item.size} Mata Kuliah",
                 style = MaterialTheme.typography.labelMedium
             )
         }
 
-        if (jadwalHarian.jadwal.isEmpty()) {
+        if (jadwalHarian.item.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -247,7 +159,7 @@ fun DaySchedule(jadwalHarian: JadwalHarian) {
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                jadwalHarian.jadwal.forEach {
+                jadwalHarian.item.forEach {
                     JadwalItem(it)
                 }
             }
@@ -256,7 +168,7 @@ fun DaySchedule(jadwalHarian: JadwalHarian) {
 }
 
 @Composable
-fun JadwalItem(jadwal: Jadwal) {
+fun JadwalItem(jadwal: DetailJadwalItemUI) {
     val semesterColor = when (jadwal.semester) {
         1 -> Color(0xFFFACC15)
         3 -> Color(0xFF10B981)
@@ -294,11 +206,11 @@ fun JadwalItem(jadwal: Jadwal) {
                             )
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
-                    Text(jadwal.sks, style = MaterialTheme.typography.labelSmall)
+                    Text(jadwal.sks.toString(), style = MaterialTheme.typography.labelSmall)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = jadwal.mataKuliah,
+                    text = jadwal.namaJadwal,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -310,7 +222,7 @@ fun JadwalItem(jadwal: Jadwal) {
                         tint = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(jadwal.dosen, style = MaterialTheme.typography.bodySmall)
+                    Text(jadwal.namaDosen, style = MaterialTheme.typography.bodySmall)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -321,17 +233,9 @@ fun JadwalItem(jadwal: Jadwal) {
                         tint = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(jadwal.ruangan, style = MaterialTheme.typography.bodySmall)
+                    Text(jadwal.namaRuangan, style = MaterialTheme.typography.bodySmall)
                 }
             }
         }
-    }
-}
-
-@Preview
-@Composable
-fun DetailJadwalPreview() {
-    AppTheme {
-        DetailJadwalScreen()
     }
 }

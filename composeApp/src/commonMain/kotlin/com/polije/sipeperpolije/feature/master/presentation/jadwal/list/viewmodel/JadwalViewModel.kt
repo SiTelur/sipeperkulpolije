@@ -38,15 +38,14 @@ class JadwalViewModel(private val listJadwalUseCase: ListJadwalUseCase) : ViewMo
     fun onAction(action: ListJadwalAction) {
         when (action) {
             is ListJadwalAction.ChangeGenerationStatus -> {
-                val currentList = _state.value.jadwal
+                _state.update { state ->
+                    val currentList = state.jadwal
 
-                if (action.status == null) {
-                    _state.update { it.copy(jadwal = currentList) }
-                    return
-                }
+                    val filtered = action.status?.let { status ->
+                        currentList.filter { it.isSuccess == status }
+                    } ?: currentList
 
-                _state.update {
-                    it.copy(filteredJadwal = currentList.filter { list -> list.isSuccess == action.status })
+                    state.copy(filteredJadwal = filtered)
                 }
 
             }

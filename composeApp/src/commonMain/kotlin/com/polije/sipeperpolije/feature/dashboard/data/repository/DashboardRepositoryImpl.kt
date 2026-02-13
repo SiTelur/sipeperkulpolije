@@ -59,7 +59,10 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
         return Result.failure(it)
     }
 
-    override suspend fun generateJadwal(semester: Semester): Result<Boolean> {
+    override suspend fun generateJadwal(
+        semester: Semester,
+        workshopTime: Int?
+    ): Result<Boolean> {
         val responses = supabase
             .from("mata_kuliah_view").select {
                 order("nama", Order.ASCENDING)
@@ -87,8 +90,11 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                 it.nama,
                 dosen,
                 it.jumlahSKS,
-                it.isWorkshop
+                semester = it.semester,
+                isWorkshop = it.isWorkshop,
+                durasiJam = if (it.isWorkshop) (workshopTime ?: 3) else 2
             )
+
         }
 
 //        val daftarMataKuliah = listOf(

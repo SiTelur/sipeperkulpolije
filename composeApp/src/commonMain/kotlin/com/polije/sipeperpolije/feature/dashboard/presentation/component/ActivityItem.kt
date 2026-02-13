@@ -27,11 +27,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.polije.sipeperpolije.theme.AppTheme
 import com.polije.sipeperpolije.utils.shimmerEffect
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
 @Composable

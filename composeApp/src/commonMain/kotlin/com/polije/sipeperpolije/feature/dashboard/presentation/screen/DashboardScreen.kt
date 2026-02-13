@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -58,7 +59,6 @@ import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.Dashboa
 import com.polije.sipeperpolije.theme.AppTheme
 import com.polije.sipeperpolije.utils.ObserveAsEvent
 import kotlinx.serialization.Serializable
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -359,13 +359,6 @@ fun SummaryCardPreview() {
     }
 }
 
-@Preview
-@Composable
-fun DashboardRoutePreview() {
-    AppTheme {
-
-    }
-}
 
 sealed class DashboardRoute(val route: String) {
     object Dashboard : DashboardRoute("dashboard")

@@ -6,10 +6,13 @@ import kotlinx.serialization.Serializable
 data class Dosen(val id: Int, val nama: String)
 
 data class MataKuliah(
-    val nama: String, val dosen: Dosen, val sks: Int,
+    val nama: String,
+    val dosen: Dosen,
+    val sks: Int,
+    val semester: Int,
     val isWorkshop: Boolean = false,
     val pertemuanPerMinggu: Int = if (isWorkshop) 2 else 1, // 4 jam = 2x pertemuan
-    val durasiJam: Int = if (isWorkshop) 3 else 2,
+    val durasiJam: Int,
 )
 
 data class Slot(
@@ -70,7 +73,8 @@ data class JadwalDataItem(
     val hari: String,
     val jamMulai: Int,
     val jamSelesai: Int,
-    val namaDosen: String
+    val namaDosen: String,
+    val semester: Int, val sks: Int, val namaRuangan: String
 )
 
 @Serializable
@@ -711,7 +715,10 @@ class WelchPowellAlgorithm {
                             hari = hari,
                             jamMulai = jamMulai,
                             jamSelesai = jamSelesai,
-                            namaDosen = value.mataKuliah.dosen.nama
+                            namaDosen = value.mataKuliah.dosen.nama,
+                            semester = value.mataKuliah.semester,
+                            sks = value.mataKuliah.sks,
+                            namaRuangan = value.ruangan.nama
                         )
                     }
                 }
@@ -732,7 +739,10 @@ class WelchPowellAlgorithm {
                             hari = hari,
                             jamMulai = jamMulai,
                             jamSelesai = jamSelesai,
-                            namaDosen = value.mataKuliah.dosen.nama
+                            namaDosen = value.mataKuliah.dosen.nama,
+                            semester = value.mataKuliah.semester,
+                            sks = value.mataKuliah.sks,
+                            namaRuangan = value.ruangan.nama
                         )
                     }
                 }
