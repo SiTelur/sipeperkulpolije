@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.jadwal
+package com.polije.sipeperpolije.feature.master.presentation.jadwal.list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,8 +46,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.polije.sipeperpolije.feature.master.presentation.jadwal.viewmodel.JadwalViewModel
-import com.polije.sipeperpolije.feature.master.presentation.jadwal.viewmodel.ListJadwalAction
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.viewmodel.JadwalViewModel
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.viewmodel.ListJadwalAction
 import org.koin.compose.viewmodel.koinViewModel
 
 enum class GenerationStatus(val displayName: String, val status: Boolean?) {

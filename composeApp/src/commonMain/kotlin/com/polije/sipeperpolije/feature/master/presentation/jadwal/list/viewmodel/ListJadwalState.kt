@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.jadwal.viewmodel
+package com.polije.sipeperpolije.feature.master.presentation.jadwal.list.viewmodel
 
 data class ListJadwalState(
     val isLoading: Boolean = false,

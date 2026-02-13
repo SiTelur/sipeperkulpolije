@@ -24,7 +24,7 @@ import com.polije.sipeperpolije.feature.dashboard.presentation.screen.DetailMata
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.screen.DetailDosenScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.screen.DosenScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.DosenUI
-import com.polije.sipeperpolije.feature.master.presentation.jadwal.JadwalScreen
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.JadwalScreen
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.screen.MataKuliahDetailScreen
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.screens.MataKuliahScreen
 import com.polije.sipeperpolije.feature.master.presentation.screen.SettingsScreen

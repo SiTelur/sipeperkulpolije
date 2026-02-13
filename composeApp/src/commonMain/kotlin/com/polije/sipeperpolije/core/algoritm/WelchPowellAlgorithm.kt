@@ -10,7 +10,6 @@ data class MataKuliah(
     val isWorkshop: Boolean = false,
     val pertemuanPerMinggu: Int = if (isWorkshop) 2 else 1, // 4 jam = 2x pertemuan
     val durasiJam: Int = if (isWorkshop) 3 else 2,
-    val durasiPerPertemuan: Int = durasiJam // Durasi tetap tidak dibagi
 )
 
 data class Slot(
@@ -66,7 +65,13 @@ data class JadwalItem(
 }
 
 @Serializable
-data class JadwalDataItem(val namaJadwal: String, val jam: String, val namaDosen: String)
+data class JadwalDataItem(
+    val namaJadwal: String,
+    val hari: String,
+    val jamMulai: Int,
+    val jamSelesai: Int,
+    val namaDosen: String
+)
 
 @Serializable
 data class Jadwal(
@@ -74,6 +79,8 @@ data class Jadwal(
     val isSuccess: Boolean,
     @SerialName("jadwal")
     val listJadwal: Map<String, List<JadwalDataItem>>,
+    @SerialName("jadwal_view")
+    val listJadwalView: Map<String, List<JadwalDataItem>>,
     val semester: String
 )
 
@@ -403,7 +410,7 @@ class WelchPowellAlgorithm {
             var berhasilDijadwalkan = false
 
             // Generate slot berdasarkan durasi per pertemuan yang spesifik
-            val availableSlots = generateSlotsForDuration(mataKuliah.durasiPerPertemuan)
+            val availableSlots = generateSlotsForDuration(mataKuliah.durasiJam)
 
             // Hitung prioritas untuk setiap slot
             val slotsWithPriority = availableSlots.map { slot ->
@@ -688,7 +695,7 @@ class WelchPowellAlgorithm {
 
 
     fun jadwalToJson(isSuccess: Boolean, jadwal: List<JadwalItem>, semester: String): Jadwal {
-        val groupedJadwal: Map<String, List<JadwalDataItem>> =
+        val groupedJadwalByRuangan: Map<String, List<JadwalDataItem>> =
             jadwal
                 .groupBy { it.ruangan.nama } // Aula, RSI, dll
                 .entries
@@ -696,18 +703,45 @@ class WelchPowellAlgorithm {
                 .associate { it.key to it.value }
                 .mapValues { (_, jadwalRuangan) ->
                     jadwalRuangan.map { value ->
-                        val formattedJamMulai =
-                            value.slot.jamMulai.toString().padStart(2, '0')
-                        val formattedJamSelesai = value.slot.jamSelesai.toString().padStart(2, '0')
+                        val jamMulai = value.slot.jamMulai
+                        val jamSelesai = value.slot.jamSelesai
                         val hari = value.slot.hari.nama
                         JadwalDataItem(
-                            value.mataKuliah.nama,
-                            jam = "$hari, $formattedJamMulai:00-$formattedJamSelesai:00",
+                            namaJadwal = value.mataKuliah.nama,
+                            hari = hari,
+                            jamMulai = jamMulai,
+                            jamSelesai = jamSelesai,
                             namaDosen = value.mataKuliah.dosen.nama
                         )
                     }
                 }
 
-        return Jadwal(isSuccess, groupedJadwal, semester)
+        val groupedJadwalByHari: Map<String, List<JadwalDataItem>> =
+            jadwal
+                .groupBy { it.slot.hari.nama } // Aula, RSI, dll
+                .entries
+                .sortedBy { it.key }
+                .associate { it.key to it.value }
+                .mapValues { (_, jadwalRuangan) ->
+                    jadwalRuangan.map { value ->
+                        val jamMulai = value.slot.jamMulai
+                        val jamSelesai = value.slot.jamSelesai
+                        val hari = value.slot.hari.nama
+                        JadwalDataItem(
+                            namaJadwal = value.mataKuliah.nama,
+                            hari = hari,
+                            jamMulai = jamMulai,
+                            jamSelesai = jamSelesai,
+                            namaDosen = value.mataKuliah.dosen.nama
+                        )
+                    }
+                }
+
+        return Jadwal(
+            isSuccess,
+            groupedJadwalByRuangan,
+            listJadwalView = groupedJadwalByHari,
+            semester
+        )
     }
 }

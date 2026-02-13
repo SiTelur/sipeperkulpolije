@@ -1,7 +1,7 @@
 package com.polije.sipeperpolije.feature.master.domain.entity
 
-import com.polije.sipeperpolije.feature.master.presentation.jadwal.viewmodel.JadwalItemUI
-import com.polije.sipeperpolije.feature.master.presentation.jadwal.viewmodel.JadwalUI
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.viewmodel.JadwalItemUI
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.viewmodel.JadwalUI
 
 data class JadwalEntity(
     val id: Int,
