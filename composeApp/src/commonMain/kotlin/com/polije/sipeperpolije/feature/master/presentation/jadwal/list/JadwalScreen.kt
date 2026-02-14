@@ -58,7 +58,10 @@ enum class GenerationStatus(val displayName: String, val status: Boolean?) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun JadwalScreen(jadwalViewModel: JadwalViewModel = koinViewModel()) {
+fun JadwalScreen(
+    jadwalViewModel: JadwalViewModel = koinViewModel(),
+    onItemClick: (id: Int) -> Unit
+) {
 
     val state by jadwalViewModel.state.collectAsStateWithLifecycle()
     var selectedFilter by remember { mutableStateOf(GenerationStatus.SEMUA) }
@@ -102,7 +105,7 @@ fun JadwalScreen(jadwalViewModel: JadwalViewModel = koinViewModel()) {
                     title = log.semester,
                     semester = log.semester,
                     status = log.isSuccess,
-                    onClick = {}
+                    onClick = { onItemClick(log.id) }
                 )
             }
         }

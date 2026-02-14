@@ -100,6 +100,24 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
         }
     }
 
+    override suspend fun getDetailMataKuliah(id: Int): Result<MataKuliahEntity> {
+        val response = try {
+            val data = supabase
+                .from("mata_kuliah_view")
+                .select {
+                    filter {
+                        MataKuliahModel::id eq id
+                    }
+                }
+                .decodeSingle<MataKuliahModel>().toEntity()
+            data
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive();
+            return Result.failure(e)
+        }
+        return Result.success(response)
+    }
+
     override suspend fun updateMataKuliah(mataKuliah: MataKuliahEntity): Result<Boolean> {
         return try {
             supabase.from("mata_kuliah").update({
@@ -209,7 +227,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
     override suspend fun getJadwalDetail(id: Int): Result<JadwalEntity> {
         val response = try {
             val data = supabase.from("jadwal")
-                .select(Columns.list("id", "jadwal", "jadwal_view")) {
+                .select(Columns.list("id", "is_success", "semester", "jadwal", "jadwal_view")) {
                     filter {
                         JadwalModel::id eq id
                     }

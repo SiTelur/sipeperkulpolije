@@ -8,9 +8,14 @@ import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.viewmode
 data class JadwalEntity(
     val id: Int,
     val isSuccess: Boolean,
-    val jadwal: Map<String, List<JadwalItemEntity>>,
-    val jadwalView: Map<String, List<JadwalItemEntity>>,
+    val jadwal: List<JadwalPerItemEntity>,
+    val jadwalView: List<JadwalPerItemEntity>,
     val semester: String
+)
+
+data class JadwalPerItemEntity(
+    val nama: String,
+    val items: List<JadwalItemEntity>
 )
 
 data class JadwalItemEntity(
@@ -41,8 +46,6 @@ fun JadwalItemEntity.toUI() = DetailJadwalItemUI(
 
 
 fun JadwalEntity.toDetailUI() = DetailJadwalUI(
-
-    jadwal.mapValues { it.value.map { value -> value.toUI() } },
-    jadwalView.map { (key, value) -> DetailJadwalListUI(key, value.map { it.toUI() }) },
-
-    )
+    jadwal.map { (nama, item) -> DetailJadwalListUI(nama, item.map { it.toUI() }) },
+    jadwalView.map { (nama, item) -> DetailJadwalListUI(nama, item.map { it.toUI() }) },
+)

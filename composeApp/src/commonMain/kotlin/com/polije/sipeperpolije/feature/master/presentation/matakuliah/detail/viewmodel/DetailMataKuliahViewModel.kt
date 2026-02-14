@@ -3,11 +3,16 @@ package com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.v
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.polije.sipeperpolije.feature.master.domain.usecase.DeleteMataKuliahUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.GetDetailMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.SearchDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.UpdateMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.toUI
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.viewmodel.DetailMataKuliahEvent.OnFailureDeleteMataKuliah
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.viewmodel.DetailMataKuliahEvent.OnFailureUpdateMataKuliah
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.viewmodel.DetailMataKuliahEvent.OnSuccessDeleteMataKuliah
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.viewmodel.DetailMataKuliahEvent.OnSuccessUpdateMataKuliah
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.MataKuliahUI
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.toUI
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,12 +21,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class DetailMataKuliahViewModel(
+    private val getDetailMataKuliahUseCase: GetDetailMataKuliahUseCase,
     private val searchDosenUseCase: SearchDosenUseCase,
     private val deleteMataKuliahUseCase: DeleteMataKuliahUseCase,
     private val updateMataKuliahUseCase: UpdateMataKuliahUseCase
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(DetailMataKuliahState())
+    private val _state = MutableStateFlow(DetailMataKuliahState(detail = null))
     val state = _state.asStateFlow()
 
     private val _events = Channel<DetailMataKuliahEvent>()
@@ -54,7 +60,7 @@ class DetailMataKuliahViewModel(
                             isWorkshop = action.isWorkshop
                         )
                     ).onSuccess {
-                        _events.send(DetailMataKuliahEvent.OnSuccessUpdateMataKuliah)
+                        _events.send(OnSuccessUpdateMataKuliah)
                     }.onFailure {
                         _events.send(OnFailureUpdateMataKuliah(it.message.toString()))
                     }
@@ -64,10 +70,27 @@ class DetailMataKuliahViewModel(
             is DetailMataKuliahAction.OnDetailMataKuliahDelete -> {
                 viewModelScope.launch {
                     deleteMataKuliahUseCase(id = action.id).onSuccess {
-                        _events.send(DetailMataKuliahEvent.OnSuccessDeleteMataKuliah)
+                        _events.send(OnSuccessDeleteMataKuliah)
                     }.onFailure {
-                        _events.send(DetailMataKuliahEvent.OnFailureDeleteMataKuliah(it.message.toString()))
+                        _events.send(OnFailureDeleteMataKuliah(it.message.toString()))
                     }
+                }
+            }
+
+            is DetailMataKuliahAction.OnDetailMataKuliahLoad -> {
+                viewModelScope.launch {
+                    _state.update { it.copy(isLoading = false) }
+                    getDetailMataKuliahUseCase(action.id)
+                        .onSuccess { value ->
+                            _state.update {
+                                it.copy(
+                                    isLoading = false,
+                                    detail = value.toUI()
+                                )
+                            }
+                        }.onFailure {
+                            _events.send(OnFailureUpdateMataKuliah(it.message.toString()))
+                        }
                 }
             }
         }

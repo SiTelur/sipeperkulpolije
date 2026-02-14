@@ -12,7 +12,7 @@ import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.polije.sipeperpolije.feature.dashboard.presentation.screen.DashboardRoute
+import com.polije.sipeperpolije.feature.DashboardRoute
 
 data class NavItem(
     val label: String,

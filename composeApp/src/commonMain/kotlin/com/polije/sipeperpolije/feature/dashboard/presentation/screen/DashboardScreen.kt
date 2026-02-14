@@ -58,7 +58,6 @@ import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.Dashboa
 import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardViewModel
 import com.polije.sipeperpolije.theme.AppTheme
 import com.polije.sipeperpolije.utils.ObserveAsEvent
-import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -360,25 +359,3 @@ fun SummaryCardPreview() {
 }
 
 
-sealed class DashboardRoute(val route: String) {
-    object Dashboard : DashboardRoute("dashboard")
-    object Dosen : DashboardRoute("dosen")
-    object MataKuliah : DashboardRoute("matkul")
-    object Jadwal : DashboardRoute("jadwal")
-    object Settings : DashboardRoute("settings")
-}
-
-@Serializable
-data class DetailDosen(val id: Int, val nama: String, val nidn: String)
-
-@Serializable
-data class DetailMataKuliah(
-    val id: Int,
-    val nama: String,
-    val kode: String,
-    val idPengampu: Int? = null,
-    val namaPengampu: String,
-    val sks: Int,
-    val semester: Int,
-    val isWorkshop: Boolean
-)

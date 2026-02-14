@@ -17,6 +17,8 @@ import com.polije.sipeperpolije.feature.master.domain.repository.MasterRepositor
 import com.polije.sipeperpolije.feature.master.domain.usecase.DeleteDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.DeleteMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.DetailDosenUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.GetDetailJadwalUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.GetDetailMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.InsertDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.InsertMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListDosenPagingUseCase
@@ -27,6 +29,7 @@ import com.polije.sipeperpolije.feature.master.domain.usecase.UpdateDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.UpdateMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.viewmodel.DetailDosenViewModel
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.ListDosenViewModel
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalViewModel
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.viewmodel.JadwalViewModel
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.viewmodel.DetailMataKuliahViewModel
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahViewModel
@@ -78,6 +81,7 @@ fun appModule() = module {
     singleOf(::ListMataKuliahPagingUseCase)
     singleOf(::InsertMataKuliahUseCase)
     singleOf(::SearchDosenUseCase)
+    singleOf(::GetDetailMataKuliahUseCase)
     singleOf(::UpdateMataKuliahUseCase)
     singleOf(::DeleteMataKuliahUseCase)
     viewModelOf(::ListMataKuliahViewModel)
@@ -91,5 +95,8 @@ fun appModule() = module {
 
     singleOf(::ListJadwalUseCase)
     viewModelOf(::JadwalViewModel)
+
+    singleOf(::GetDetailJadwalUseCase)
+    viewModelOf(::DetailJadwalViewModel)
 }
 

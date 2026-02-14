@@ -3,7 +3,7 @@ package com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewm
 import kotlinx.serialization.Serializable
 
 data class DetailJadwalUI(
-    val jadwal: Map<String, List<DetailJadwalItemUI>> = emptyMap(),
+    val jadwal: List<DetailJadwalListUI> = emptyList(),
     val jadwalView: List<DetailJadwalListUI> = emptyList(),
 )
 

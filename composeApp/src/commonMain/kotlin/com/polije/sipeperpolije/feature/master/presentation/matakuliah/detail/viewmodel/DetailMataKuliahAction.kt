@@ -12,4 +12,5 @@ sealed class DetailMataKuliahAction {
     ) : DetailMataKuliahAction()
 
     data class OnDetailMataKuliahDelete(val id: Int) : DetailMataKuliahAction()
+    data class OnDetailMataKuliahLoad(val id: Int) : DetailMataKuliahAction()
 }

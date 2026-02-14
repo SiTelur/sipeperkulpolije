@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -22,26 +23,32 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.polije.sipeperpolije.LocalSnackbarHostState
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalAction
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalEvent
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalItemUI
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalListUI
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalViewModel
+import com.polije.sipeperpolije.utils.ObserveAsEvent
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,13 +58,28 @@ fun DetailJadwalScreen(
     detailJadwalViewModel: DetailJadwalViewModel = koinViewModel()
 ) {
 
-    val state = detailJadwalViewModel.state.collectAsStateWithLifecycle()
+    val state by detailJadwalViewModel.state.collectAsStateWithLifecycle()
+
+    val snackbarHost = LocalSnackbarHostState.current
 
     LaunchedEffect(id) {
         detailJadwalViewModel.onAction(DetailJadwalAction.OnDetailInitial(id))
     }
 
+    ObserveAsEvent(detailJadwalViewModel.channel) { event ->
+        when (event) {
+            is DetailJadwalEvent.OnFailure -> {
+                snackbarHost.showSnackbar(event.message)
+            }
+
+            DetailJadwalEvent.OnSuccess -> {
+                snackbarHost.showSnackbar("Berhasil memuat jadwal")
+            }
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHost) },
         topBar = {
             TopAppBar(
                 title = { Text("Detail Jadwal Akademik", fontWeight = FontWeight.SemiBold) },
@@ -93,9 +115,25 @@ fun DetailJadwalScreen(
                 }
             }
 
-//            items(detailJadwals) { harian ->
-//                DaySchedule(harian)
-//            }
+            when {
+                state.isLoading -> {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+
+                        }
+                    }
+                }
+
+                state.jadwal.jadwalView.isNotEmpty() && !state.isLoading -> {
+                    items(state.jadwal.jadwalView) { harian ->
+                        DaySchedule(harian)
+                    }
+                }
+            }
         }
     }
 }

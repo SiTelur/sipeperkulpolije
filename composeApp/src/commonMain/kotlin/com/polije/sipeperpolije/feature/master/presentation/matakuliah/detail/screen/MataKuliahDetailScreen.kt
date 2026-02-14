@@ -28,6 +28,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,6 +40,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,13 +73,6 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun MataKuliahDetailScreen(
     id: Int,
-    nama: String,
-    kode: String,
-    sks: Int,
-    idPengampu: Int? = null,
-    pengampu: String,
-    isWorkshop: Boolean,
-    semester: Int,
     detailMataKuliahViewModel: DetailMataKuliahViewModel = koinViewModel(),
     onBackPressed: () -> Unit,
     onSuccessAction: () -> Unit,
@@ -91,7 +86,13 @@ fun MataKuliahDetailScreen(
     val snackbarHost = LocalSnackbarHostState.current
     val scope = rememberCoroutineScope()
 
-    val state = detailMataKuliahViewModel.state.collectAsStateWithLifecycle()
+    val state by detailMataKuliahViewModel.state.collectAsStateWithLifecycle()
+
+
+
+    LaunchedEffect(id) {
+        detailMataKuliahViewModel.onAction(DetailMataKuliahAction.OnDetailMataKuliahLoad(id))
+    }
 
     ObserveAsEvent(detailMataKuliahViewModel.events) { event ->
         when (event) {
@@ -182,56 +183,84 @@ fun MataKuliahDetailScreen(
             }
         }
     ) { paddingValues ->
-        LazyColumn(contentPadding = paddingValues) {
-            item { HeroSection(nama, semester = semester) }
-            item { QuickStats(kode, sks) }
-            item { InfoSection(pengampu, isWorkshop = isWorkshop) }
 
+        when {
+            state.detail != null && !state.isLoading -> {
+                LazyColumn(contentPadding = paddingValues) {
+                    item { HeroSection(state.detail!!.nama, semester = state.detail!!.semester) }
+                    item { QuickStats(state.detail!!.kode, state.detail!!.jumlahSKS) }
+                    item {
+                        InfoSection(
+                            state.detail!!.namaPenampuPertama,
+                            isWorkshop = state.detail!!.isWorkshop
+                        )
+                    }
+                }
+            }
+
+            state.isLoading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
         }
+
+
+        /**
+         *  (){
+         *             LazyColumn(contentPadding = paddingValues) {
+         *                 item { HeroSection(state.detail, semester = semester) }
+         *                 item { QuickStats(kode, sks) }
+         *                 item { InfoSection(pengampu, isWorkshop = isWorkshop) }
+         *             }
+         *         }
+         */
 
         when {
             showEditModal -> {
-                UpdateMataKuliahModal(
-                    listDosen = state.value.result,
-                    modalBottomSheetState = sheetState,
-                    onDismiss = {
-                        scope.launch {
-                            sheetState.hide()
-                        }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                showEditModal = false
+                state.detail?.let { detail ->
+                    UpdateMataKuliahModal(
+                        listDosen = state.result,
+                        modalBottomSheetState = sheetState,
+                        onDismiss = {
+                            scope.launch {
+                                sheetState.hide()
+                            }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showEditModal = false
+                                }
                             }
-                        }
-                    },
-                    initialMataKuliah = nama,
-                    initialKodeMataKuliah = kode,
-                    initialNamaDosen = pengampu,
-                    initialJumlahSKS = sks,
-                    initialSemester = semester,
-                    initialIDDosen = idPengampu,
-                    initialIsWorkshop = isWorkshop,
-                    onSave = { nama, kode, sks, semester, idDosen, isWorkshop ->
-                        detailMataKuliahViewModel.onAction(
-                            DetailMataKuliahAction.OnDetailMataKuliahUpdate(
-                                id = id,
-                                nama = nama,
-                                kode = kode,
-                                sks = sks,
-                                semester = semester,
-                                idDosen = idDosen,
-                                isWorkshop
+                        },
+                        initialMataKuliah = detail.nama,
+                        initialKodeMataKuliah = detail.kode,
+                        initialNamaDosen = detail.namaPenampuPertama,
+                        initialJumlahSKS = detail.jumlahSKS,
+                        initialSemester = detail.semester,
+                        initialIDDosen = detail.idPengampu,
+                        initialIsWorkshop = detail.isWorkshop,
+                        onSave = { nama, kode, sks, semester, idDosen, isWorkshop ->
+                            detailMataKuliahViewModel.onAction(
+                                DetailMataKuliahAction.OnDetailMataKuliahUpdate(
+                                    id = id,
+                                    nama = nama,
+                                    kode = kode,
+                                    sks = sks,
+                                    semester = semester,
+                                    idDosen = idDosen,
+                                    isWorkshop
+                                )
                             )
-                        )
 
-                        scope.launch {
-                            sheetState.hide()
-                        }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                showEditModal = false
+                            scope.launch {
+                                sheetState.hide()
+                            }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showEditModal = false
+                                }
                             }
                         }
-                    }
-                )
+                    )
+                }
             }
 
             showConfirmationDelete -> {

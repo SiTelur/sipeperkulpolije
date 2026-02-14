@@ -82,12 +82,14 @@ data class Jadwal(
     @SerialName("is_success")
     val isSuccess: Boolean,
     @SerialName("jadwal")
-    val listJadwal: Map<String, List<JadwalDataItem>>,
+    val listJadwal: List<JadwalPerItem>,
     @SerialName("jadwal_view")
-    val listJadwalView: Map<String, List<JadwalDataItem>>,
+    val listJadwalView: List<JadwalPerItem>,
     val semester: String
 )
 
+@Serializable
+data class JadwalPerItem(val nama: String, val items: List<JadwalDataItem>)
 data class MKDegree(
     val mk: MataKuliah,
     val pertemuan: Int,
@@ -204,24 +206,33 @@ class WelchPowellAlgorithm {
         ruangan1: Ruangan,
         ruangan2: Ruangan
     ): Boolean {
-        // Konflik dosen yang sama di waktu yang sama
+        val timeOverlap = isTimeOverlap(slot1, slot2)
+
         // 1. Workshop tidak boleh di hari yang sama
         if (mk1 == mk2 && mk1.isWorkshop && slot1.hari == slot2.hari) {
             return true
         }
 
         // 2. Konflik dosen
-        if (mk1.dosen == mk2.dosen && isTimeOverlap(slot1, slot2)) {
+        if (mk1.dosen == mk2.dosen && timeOverlap) {
             return true
         }
 
         // 3. Konflik ruangan
-        if (ruangan1 == ruangan2 && isTimeOverlap(slot1, slot2)) {
+        if (ruangan1 == ruangan2 && timeOverlap) {
+            return true
+        }
+
+        // 4. Mata kuliah umum (non-workshop) semester sama tidak boleh paralel
+        if (!mk1.isWorkshop &&
+            !mk2.isWorkshop &&
+            mk1.semester == mk2.semester &&
+            timeOverlap
+        ) {
             return true
         }
 
         return false
-
     }
 
     // Cek apakah dua slot waktu tumpang tindih
@@ -407,7 +418,7 @@ class WelchPowellAlgorithm {
         println()
 
         val jadwal = mutableListOf<JadwalItem>()
-        var isSuccess: Boolean = true
+        var isSuccess = true
 
         // Step 2: Assign slot untuk setiap mata kuliah
         for ((mataKuliah, pertemuanKe, _) in mataKuliahDenganDegree) {
@@ -698,60 +709,66 @@ class WelchPowellAlgorithm {
     }
 
 
-    fun jadwalToJson(isSuccess: Boolean, jadwal: List<JadwalItem>, semester: String): Jadwal {
-        val groupedJadwalByRuangan: Map<String, List<JadwalDataItem>> =
-            jadwal
-                .groupBy { it.ruangan.nama } // Aula, RSI, dll
+    fun jadwalToJson(
+        isSuccess: Boolean,
+        jadwal: List<JadwalItem>,
+        semester: String
+    ): Jadwal {
+
+        val hariMap = mapOf(
+            "senin" to 1,
+            "selasa" to 2,
+            "rabu" to 3,
+            "kamis" to 4,
+            "jumat" to 5,
+            "sabtu" to 6,
+            "minggu" to 7
+        )
+
+        // 1️⃣ Transform sekali
+        val jadwalData = jadwal.map { value ->
+            JadwalDataItem(
+                namaJadwal = value.mataKuliah.nama,
+                hari = value.slot.hari.nama,
+                jamMulai = value.slot.jamMulai,
+                jamSelesai = value.slot.jamSelesai,
+                namaDosen = value.mataKuliah.dosen.nama,
+                semester = value.mataKuliah.semester,
+                sks = value.mataKuliah.sks,
+                namaRuangan = value.ruangan.nama
+            )
+        }
+
+        // 2️⃣ Group by Ruangan (urut alfabet ruangan)
+        val groupedByRuangan =
+            jadwalData
+                .groupBy { it.namaRuangan }
                 .entries
                 .sortedBy { it.key }
-                .associate { it.key to it.value }
-                .mapValues { (_, jadwalRuangan) ->
-                    jadwalRuangan.map { value ->
-                        val jamMulai = value.slot.jamMulai
-                        val jamSelesai = value.slot.jamSelesai
-                        val hari = value.slot.hari.nama
-                        JadwalDataItem(
-                            namaJadwal = value.mataKuliah.nama,
-                            hari = hari,
-                            jamMulai = jamMulai,
-                            jamSelesai = jamSelesai,
-                            namaDosen = value.mataKuliah.dosen.nama,
-                            semester = value.mataKuliah.semester,
-                            sks = value.mataKuliah.sks,
-                            namaRuangan = value.ruangan.nama
-                        )
-                    }
+                .associate { it.key to it.value }.map { (ruangan, items) ->
+                    JadwalPerItem(ruangan, items)
                 }
 
-        val groupedJadwalByHari: Map<String, List<JadwalDataItem>> =
-            jadwal
-                .groupBy { it.slot.hari.nama } // Aula, RSI, dll
-                .entries
-                .sortedBy { it.key }
-                .associate { it.key to it.value }
-                .mapValues { (_, jadwalRuangan) ->
-                    jadwalRuangan.map { value ->
-                        val jamMulai = value.slot.jamMulai
-                        val jamSelesai = value.slot.jamSelesai
-                        val hari = value.slot.hari.nama
-                        JadwalDataItem(
-                            namaJadwal = value.mataKuliah.nama,
-                            hari = hari,
-                            jamMulai = jamMulai,
-                            jamSelesai = jamSelesai,
-                            namaDosen = value.mataKuliah.dosen.nama,
-                            semester = value.mataKuliah.semester,
-                            sks = value.mataKuliah.sks,
-                            namaRuangan = value.ruangan.nama
-                        )
-                    }
+
+        // 3️⃣ Group by Hari (urut sesuai urutan minggu)
+        val groupedByHari =
+            jadwalData
+                .groupBy { it.hari }
+                .toList()
+                .sortedBy { (hari, _) ->
+                    hariMap[hari.lowercase()] ?: Int.MAX_VALUE
                 }
+                .map { (hari, items) ->
+                    JadwalPerItem(hari, items)
+                }
+
 
         return Jadwal(
-            isSuccess,
-            groupedJadwalByRuangan,
-            listJadwalView = groupedJadwalByHari,
-            semester
+            isSuccess = isSuccess,
+            listJadwal = groupedByRuangan,
+            listJadwalView = groupedByHari,
+            semester = semester
         )
     }
+
 }

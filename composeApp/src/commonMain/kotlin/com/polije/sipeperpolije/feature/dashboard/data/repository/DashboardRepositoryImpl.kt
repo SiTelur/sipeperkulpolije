@@ -157,7 +157,7 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
             ),
             Hari(
                 "Jumat",
-                jamMulai = 8, jamSelesai = 17,
+                jamMulai = 7, jamSelesai = 17,
                 jamIstirahatMulai = 11,
                 jamIstirahatSelesai = 12
             )

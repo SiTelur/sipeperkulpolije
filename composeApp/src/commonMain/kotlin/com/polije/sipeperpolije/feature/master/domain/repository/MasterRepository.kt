@@ -9,6 +9,7 @@ interface MasterRepository {
     suspend fun getDetailDosenMataKuliah(id: Int): Result<List<MataKuliahEntity>>
     suspend fun getMataKuliahPaging(offset: Int, limit: Int): Result<List<MataKuliahEntity>>
     suspend fun updateDosen(dosen: DosenEntity): Result<Boolean>
+    suspend fun getDetailMataKuliah(id: Int): Result<MataKuliahEntity>
     suspend fun updateMataKuliah(mataKuliah: MataKuliahEntity): Result<Boolean>
     suspend fun deleteDosen(id: Int): Result<Boolean>
     suspend fun deleteMataKuliah(id: Int): Result<Boolean>

@@ -17,17 +17,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
 import androidx.navigation.toRoute
 import com.polije.sipeperpolije.feature.dashboard.presentation.component.navigationItems
-import com.polije.sipeperpolije.feature.dashboard.presentation.screen.DashboardRoute
 import com.polije.sipeperpolije.feature.dashboard.presentation.screen.DashboardScreen
-import com.polije.sipeperpolije.feature.dashboard.presentation.screen.DetailDosen
-import com.polije.sipeperpolije.feature.dashboard.presentation.screen.DetailMataKuliah
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.screen.DetailDosenScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.screen.DosenScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.DosenUI
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.DetailJadwalScreen
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.JadwalScreen
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.screen.MataKuliahDetailScreen
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.screens.MataKuliahScreen
 import com.polije.sipeperpolije.feature.master.presentation.screen.SettingsScreen
+import kotlinx.serialization.Serializable
 
 @Composable
 fun MainScreen(
@@ -110,7 +109,9 @@ fun MainScreen(
             }
 
             composable(DashboardRoute.Jadwal.route) {
-                JadwalScreen()
+                JadwalScreen {
+                    navController.navigate(DetailJadwal(it))
+                }
             }
 
             composable(DashboardRoute.Settings.route) {
@@ -145,13 +146,6 @@ fun MainScreen(
                 val detailMataKuliah: DetailMataKuliah = backStackEntry.toRoute()
                 MataKuliahDetailScreen(
                     detailMataKuliah.id,
-                    detailMataKuliah.nama,
-                    detailMataKuliah.kode,
-                    detailMataKuliah.sks,
-                    detailMataKuliah.idPengampu,
-                    detailMataKuliah.namaPengampu,
-                    semester = detailMataKuliah.semester,
-                    isWorkshop = detailMataKuliah.isWorkshop,
                     onBackPressed = {
                         navController.popBackStack()
                     },
@@ -171,8 +165,39 @@ fun MainScreen(
                     }
                 )
             }
+
+            composable<DetailJadwal> { backStackEntry ->
+                val detailJadwal: DetailJadwal = backStackEntry.toRoute()
+                DetailJadwalScreen(id = detailJadwal.id)
+            }
         }
 
         NavHost(navController = navController, graph = graph)
     }
 }
+
+sealed class DashboardRoute(val route: String) {
+    object Dashboard : DashboardRoute("dashboard")
+    object Dosen : DashboardRoute("dosen")
+    object MataKuliah : DashboardRoute("matkul")
+    object Jadwal : DashboardRoute("jadwal")
+    object Settings : DashboardRoute("settings")
+}
+
+@Serializable
+data class DetailDosen(val id: Int, val nama: String, val nidn: String)
+
+@Serializable
+data class DetailMataKuliah(
+    val id: Int,
+    val nama: String,
+    val kode: String,
+    val idPengampu: Int? = null,
+    val namaPengampu: String,
+    val sks: Int,
+    val semester: Int,
+    val isWorkshop: Boolean
+)
+
+@Serializable
+data class DetailJadwal(val id: Int)
