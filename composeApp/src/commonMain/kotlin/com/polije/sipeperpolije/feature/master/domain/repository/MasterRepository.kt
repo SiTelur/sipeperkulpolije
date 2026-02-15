@@ -1,6 +1,7 @@
 package com.polije.sipeperpolije.feature.master.domain.repository
 
 import com.polije.sipeperpolije.feature.master.domain.entity.DosenEntity
+import com.polije.sipeperpolije.feature.master.domain.entity.HariEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.JadwalEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.MataKuliahEntity
 
@@ -18,4 +19,6 @@ interface MasterRepository {
     suspend fun searchDosen(): Result<List<DosenEntity>>
     suspend fun getJadwal(): Result<List<JadwalEntity>>
     suspend fun getJadwalDetail(id: Int): Result<JadwalEntity>
+    suspend fun getHari(): Result<List<HariEntity>>
+
 }

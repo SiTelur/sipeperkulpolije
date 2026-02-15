@@ -3,10 +3,12 @@ package com.polije.sipeperpolije.feature.master.data.repository
 import com.polije.sipeperpolije.core.log
 import com.polije.sipeperpolije.core.logList
 import com.polije.sipeperpolije.feature.master.data.model.DosenModel
+import com.polije.sipeperpolije.feature.master.data.model.HariModel
 import com.polije.sipeperpolije.feature.master.data.model.JadwalModel
 import com.polije.sipeperpolije.feature.master.data.model.MataKuliahModel
 import com.polije.sipeperpolije.feature.master.data.model.toEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.DosenEntity
+import com.polije.sipeperpolije.feature.master.domain.entity.HariEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.JadwalEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.MataKuliahEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.toModel
@@ -232,6 +234,31 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                         JadwalModel::id eq id
                     }
                 }.decodeSingle<JadwalModel>().toEntity()
+            data
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive();
+            log("error ${e.message}")
+            return Result.failure(e)
+        }
+        return Result.success(response)
+    }
+
+    override suspend fun getHari(): Result<List<HariEntity>> {
+        val response = try {
+            val data = supabase.from("hari")
+                .select(
+                    Columns.list(
+                        "id",
+                        "jam_mulai",
+                        "jam_selesai",
+                        "jam_istirahat_mulai",
+                        "jam_istirahat_selesai"
+                    )
+                ) {
+
+                }.decodeList<HariModel>().map {
+                    it.toEntity()
+                }
             data
         } catch (e: Exception) {
             currentCoroutineContext().ensureActive();
