@@ -248,11 +248,11 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
             val data = supabase.from("hari")
                 .select(
                     Columns.list(
-                        "id",
+                        "id", "nama",
                         "jam_mulai",
                         "jam_selesai",
-                        "jam_istirahat_mulai",
-                        "jam_istirahat_selesai"
+                        "jam_mulai_istirahat",
+                        "jam_selesai_istirahat"
                     )
                 ) {
 

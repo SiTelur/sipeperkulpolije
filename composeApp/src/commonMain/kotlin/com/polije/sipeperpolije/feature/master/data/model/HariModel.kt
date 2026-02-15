@@ -7,18 +7,20 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class HariModel(
     val id: Int,
+    val nama: String,
     @SerialName("jam_mulai")
     val jamMulai: Int,
     @SerialName("jam_selesai")
     val jamSelesai: Int,
-    @SerialName("jam_istirahat_mulai")
+    @SerialName("jam_mulai_istirahat")
     val jamIstirahatMulai: Int?,
-    @SerialName("jam_istirahat_selesai")
+    @SerialName("jam_selesai_istirahat")
     val jamIstirahatSelesai: Int?
 )
 
 fun HariModel.toEntity() = HariEntity(
     this.id,
+    this.nama,
     this.jamMulai,
     this.jamSelesai,
     this.jamIstirahatMulai,

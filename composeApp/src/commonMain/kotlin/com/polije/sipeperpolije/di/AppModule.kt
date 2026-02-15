@@ -22,6 +22,7 @@ import com.polije.sipeperpolije.feature.master.domain.usecase.GetDetailMataKulia
 import com.polije.sipeperpolije.feature.master.domain.usecase.InsertDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.InsertMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListDosenPagingUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.ListHariUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListJadwalUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListMataKuliahPagingUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.SearchDosenUseCase
@@ -33,6 +34,7 @@ import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmo
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.viewmodel.JadwalViewModel
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.viewmodel.DetailMataKuliahViewModel
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahViewModel
+import com.polije.sipeperpolije.feature.master.presentation.settings.viewmodel.SettingsViewModel
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.FlowType
 import io.github.jan.supabase.createSupabaseClient
@@ -66,7 +68,6 @@ fun appModule() = module {
     singleOf(::IsLoginUseCase)
     viewModelOf(::LoginViewModel)
 
-
     factoryOf(::DashboardRepositoryImpl) { bind<DashboardRepository>() }
     singleOf(::LogoutUseCase)
     singleOf(::FetchDashboardUseCase)
@@ -98,5 +99,8 @@ fun appModule() = module {
 
     singleOf(::GetDetailJadwalUseCase)
     viewModelOf(::DetailJadwalViewModel)
+
+    singleOf(::ListHariUseCase)
+    viewModelOf(::SettingsViewModel)
 }
 

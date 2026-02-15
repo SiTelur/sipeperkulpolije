@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -23,7 +25,6 @@ import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,12 +50,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.polije.sipeperpolije.feature.master.presentation.settings.viewmodel.SettingsViewModel
 import com.polije.sipeperpolije.theme.AppTheme
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navigateToEditHari: () -> Unit) {
-    var isDarkMode by remember { mutableStateOf(true) }
+fun SettingsScreen(
+    settingsViewModel: SettingsViewModel = koinViewModel(),
+    navigateToEditHari: () -> Unit
+) {
+    val state by settingsViewModel.settings.collectAsStateWithLifecycle()
+
 
     Scaffold(
         topBar = {
@@ -143,15 +151,18 @@ fun SettingsScreen(navigateToEditHari: () -> Unit) {
                             }
                         }
                         Spacer(Modifier.height(16.dp))
-                        Row(
+                        LazyRow(
                             Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            DayAvailabilityItem("Sen", "08-16", Modifier.weight(1f))
-                            DayAvailabilityItem("Sel", "08-16", Modifier.weight(1f))
-                            DayAvailabilityItem("Rab", "08-16", Modifier.weight(1f))
-                            DayAvailabilityItem("Kam", "08-16", Modifier.weight(1f))
-                            DayAvailabilityItem("Jum", "08-14", Modifier.weight(1f))
+                            items(state.listOfHari) { hari ->
+                                DayAvailabilityItem(
+                                    hari.nama,
+                                    "${hari.jamMulai}-${hari.jamSelesai}",
+                                    Modifier.weight(1f)
+                                )
+
+                            }
                         }
                     }
                 }
