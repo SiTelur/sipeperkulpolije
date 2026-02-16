@@ -4,6 +4,7 @@ import com.polije.sipeperpolije.feature.master.domain.entity.DosenEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.HariEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.JadwalEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.MataKuliahEntity
+import com.polije.sipeperpolije.feature.master.domain.entity.RuanganEntity
 
 interface MasterRepository {
     suspend fun getDosenPaging(offset: Int, limit: Int): Result<List<DosenEntity>>
@@ -20,5 +21,14 @@ interface MasterRepository {
     suspend fun getJadwal(): Result<List<JadwalEntity>>
     suspend fun getJadwalDetail(id: Int): Result<JadwalEntity>
     suspend fun getHari(): Result<List<HariEntity>>
+    suspend fun updateHari(hari: HariEntity): Result<Boolean>
+    suspend fun deleteHari(id: Int): Result<Boolean>
+    suspend fun insertHari(hari: HariEntity): Result<Boolean>
+
+    suspend fun getRuangan(): Result<List<RuanganEntity>>
+    suspend fun updateRuangan(ruangan: RuanganEntity): Result<Boolean>
+    suspend fun deleteRuangan(id: Int): Result<Boolean>
+    suspend fun insertRuangan(ruangan: RuanganEntity): Result<Boolean>
+
 
 }

@@ -6,11 +6,13 @@ import com.polije.sipeperpolije.feature.master.data.model.DosenModel
 import com.polije.sipeperpolije.feature.master.data.model.HariModel
 import com.polije.sipeperpolije.feature.master.data.model.JadwalModel
 import com.polije.sipeperpolije.feature.master.data.model.MataKuliahModel
+import com.polije.sipeperpolije.feature.master.data.model.RuanganModel
 import com.polije.sipeperpolije.feature.master.data.model.toEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.DosenEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.HariEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.JadwalEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.MataKuliahEntity
+import com.polije.sipeperpolije.feature.master.domain.entity.RuanganEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.toModel
 import com.polije.sipeperpolije.feature.master.domain.repository.MasterRepository
 import io.github.jan.supabase.SupabaseClient
@@ -268,5 +270,118 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
         return Result.success(response)
     }
 
+    override suspend fun updateHari(hari: HariEntity): Result<Boolean> {
+        val response = try {
+            supabase.from("hari").update({
+                HariModel::nama setTo hari.nama
+                HariModel::jamMulai setTo hari.jamMulai
+                HariModel::jamSelesai setTo hari.jamSelesai
+                HariModel::jamIstirahatMulai setTo hari.jamIstirahatMulai
+                HariModel::jamIstirahatSelesai setTo hari.jamIstirahatSelesai
+            }) {
+                filter {
+                    eq("id", hari.id)
+                }
+
+            }
+            true
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive()
+            return Result.failure(e)
+        }
+        return Result.success(response)
+    }
+
+    override suspend fun deleteHari(id: Int): Result<Boolean> {
+        val response = try {
+            supabase.from("hari").delete {
+                filter {
+                    eq("id", id)
+                }
+
+            }
+            true
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive()
+            return Result.failure(e)
+        }
+        return Result.success(response)
+    }
+
+    override suspend fun insertHari(hari: HariEntity): Result<Boolean> {
+        val response = try {
+            supabase.from("hari").insert(hari.toModel())
+            true
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive()
+            return Result.failure(e)
+        }
+        return Result.success(response)
+    }
+
+    override suspend fun getRuangan(): Result<List<RuanganEntity>> {
+        val response = try {
+            val data = supabase.from("hari")
+                .select(
+                    Columns.list(
+                        "id", "nama",
+                        "is_workshop",
+                    )
+                ).decodeList<RuanganModel>().map {
+                    it.toEntity()
+                }
+            data
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive();
+            log("error ${e.message}")
+            return Result.failure(e)
+        }
+        return Result.success(response)
+
+    }
+
+    override suspend fun updateRuangan(ruangan: RuanganEntity): Result<Boolean> {
+        val response = try {
+            supabase.from("ruangan").update({
+                RuanganModel::nama setTo ruangan.nama
+                RuanganModel::isWorkshop setTo ruangan.isWorkshop
+            }) {
+                filter {
+                    eq("id", ruangan.id)
+                }
+            }
+            true
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive()
+            return Result.failure(e)
+        }
+        return Result.success(response)
+    }
+
+    override suspend fun deleteRuangan(id: Int): Result<Boolean> {
+        val response = try {
+            supabase.from("ruangan").delete {
+                filter {
+                    eq("id", id)
+                }
+            }
+            true
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive()
+            return Result.failure(e)
+        }
+        return Result.success(response)
+    }
+
+    override suspend fun insertRuangan(ruangan: RuanganEntity): Result<Boolean> {
+        val response = try {
+            supabase.from("hari").insert(ruangan.toModel())
+            true
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive()
+            return Result.failure(e)
+        }
+        return Result.success(response)
+    }
 
 }

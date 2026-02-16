@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class HariModel(
-    val id: Int,
+    val id: Int = 0,
     val nama: String,
     @SerialName("jam_mulai")
     val jamMulai: Int,
