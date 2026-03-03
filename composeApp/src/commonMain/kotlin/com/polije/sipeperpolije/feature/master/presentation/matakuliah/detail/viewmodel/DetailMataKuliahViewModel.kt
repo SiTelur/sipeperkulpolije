@@ -55,9 +55,11 @@ class DetailMataKuliahViewModel(
                             kode = action.kode,
                             nama = action.nama,
                             semester = action.semester,
-                            jumlahSKS = action.sks,
-                            idPengampu = action.idDosen, namaPenampuPertama = "",
-                            isWorkshop = action.isWorkshop
+                            sksTeori = action.sksTeori,
+                            sksPraktek = action.sksPraktek,
+                            isActive = action.isActive,
+                            idPengampu = action.idDosen,
+                            namaPenampu = ""
                         )
                     ).onSuccess {
                         _events.send(OnSuccessUpdateMataKuliah)

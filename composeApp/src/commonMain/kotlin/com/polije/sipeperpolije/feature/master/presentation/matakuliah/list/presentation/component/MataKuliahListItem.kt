@@ -63,11 +63,11 @@ fun MataKuliahListItem(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    SksChip(sks = mataKuliah.jumlahSKS)
+                    SksChip(sks = mataKuliah.sksTeori + mataKuliah.sksPraktek)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = mataKuliah.namaPenampuPertama,
+                    text = mataKuliah.namaPenampu,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -86,27 +86,5 @@ fun MataKuliahListItem(
                 )
             }
         }
-    }
-}
-
-
-@Composable
-@Preview
-fun MataKuliahListItemPreview() {
-    AppTheme {
-        MataKuliahListItem(
-            mataKuliah = MataKuliahUI(
-                kode = "TIF120706",
-                id = 1,
-                jumlahSKS = 3,
-                namaPenampuPertama = "Dimas",
-                nama = "Pemrograman Mobile",
-                semester = 2,
-                idPengampu = 1,
-                isWorkshop = false
-            ),
-
-            onItemClick = {},
-        )
     }
 }

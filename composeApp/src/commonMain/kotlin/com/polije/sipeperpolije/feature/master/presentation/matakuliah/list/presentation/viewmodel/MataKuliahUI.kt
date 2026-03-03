@@ -7,10 +7,11 @@ data class MataKuliahUI(
     val kode: String,
     val nama: String,
     val semester: Int,
-    val jumlahSKS: Int,
+    val sksTeori: Int,
+    val sksPraktek: Int,
     val idPengampu: Int?,
-    val namaPenampuPertama: String,
-    val isWorkshop: Boolean
+    val namaPenampu: String,
+    val isActive: Boolean
 )
 
 fun MataKuliahEntity.toUI() = MataKuliahUI(
@@ -18,10 +19,11 @@ fun MataKuliahEntity.toUI() = MataKuliahUI(
     this.kode,
     this.nama,
     this.semester,
-    this.jumlahSKS,
-    this.idPengampuPertama,
-    this.namaPengampuPertama ?: "Belum ditentukan",
-    this.isWorkshop
+    this.sksTeori,
+    this.sksPraktek,
+    this.idPengampu,
+    this.namaPengampu ?: "Belum ditentukan",
+    this.isActive
 )
 
 fun MataKuliahUI.toEntity() =
@@ -30,10 +32,9 @@ fun MataKuliahUI.toEntity() =
         this.kode,
         this.nama,
         this.semester,
-        this.jumlahSKS,
+        this.sksTeori,
+        this.sksPraktek,
         this.idPengampu,
-        null,
-        null,
-        null,
-        this.isWorkshop
+        this.namaPenampu,
+        this.isActive,
     )

@@ -10,30 +10,26 @@ class MataKuliahModel(
     val kode: String,
     val nama: String,
     val semester: Int,
-    @SerialName("jumlah_sks")
-    val jumlahSKS: Int,
-    @SerialName("id_pengampu_pertama")
-    val idPengampuPertama: Int? = null,
-    @SerialName("nama_pengampu_pertama")
-    val namaPengampuPertama: String? = null,
-    @SerialName("id_pengampu_kedua")
-    val idPenampuKedua: Int? = null,
-    @SerialName("nama_pengampu_kedua")
-    val namaPengampuKedua: String? = null,
-    @SerialName("is_workshop")
-    val isWorkshop: Boolean
+    @SerialName("sks_teori")
+    val sksTeori: Int,
+    @SerialName("sks_praktek")
+    val sksPraktek: Int,
+    @SerialName("id_pengampu")
+    val idPengampu: Int? = null,
+    @SerialName("nama_pengampu")
+    val namaPengampu: String? = null,
+    @SerialName("is_active")
+    val isActive: Boolean,
 )
 
 fun MataKuliahModel.toEntity() = MataKuliahEntity(
     id = id,
     kode = kode,
     nama = nama,
-    jumlahSKS = jumlahSKS,
-    idPengampuPertama = idPengampuPertama,
-    namaPengampuPertama = namaPengampuPertama,
-    idPenampuKedua = idPenampuKedua,
-    namaPengampuKedua = namaPengampuKedua,
     semester = semester,
-    isWorkshop = isWorkshop
+    sksTeori = sksTeori,
+    sksPraktek = sksPraktek,
+    idPengampu = idPengampu,
+    isActive = isActive
 )
 

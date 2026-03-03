@@ -188,11 +188,11 @@ fun MataKuliahDetailScreen(
             state.detail != null && !state.isLoading -> {
                 LazyColumn(contentPadding = paddingValues) {
                     item { HeroSection(state.detail!!.nama, semester = state.detail!!.semester) }
-                    item { QuickStats(state.detail!!.kode, state.detail!!.jumlahSKS) }
+                    item { QuickStats(state.detail!!.kode, state.detail!!.sksTeori) }
                     item {
                         InfoSection(
-                            state.detail!!.namaPenampuPertama,
-                            isWorkshop = state.detail!!.isWorkshop
+                            state.detail!!.namaPenampu,
+                            isWorkshop = state.detail!!.isActive
                         )
                     }
                 }
@@ -233,21 +233,23 @@ fun MataKuliahDetailScreen(
                         },
                         initialMataKuliah = detail.nama,
                         initialKodeMataKuliah = detail.kode,
-                        initialNamaDosen = detail.namaPenampuPertama,
-                        initialJumlahSKS = detail.jumlahSKS,
+                        initialNamaDosen = detail.nama,
+                        initialSKSTeori = detail.sksTeori,
+                        initialSKSPraktek = detail.sksPraktek,
                         initialSemester = detail.semester,
                         initialIDDosen = detail.idPengampu,
-                        initialIsWorkshop = detail.isWorkshop,
-                        onSave = { nama, kode, sks, semester, idDosen, isWorkshop ->
+                        initialIsActive = detail.isActive,
+                        onSave = { nama, kode, sksTeori, sksPraktek, semester, idDosen, isActive ->
                             detailMataKuliahViewModel.onAction(
                                 DetailMataKuliahAction.OnDetailMataKuliahUpdate(
                                     id = id,
                                     nama = nama,
                                     kode = kode,
-                                    sks = sks,
+                                    sksTeori = sksTeori,
+                                    sksPraktek = sksPraktek,
                                     semester = semester,
                                     idDosen = idDosen,
-                                    isWorkshop
+                                    isActive
                                 )
                             )
 
@@ -419,7 +421,7 @@ private fun InfoSection(pengampu: String, isWorkshop: Boolean) {
             icon = Icons.Default.Person,
             iconBackgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
             iconColor = MaterialTheme.colorScheme.primary,
-            label = "Workshop",
+            label = "Aktif",
             value = if (isWorkshop) "Iya" else "Tidak"
         )
 

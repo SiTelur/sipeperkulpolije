@@ -5,6 +5,7 @@ import com.polije.sipeperpolije.core.algoritm.Dosen
 import com.polije.sipeperpolije.core.algoritm.Hari
 import com.polije.sipeperpolije.core.algoritm.MataKuliah
 import com.polije.sipeperpolije.core.algoritm.Ruangan
+import com.polije.sipeperpolije.core.algoritm.TipePenggunaan
 import com.polije.sipeperpolije.core.algoritm.WelchPowellAlgorithm
 import com.polije.sipeperpolije.core.log
 import com.polije.sipeperpolije.core.logList
@@ -73,7 +74,7 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
 
         logList("mataKuliah", responses)
 
-        val isMataKuliahValid = responses.all { it.idPengampuPertama != null }
+        val isMataKuliahValid = responses.all { it.idPengampu != null }
 
         if (!isMataKuliahValid) {
             return Result.failure(Exception("Ada mata kuliah yang belum memiliki dosen pengampu"))
@@ -82,17 +83,16 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
         val dosenCache = mutableMapOf<Int, Dosen>()
 
         val rawJadwal = responses.map {
-            val dosen = dosenCache.getOrPut(it.idPengampuPertama!!) {
-                Dosen(it.idPengampuPertama, it.namaPengampuPertama!!)
+            val dosen = dosenCache.getOrPut(it.idPengampu!!) {
+                Dosen(it.idPengampu, it.namaPengampu.toString())
             }
 
             MataKuliah(
                 it.nama,
                 dosen,
-                it.jumlahSKS,
+                it.sksTeori,
+                it.sksPraktek,
                 semester = it.semester,
-                isWorkshop = it.isWorkshop,
-                durasiJam = if (it.isWorkshop) (workshopTime ?: 3) else 2
             )
 
         }
@@ -133,10 +133,10 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
 //        )
 
         val daftarRuangan = listOf(
-            Ruangan("Aula", canWorkshop = true),
-            Ruangan("Ruang 101", canWorkshop = true),
-            Ruangan("Lab RSI", canWorkshop = true),
-            Ruangan("Lab SKK", canWorkshop = true)
+            Ruangan("Aula", supports = setOf(TipePenggunaan.TEORI, TipePenggunaan.PRAKTIK)),
+            Ruangan("Ruang 101", setOf(TipePenggunaan.TEORI, TipePenggunaan.PRAKTIK)),
+            Ruangan("Lab RSI", setOf(TipePenggunaan.PRAKTIK)),
+            Ruangan("Lab SKK", setOf(TipePenggunaan.PRAKTIK))
         )
         val hari = listOf(
             Hari(
@@ -164,7 +164,12 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
         )
 
 
-        val jadwal = welchPowellAlgorithm.buatJadwal(rawJadwal, daftarRuangan, hari)
+        val jadwal = welchPowellAlgorithm.buatJadwal(
+            rawJadwal,
+            daftarRuangan,
+            hari,
+            overrideDurasiWorkshop = workshopTime
+        )
         welchPowellAlgorithm.tampilkanJadwal(jadwal.second, daftarRuangan)
 
         try {

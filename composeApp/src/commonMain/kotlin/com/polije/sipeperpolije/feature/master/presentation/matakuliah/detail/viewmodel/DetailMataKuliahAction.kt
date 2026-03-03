@@ -5,10 +5,11 @@ sealed class DetailMataKuliahAction {
         val id: Int,
         val nama: String,
         val kode: String,
-        val sks: Int,
+        val sksTeori: Int,
+        val sksPraktek: Int,
         val semester: Int,
         val idDosen: Int?,
-        val isWorkshop: Boolean
+        val isActive: Boolean
     ) : DetailMataKuliahAction()
 
     data class OnDetailMataKuliahDelete(val id: Int) : DetailMataKuliahAction()

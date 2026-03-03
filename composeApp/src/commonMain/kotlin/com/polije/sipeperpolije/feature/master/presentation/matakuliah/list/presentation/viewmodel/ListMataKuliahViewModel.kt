@@ -94,11 +94,12 @@ class ListMataKuliahViewModel(
                             nama = listMataKuliahAction.nama,
                             kode = listMataKuliahAction.kode,
                             semester = listMataKuliahAction.semester,
-                            jumlahSKS = listMataKuliahAction.sks,
+                            sksTeori = listMataKuliahAction.sksTeori,
+                            sksPraktek = listMataKuliahAction.sksPraktek,
                             idPengampu = listMataKuliahAction.dosenID,
-                            namaPenampuPertama = listMataKuliahAction.namaDosen
+                            namaPenampu = listMataKuliahAction.namaDosen
                                 ?: "Belum ditentukan",
-                            isWorkshop = listMataKuliahAction.isWorkshop
+                            isActive = listMataKuliahAction.isActive
                         ).toEntity()
                     ).onSuccess {
                         resetItems()

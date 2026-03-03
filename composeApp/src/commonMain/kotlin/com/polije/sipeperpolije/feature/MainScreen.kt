@@ -100,10 +100,11 @@ fun MainScreen(
                             it.nama,
                             it.kode,
                             it.idPengampu,
-                            it.namaPenampuPertama,
-                            it.jumlahSKS,
+                            it.namaPenampu,
+                            it.sksTeori,
+                            it.sksPraktek,
                             it.semester,
-                            it.isWorkshop
+                            it.isActive
                         )
                     )
                 }
@@ -202,9 +203,10 @@ data class DetailMataKuliah(
     val kode: String,
     val idPengampu: Int? = null,
     val namaPengampu: String,
-    val sks: Int,
+    val sksTeori: Int,
+    val sksPraktek: Int,
     val semester: Int,
-    val isWorkshop: Boolean
+    val isActive: Boolean
 )
 
 @Serializable

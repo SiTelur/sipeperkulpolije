@@ -4,11 +4,12 @@ sealed class ListMataKuliahAction {
     data class OnSaveMataKuliah(
         val nama: String,
         val kode: String,
-        val sks: Int,
+        val sksTeori: Int,
+        val sksPraktek: Int,
         val semester: Int,
         val dosenID: Int?,
         val namaDosen: String?,
-        val isWorkshop: Boolean
+        val isActive: Boolean
     ) : ListMataKuliahAction()
 
     data class OnSearcDosen(val query: String) : ListMataKuliahAction()

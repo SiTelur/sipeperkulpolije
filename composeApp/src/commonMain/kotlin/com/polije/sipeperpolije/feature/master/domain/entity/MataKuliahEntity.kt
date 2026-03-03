@@ -7,12 +7,9 @@ data class MataKuliahEntity(
     val kode: String,
     val nama: String,
     val semester: Int,
-    val jumlahSKS: Int,
-    val idPengampuPertama: Int?,
-    val namaPengampuPertama: String?,
-    val idPenampuKedua: Int?,
-    val namaPengampuKedua: String?,
-    val isWorkshop: Boolean
+    val sksTeori: Int, val sksPraktek: Int, val idPengampu: Int? = null,
+    val namaPengampu: String? = null,
+    val isActive: Boolean
 )
 
 fun MataKuliahEntity.toModel() = MataKuliahModel(
@@ -20,7 +17,9 @@ fun MataKuliahEntity.toModel() = MataKuliahModel(
     kode = kode,
     nama = nama,
     semester = semester,
-    jumlahSKS = jumlahSKS,
-    idPengampuPertama = idPengampuPertama,
-    isWorkshop = isWorkshop
+    sksTeori = sksTeori,
+    sksPraktek = sksPraktek,
+    idPengampu = idPengampu,
+    namaPengampu = namaPengampu,
+    isActive = isActive
 )

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.setTextAndSelectAll
 import androidx.compose.foundation.verticalScroll
@@ -39,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.DosenUI
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.component.DosenSearchBar
@@ -49,28 +51,31 @@ fun UpdateMataKuliahModal(
     initialMataKuliah: String,
     initialKodeMataKuliah: String,
     initialNamaDosen: String,
-    initialJumlahSKS: Int,
+    initialSKSTeori: Int,
+    initialSKSPraktek: Int,
     initialSemester: Int,
     initialIDDosen: Int?,
-    initialIsWorkshop: Boolean,
+    initialIsActive: Boolean,
     modalBottomSheetState: SheetState,
     onDismiss: () -> Unit,
     listDosen: List<DosenUI>,
-    onSave: (nama: String, kode: String, sks: Int, semester: Int, idDosen: Int?, isWorkshop: Boolean) -> Unit
+    onSave: (nama: String, kode: String, sksTeori: Int, sksPraktek: Int, semester: Int, idDosen: Int?, isActive: Boolean) -> Unit
 ) {
     val namaMataKuliahState = TextFieldState(initialText = initialMataKuliah)
     val kodeMataKuliahState = TextFieldState(initialText = initialKodeMataKuliah)
     val namaDosenState = TextFieldState()
-    val sksState = TextFieldState("$initialJumlahSKS SKS")
+    val sksTeoriState = TextFieldState("$initialSKSTeori")
+    val sksPraktekState = TextFieldState("$initialSKSPraktek")
     val semesterState = TextFieldState("Semester ke $initialSemester")
     var expandedSks by remember { mutableStateOf(false) }
     var expandedSemester by remember { mutableStateOf(false) }
     var expandedDosen by remember { mutableStateOf(false) }
-    var isWorkshop by remember { mutableStateOf(initialIsWorkshop) }
+    var isActive by remember { mutableStateOf(initialIsActive) }
     val sksOptions = listOf(1, 2, 3, 4, 6)
     val semesterOptions = (1..8)
 
-    var sks = initialJumlahSKS
+    var sksTeori = initialSKSTeori
+    var sksPraktek = initialSKSPraktek
     var semester = initialSemester
     var idDosen: Int? = initialIDDosen
 
@@ -136,71 +141,55 @@ fun UpdateMataKuliahModal(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        ExposedDropdownMenuBox(
-                            expanded = expandedSks,
-                            onExpandedChange = { expandedSks = !expandedSks },
+                        OutlinedTextField(
+                            state = sksTeoriState,
+                            readOnly = true,
+                            label = { Text("Jumlah SKS") },
+                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f)
-                        ) {
-                            OutlinedTextField(
-                                state = sksState,
-                                readOnly = true,
-                                label = { Text("Jumlah SKS") },
-                                trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSks)
-                                },
-                                modifier = Modifier.menuAnchor(
-                                    ExposedDropdownMenuAnchorType.PrimaryEditable,
-                                    enabled = true
-                                ).fillMaxWidth()
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expandedSks,
-                                onDismissRequest = { expandedSks = false }
-                            ) {
-                                sksOptions.forEach { option ->
-                                    DropdownMenuItem(
-                                        text = { Text("$option SKS") },
-                                        onClick = {
-                                            sksState.setTextAndSelectAll("$option SKS")
-                                            sks = option
-                                            expandedSks = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
+                        )
 
-                        ExposedDropdownMenuBox(
-                            expanded = expandedSemester,
-                            onExpandedChange = { expandedSemester = !expandedSemester },
+                        OutlinedTextField(
+                            state = sksPraktekState,
+                            readOnly = true,
+                            label = { Text("Jumlah SKS") },
+                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f)
+                        )
+
+
+                    }
+
+                    ExposedDropdownMenuBox(
+                        expanded = expandedSemester,
+                        onExpandedChange = { expandedSemester = !expandedSemester },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        OutlinedTextField(
+                            state = semesterState,
+                            readOnly = true,
+                            label = { Text("Semester") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSemester)
+                            },
+                            modifier = Modifier.menuAnchor(
+                                ExposedDropdownMenuAnchorType.PrimaryEditable,
+                                enabled = true
+                            ).fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expandedSemester,
+                            onDismissRequest = { expandedSemester = false }
                         ) {
-                            OutlinedTextField(
-                                state = semesterState,
-                                readOnly = true,
-                                label = { Text("Semester") },
-                                trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSemester)
-                                },
-                                modifier = Modifier.menuAnchor(
-                                    ExposedDropdownMenuAnchorType.PrimaryEditable,
-                                    enabled = true
-                                ).fillMaxWidth()
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expandedSemester,
-                                onDismissRequest = { expandedSemester = false }
-                            ) {
-                                semesterOptions.forEach { option ->
-                                    DropdownMenuItem(
-                                        text = { Text("Semester ke $option") },
-                                        onClick = {
-                                            semesterState.setTextAndSelectAll("Semester ke $option")
-                                            semester = option
-                                            expandedSemester = false
-                                        }
-                                    )
-                                }
+                            semesterOptions.forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text("Semester ke $option") },
+                                    onClick = {
+                                        semesterState.setTextAndSelectAll("Semester ke $option")
+                                        semester = option
+                                        expandedSemester = false
+                                    }
+                                )
                             }
                         }
                     }
@@ -212,8 +201,8 @@ fun UpdateMataKuliahModal(
                     ) {
                         Text("Workshop")
                         Switch(
-                            checked = isWorkshop,
-                            onCheckedChange = { checked -> isWorkshop = checked })
+                            checked = isActive,
+                            onCheckedChange = { checked -> isActive = checked })
                     }
 
 
@@ -226,8 +215,9 @@ fun UpdateMataKuliahModal(
                         onSave(
                             namaMataKuliahState.text.toString(),
                             kodeMataKuliahState.text.toString(),
-                            sks,
-                            semester, idDosen, isWorkshop
+                            sksTeoriState.text.toString().toInt(),
+                            sksPraktekState.text.toString().toInt(),
+                            semester, idDosen, isActive
                         )
                     },
                     modifier = Modifier

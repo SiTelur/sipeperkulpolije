@@ -49,7 +49,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
         val response = try {
             val data = supabase.from("mata_kuliah_view").select {
                 filter {
-                    MataKuliahModel::idPengampuPertama eq id
+                    MataKuliahModel::idPengampu eq id
                 }
             }.decodeList<MataKuliahModel>().map { it.toEntity() }
             data
@@ -128,9 +128,9 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                 set("kode", mataKuliah.kode)
                 set("nama", mataKuliah.nama)
                 set("semester", mataKuliah.semester)
-                set("jumlah_sks", mataKuliah.jumlahSKS)
-                set("id_pengampu_pertama", mataKuliah.idPengampuPertama)
-                set("is_workshop", mataKuliah.isWorkshop)
+                set("sks_teori", mataKuliah.sksTeori)
+                set("sks_praktek", mataKuliah.sksPraktek)
+                set("is_active", mataKuliah.isActive)
             }) {
                 filter {
                     eq("id", mataKuliah.id)
@@ -344,7 +344,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
         val response = try {
             supabase.from("ruangan").update({
                 RuanganModel::nama setTo ruangan.nama
-                RuanganModel::isWorkshop setTo ruangan.isWorkshop
+                RuanganModel::tipeRuangan setTo ruangan.tipeRuangan
             }) {
                 filter {
                     eq("id", ruangan.id)

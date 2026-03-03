@@ -8,12 +8,26 @@ data class Dosen(val id: Int, val nama: String)
 data class MataKuliah(
     val nama: String,
     val dosen: Dosen,
-    val sks: Int,
+    val sksTeori: Int,
+    val sksPraktek: Int,
     val semester: Int,
-    val isWorkshop: Boolean = false,
-    val pertemuanPerMinggu: Int = if (isWorkshop) 2 else 1, // 4 jam = 2x pertemuan
-    val durasiJam: Int,
-)
+) {
+    val isWorkshop: Boolean = (sksPraktek == 4)
+    val pertemuanPerMinggu: Int = if (isWorkshop) 2 else 1
+
+    var durasiJam: Int = 0
+        get() {
+            val teori = sksTeori * DurasiConfig.jamPerSksTeori
+            val praktik =
+                (if (sksPraktek > 2) sksPraktek / 2 else sksPraktek) * DurasiConfig.jamPerSksPraktik
+            return teori + praktik
+        }
+}
+
+object DurasiConfig {
+    var jamPerSksTeori: Int = 1
+    var jamPerSksPraktik: Int = 2
+}
 
 data class Slot(
     val hari: Hari,
@@ -23,7 +37,10 @@ data class Slot(
     override fun toString(): String = "${hari.nama} $jamMulai:00-$jamSelesai:00"
 }
 
-data class Ruangan(val nama: String, val canWorkshop: Boolean)
+@Serializable
+enum class TipePenggunaan { TEORI, PRAKTIK }
+
+data class Ruangan(val nama: String, val supports: Set<TipePenggunaan>)
 
 data class Hari(
     val nama: String,
@@ -32,24 +49,20 @@ data class Hari(
     val jamIstirahatMulai: Int? = null,
     val jamIstirahatSelesai: Int? = null
 ) {
-
     init {
         require(
             (jamIstirahatMulai == null && jamIstirahatSelesai == null) ||
                     (jamIstirahatMulai != null && jamIstirahatSelesai != null)
-        ) {
-            "Jam istirahat harus diisi lengkap atau tidak sama sekali"
-        }
+        ) { "Jam istirahat harus diisi lengkap atau tidak sama sekali" }
     }
 
     val jamIstirahat: IntRange =
         if (jamIstirahatMulai != null && jamIstirahatSelesai != null)
-            jamIstirahatMulai..jamIstirahatSelesai
+            jamIstirahatMulai..<jamIstirahatSelesai
         else IntRange.EMPTY
+
     val jamPelajaran: List<Int> =
-        (jamMulai..<jamSelesai).filterNot { jam ->
-            jamIstirahat.contains(jam)
-        }
+        (jamMulai..<jamSelesai).filterNot { it in jamIstirahat }
 }
 
 data class JadwalItem(
@@ -106,177 +119,104 @@ class WelchPowellAlgorithm {
     private lateinit var daftarHari: List<Hari>
     private lateinit var daftarMataKuliah: List<MataKuliah>
 
-//    // Generate slot waktu berdasarkan durasi mata kuliah yang dibutuhkan
-//    private fun generateSlotsForDuration(durasi: Int): List<Slot> {
-//        val slots = mutableListOf<Slot>()
-////        for (hari in daftarHari) {
-////            for (jamMulai in daftarHari) {
-////                val jamSelesai = jamMulai + durasi
-////
-////                // Validasi berdasarkan hari
-////                val isValidSlot = if (hari == "Jumat") {
-////                    // Jumat: tidak boleh melewati jam 17, tidak boleh mulai di jam istirahat (11-13)
-////                    jamSelesai <= 17 && jamMulai != 11 && jamMulai != 12 &&
-////                            // Tidak boleh ada slot yang melewati jam istirahat 11-13
-////                            !(jamMulai < 11 && jamSelesai > 11)
-////                } else {
-////                    // Hari lain: tidak boleh melewati jam 17, tidak boleh mulai di jam istirahat (12)
-////                    jamSelesai <= 17 && jamMulai != 12 &&
-////                            // Tidak boleh ada slot yang melewati jam istirahat 12-13
-////                            !(jamMulai < 12 && jamSelesai > 12)
-////                }
-////
-////                if (isValidSlot) {
-////                    slots.add(Slot(hari, jamMulai, jamSelesai))
-////                }
-////            }
-////        }
-//
-//        daftarHari.forEach { daftarHari ->
-//            val hari =  daftarHari.nama
-//            val jamAkhir = daftarHari.jamPelajaran.last() + 1
-//                daftarHari.jamPelajaran.forEach { jamMulai ->
-//                val jamSelesai = jamMulai + durasi
-//
-//                val isValidSlot = if (hari == "Jumat") {
-//                    // Jumat: tidak boleh melewati jam 17, tidak boleh mulai di jam istirahat (11-13)
-//                    jamSelesai <= jamAkhir
-////                            && jamMulai != 11 && jamMulai != 12 &&
-////                            // Tidak boleh ada slot yang melewati jam istirahat 11-13
-////                            !(jamMulai < 11 && jamSelesai > 11)
-//                } else {
-//                    // Hari lain: tidak boleh melewati jam 17, tidak boleh mulai di jam istirahat (12)
-//                    jamSelesai <= jamAkhir
-////                            && jamMulai != 12 &&
-////                            // Tidak boleh ada slot yang melewati jam istirahat 12-13
-////                            !(jamMulai < 12 && jamSelesai > 12)
-//                }
-//
-//                if (isValidSlot) {
-//                    slots.add(Slot(hari, jamMulai, jamSelesai))
-//                }
-//            }
-//
-//
-//        }
-//        return slots
-//    }
+    // ─── Slot generation ────────────────────────────────────────────────────────
 
+    /**
+     * Menghasilkan semua slot kontigu dengan panjang [durasi] jam pelajaran.
+     * Slot tidak boleh memotong jam istirahat karena jamPelajaran sudah mengecualikannya.
+     * Contiguity diperiksa pada jam riil (bukan indeks) sehingga lompatan di sekitar
+     * istirahat tidak dianggap kontigu.
+     */
     private fun generateSlotsForDuration(durasi: Int): List<Slot> {
+        if (durasi <= 0) return emptyList()
         val slots = mutableListOf<Slot>()
 
-        daftarHari.forEach { hariData ->
+        for (hariData in daftarHari) {
             val jamList = hariData.jamPelajaran.sorted()
-            val breakRange = hariData.jamIstirahat
+            if (jamList.size < durasi) continue
 
             for (i in 0..jamList.size - durasi) {
                 val window = jamList.subList(i, i + durasi)
 
-                // jam harus kontigu
-                val isContiguous =
-                    window.zipWithNext().all { (a, b) -> b == a + 1 }
+                // Semua jam dalam window harus kontigu (tidak ada lompatan)
+                val isContiguous = window.zipWithNext().all { (a, b) -> b == a + 1 }
                 if (!isContiguous) continue
 
-                val jamMulai = window.first()
-                val jamSelesai = window.last() + 1
-
-                // cek bentrok istirahat
-                val overlapsBreak =
-                    breakRange != IntRange.EMPTY &&
-                            jamMulai < breakRange.last + 1 &&
-                            jamSelesai > breakRange.first
-
-                // ⬅️ INI YANG BENAR
-                if (!overlapsBreak) {
-                    slots.add(Slot(hariData, jamMulai, jamSelesai))
-                }
+                slots.add(Slot(hariData, window.first(), window.last() + 1))
             }
         }
-
         return slots
     }
 
+    // ─── Conflict detection ──────────────────────────────────────────────────────
 
-    // Cek apakah dua mata kuliah berkonflik
+    private fun isTimeOverlap(slot1: Slot, slot2: Slot): Boolean {
+        if (slot1.hari != slot2.hari) return false
+        return slot1.jamMulai < slot2.jamSelesai && slot2.jamMulai < slot1.jamSelesai
+    }
+
     private fun isConflict(
-        mk1: MataKuliah,
-        mk2: MataKuliah,
-        slot1: Slot,
-        slot2: Slot,
-        ruangan1: Ruangan,
-        ruangan2: Ruangan
+        mk1: MataKuliah, mk2: MataKuliah,
+        slot1: Slot, slot2: Slot,
+        ruangan1: Ruangan, ruangan2: Ruangan
     ): Boolean {
-        val timeOverlap = isTimeOverlap(slot1, slot2)
+        val overlap = isTimeOverlap(slot1, slot2)
 
-        // 1. Workshop tidak boleh di hari yang sama
-        if (mk1 == mk2 && mk1.isWorkshop && slot1.hari == slot2.hari) {
-            return true
-        }
+        // Workshop tidak boleh di hari yang sama untuk pertemuan berbeda dari MK yang sama
+        if (mk1 == mk2 && mk1.isWorkshop && slot1.hari == slot2.hari) return true
 
-        // 2. Konflik dosen
-        if (mk1.dosen == mk2.dosen && timeOverlap) {
-            return true
-        }
+        // Dosen yang sama tidak boleh mengajar bersamaan
+        if (mk1.dosen == mk2.dosen && overlap) return true
 
-        // 3. Konflik ruangan
-        if (ruangan1 == ruangan2 && timeOverlap) {
-            return true
-        }
+        // Ruangan yang sama tidak boleh dipakai bersamaan
+        if (ruangan1 == ruangan2 && overlap) return true
 
-        // 4. Mata kuliah umum (non-workshop) semester sama tidak boleh paralel
-        if (!mk1.isWorkshop &&
-            !mk2.isWorkshop &&
-            mk1.semester == mk2.semester &&
-            timeOverlap
-        ) {
-            return true
-        }
+        // Mata kuliah non-workshop semester sama tidak boleh paralel
+        if (!mk1.isWorkshop && !mk2.isWorkshop &&
+            mk1.semester == mk2.semester && overlap
+        ) return true
 
         return false
     }
 
-    // Cek apakah dua slot waktu tumpang tindih
-    private fun isTimeOverlap(slot1: Slot, slot2: Slot): Boolean {
-        if (slot1.hari != slot2.hari) return false
-
-        return !(slot1.jamSelesai <= slot2.jamMulai || slot2.jamSelesai <= slot1.jamMulai)
-    }
-
-    // Cek apakah ruangan cocok untuk mata kuliah
     private fun isRuanganCocok(mataKuliah: MataKuliah, ruangan: Ruangan): Boolean {
-        // Workshop hanya bisa di Lab RSI atau Lab SKK
-        if (mataKuliah.isWorkshop) {
-            return ruangan.canWorkshop
-        }
-
-        // Mata kuliah biasa bisa di semua ruangan
-        return true
+        val kebutuhan = if (mataKuliah.isWorkshop) TipePenggunaan.PRAKTIK else TipePenggunaan.TEORI
+        return kebutuhan in ruangan.supports
     }
 
-    // Hitung degree (jumlah konflik potensial) untuk setiap mata kuliah
-    private fun hitungDegree(mataKuliah: MataKuliah, daftarMataKuliah: List<MataKuliah>): Int {
+    // ─── Degree calculation ──────────────────────────────────────────────────────
+
+    /**
+     * Degree = estimasi jumlah konflik potensial sebuah MK dengan MK lain.
+     * Bobot lebih besar untuk konflik dosen (lebih kritis) dan workshop.
+     */
+    private fun hitungDegree(mataKuliah: MataKuliah, daftarMK: List<MataKuliah>): Int {
         var degree = 0
-        for (mk in daftarMataKuliah) {
-            if (mk != mataKuliah) {
-                // Tambah degree jika dosen sama
-                if (mk.dosen == mataKuliah.dosen) {
-                    degree += 3 * mk.pertemuanPerMinggu // Konflik dosen lebih kritis
-                }
+        for (mk in daftarMK) {
+            if (mk == mataKuliah) continue
 
-                val isWorkshopCurrent =
-                    mataKuliah.isWorkshop
-                val isWorkshopOther =
-                    mk.isWorkshop
+            if (mk.dosen == mataKuliah.dosen)
+                degree += 3 * mk.pertemuanPerMinggu
 
-                if (isWorkshopCurrent && isWorkshopOther) {
-                    degree += 2 * (mk.pertemuanPerMinggu + mataKuliah.pertemuanPerMinggu)
-                }
-            }
+            if (mataKuliah.isWorkshop && mk.isWorkshop)
+                degree += 2 * (mk.pertemuanPerMinggu + mataKuliah.pertemuanPerMinggu)
+
+            // Semester sama → potensi konflik paralel
+            if (!mataKuliah.isWorkshop && !mk.isWorkshop &&
+                mataKuliah.semester == mk.semester
+            ) degree += 1
         }
         return degree
     }
 
-    // Hitung prioritas slot berdasarkan minimisasi celah waktu
+    // ─── Slot priority ───────────────────────────────────────────────────────────
+
+    /**
+     * Menghitung skor prioritas slot.
+     * Skor lebih tinggi = lebih disukai.
+     * Tujuan: jadwal kompak (minimal celah), distribusi merata antar hari,
+     * dan pertemuan ke-2 workshop di hari berbeda.
+     */
     private fun hitungPrioritasSlot(
         slot: Slot,
         jadwal: List<JadwalItem>,
@@ -285,483 +225,328 @@ class WelchPowellAlgorithm {
     ): Int {
         var prioritas = 100
 
-        // 1. Distribusi merata per hari (kurangi bobot ini)
-        val jadwalHariIni = jadwal.count { it.slot.hari == slot.hari }
-        prioritas -= jadwalHariIni * 3
-
-        // 2. Untuk pertemuan ke-2, hindari hari yang sama dengan pertemuan ke-1
-        if (pertemuanKe == 2) {
-            val pertemuan1 = jadwal.find {
-                it.mataKuliah == mataKuliah && it.pertemuanKe == 1
-            }
-            if (pertemuan1 != null && pertemuan1.slot.hari == slot.hari) {
-                prioritas -= 20
-            }
-        }
         val jadwalPerHari = jadwal.groupBy { it.slot.hari }
+        val jadwalHariIni = jadwalPerHari[slot.hari] ?: emptyList()
 
-        // 3. PRIORITAS TINGGI: Minimisasi celah waktu
-        val jadwalHariIni2 =
-            jadwalPerHari[slot.hari] ?: emptyList()
+        // 1. Distribusi merata — penalti ringan jika hari ini sudah padat
+        prioritas -= jadwalHariIni.size * 3
 
-        // Bonus besar jika slot ini bisa mengisi celah atau menempel dengan slot existing
-        var adjacencyBonus = 0
-        for (existingSlot in jadwalHariIni2) {
-            // Bonus jika slot ini langsung setelah slot yang ada (tanpa celah)
-            if (existingSlot.slot.jamSelesai == slot.jamMulai) {
-                adjacencyBonus += 25
-            }
-            // Bonus jika slot ini langsung sebelum slot yang ada (tanpa celah)
-            if (slot.jamSelesai == existingSlot.slot.jamMulai) {
-                adjacencyBonus += 25
-            }
-        }
-        prioritas += adjacencyBonus
-
-        // 4. Bonus untuk menggunakan waktu dari jam awal secara berurutan
-        val jamAwal = slot.hari.jamPelajaran.first()
-        if (slot.jamMulai == jamAwal) {
-            prioritas += 20 // Prioritas tinggi untuk mulai jam awal
-        } else {
-            // Cek apakah ada slot yang berakhir tepat sebelum slot ini dimulai
-            val adaSlotSebelum = jadwalHariIni2.any { it.slot.jamSelesai == slot.jamMulai }
-            if (adaSlotSebelum) {
-                prioritas += 15 // Bonus untuk continuity
+        // 2. Pertemuan ke-2 workshop: bonus besar jika beda hari dari pertemuan ke-1
+        if (pertemuanKe == 2) {
+            val pertemuan1 = jadwal.find { it.mataKuliah == mataKuliah && it.pertemuanKe == 1 }
+            if (pertemuan1 != null) {
+                if (pertemuan1.slot.hari == slot.hari) prioritas -= 50  // harus beda hari untuk workshop
+                else prioritas += 10
             }
         }
 
-        // 5. Penalti untuk membuat celah
-        // Hitung berapa celah yang akan terbentuk jika slot ini digunakan
-        val simulatedSchedule = jadwalHariIni2.toMutableList()
-        val dummyRuangan = Ruangan("", true)
-        simulatedSchedule.add(JadwalItem(mataKuliah, dummyRuangan, slot, pertemuanKe))
-        val sortedSimulated = simulatedSchedule.sortedBy { it.slot.jamMulai }
+        // 3. Adjacency bonus — slot menempel langsung dengan slot yang ada (tanpa celah)
+        for (existing in jadwalHariIni) {
+            if (existing.slot.jamSelesai == slot.jamMulai) prioritas += 25
+            if (slot.jamSelesai == existing.slot.jamMulai) prioritas += 25
+        }
+
+        // 4. Mulai dari jam paling awal hari ini (jika belum ada jadwal)
+        if (jadwalHariIni.isEmpty() && slot.jamMulai == slot.hari.jamPelajaran.first()) {
+            prioritas += 20
+        }
+
+        // 5. Gap penalty — hitung celah yang akan terbentuk setelah slot ini ditambahkan
+        val simulasi = (jadwalHariIni + listOf(
+            JadwalItem(
+                mataKuliah,
+                Ruangan("_", setOf(TipePenggunaan.TEORI, TipePenggunaan.PRAKTIK)),
+                slot,
+                pertemuanKe
+            )
+        )).sortedBy { it.slot.jamMulai }
 
         var gapPenalty = 0
-        for (i in 0..<sortedSimulated.lastIndex) {
-            val currentEnd = sortedSimulated[i].slot.jamSelesai
-            val nextStart = sortedSimulated[i + 1].slot.jamMulai
-
-            // Gap mentah
-            val rawGap = (nextStart - currentEnd).coerceAtLeast(0)
-
-            // Potong jam istirahat
-            val breakCut = slot.hari.jamIstirahat.sumOf { breakRange ->
-                (maxOf(currentEnd, breakRange)..<minOf(nextStart, breakRange + 1))
-                    .count()
-            }
-
-            val actualGap = (rawGap - breakCut).coerceAtLeast(0)
-
-            if (actualGap > 0) {
-                gapPenalty += actualGap * 5
+        for (i in 0 until simulasi.lastIndex) {
+            val end = simulasi[i].slot.jamSelesai
+            val start = simulasi[i + 1].slot.jamMulai
+            if (start > end) {
+                // Kurangi durasi istirahat yang ada di dalam celah
+                val breakInGap = if (slot.hari.jamIstirahat != IntRange.EMPTY) {
+                    (maxOf(end, slot.hari.jamIstirahat.first) until
+                            minOf(start, slot.hari.jamIstirahat.last + 1)).count()
+                } else 0
+                val actualGap = (start - end - breakInGap).coerceAtLeast(0)
+                gapPenalty += actualGap * 8
             }
         }
-
         prioritas -= gapPenalty
 
-        // 6. Bonus untuk slot yang menggunakan waktu paling efisien
-        // Hitung total waktu yang akan terpakai vs waktu kosong
-        if (jadwalHariIni2.isNotEmpty()) {
-            val minStart = minOf(slot.jamMulai, jadwalHariIni2.minOf { it.slot.jamMulai })
-            val maxEnd = maxOf(slot.jamSelesai, jadwalHariIni2.maxOf { it.slot.jamSelesai })
-            val totalTimeSpan = maxEnd - minStart
-            val totalUsedTime =
-                slot.jamSelesai - slot.jamMulai + jadwalHariIni2.sumOf { it.slot.jamSelesai - it.slot.jamMulai }
-            val efficiency = (totalUsedTime.toDouble() / totalTimeSpan * 100).toInt()
-            prioritas += efficiency / 10 // Bonus berdasarkan efisiensi
-        }
-
-        // 7. Penalti untuk melewati jam istirahat
-        val breakRange = slot.hari.jamIstirahat
-
-        if (breakRange != IntRange.EMPTY) {
-            val overlap =
-                slot.jamMulai < breakRange.last + 1 &&
-                        slot.jamSelesai > breakRange.first
-
-            if (overlap) {
-                prioritas -= 10
-            }
+        // 6. Efisiensi waktu hari ini
+        if (jadwalHariIni.isNotEmpty()) {
+            val minStart = minOf(slot.jamMulai, jadwalHariIni.minOf { it.slot.jamMulai })
+            val maxEnd = maxOf(slot.jamSelesai, jadwalHariIni.maxOf { it.slot.jamSelesai })
+            val usedTime = (slot.jamSelesai - slot.jamMulai) +
+                    jadwalHariIni.sumOf { it.slot.jamSelesai - it.slot.jamMulai }
+            val span = (maxEnd - minStart).coerceAtLeast(1)
+            prioritas += (usedTime * 100 / span) / 10
         }
 
         return prioritas
     }
 
-    // Implementasi algoritma Welch-Powell yang diperbaiki
+    // ─── Main scheduling ─────────────────────────────────────────────────────────
+
     fun buatJadwal(
         daftarMataKuliah: List<MataKuliah>,
         daftarRuangan: List<Ruangan>,
-        daftarHari: List<Hari>
+        daftarHari: List<Hari>,
+        overrideDurasiWorkshop: Int? = null
     ): Pair<Boolean, List<JadwalItem>> {
         this.daftarMataKuliah = daftarMataKuliah
         this.daftarHari = daftarHari
 
-        // Expand mata kuliah yang memiliki multiple pertemuan
-        val expandedMataKuliah = mutableListOf<Pair<MataKuliah, Int>>()
-        for (mk in daftarMataKuliah) {
-            for (pertemuan in 1..mk.pertemuanPerMinggu) {
-                expandedMataKuliah.add(Pair(mk, pertemuan))
-            }
+        // Expand MK dengan multiple pertemuan
+        val expandedMK = daftarMataKuliah.flatMap { mk ->
+            (1..mk.pertemuanPerMinggu).map { Pair(mk, it) }
         }
 
-        // Step 1: Hitung degree dan urutkan mata kuliah (descending)
-        val mataKuliahDenganDegree = expandedMataKuliah.map { (mk, pertemuan) ->
+        // Urutkan berdasarkan degree (descending), lalu durasi (descending)
+        val mkDenganDegree = expandedMK.map { (mk, pertemuan) ->
             MKDegree(mk, pertemuan, hitungDegree(mk, daftarMataKuliah))
-        }.sortedByDescending { it.degree }
+        }.sortedWith(
+            compareByDescending<MKDegree> { it.degree }
+                .thenByDescending { it.mk.durasiJam }
+                .thenByDescending { it.mk.isWorkshop }
+        )
 
         println("Urutan mata kuliah berdasarkan degree:")
-        mataKuliahDenganDegree.forEach { (mk, pertemuan, degree) ->
+        mkDenganDegree.forEach { (mk, pertemuan, degree) ->
             val suffix = if (mk.pertemuanPerMinggu > 1) " (Pertemuan $pertemuan)" else ""
-            println("${mk.nama}$suffix - Degree: $degree")
+            println("  ${mk.nama}$suffix — Degree: $degree, Durasi: ${mk.durasiJam} jam")
         }
         println()
 
         val jadwal = mutableListOf<JadwalItem>()
         var isSuccess = true
 
-        // Step 2: Assign slot untuk setiap mata kuliah
-        for ((mataKuliah, pertemuanKe, _) in mataKuliahDenganDegree) {
-            var berhasilDijadwalkan = false
+        for ((mataKuliah, pertemuanKe, _) in mkDenganDegree) {
+            val durasi = if (mataKuliah.isWorkshop && overrideDurasiWorkshop != null)
+                overrideDurasiWorkshop
+            else
+                mataKuliah.durasiJam
 
-            // Generate slot berdasarkan durasi per pertemuan yang spesifik
-            val availableSlots = generateSlotsForDuration(mataKuliah.durasiJam)
+            val availableSlots = generateSlotsForDuration(durasi)
 
-            // Hitung prioritas untuk setiap slot
-            val slotsWithPriority = availableSlots.map { slot ->
-                val prioritas = hitungPrioritasSlot(slot, jadwal, mataKuliah, pertemuanKe)
-                SlotPriority(slot, prioritas)
-            }.sortedByDescending { it.priority }
-
-            // Coba setiap slot dengan prioritas tertinggi
-            for ((slot, prioritas) in slotsWithPriority) {
-                val ruanganCocok = daftarRuangan.filter { isRuanganCocok(mataKuliah, it) }
-
-                for (ruangan in ruanganCocok) {
-                    // Cek konflik dengan jadwal yang sudah ada
-                    var adaKonflik = false
-                    for (jadwalItem in jadwal) {
-                        if (isConflict(
-                                mataKuliah,
-                                jadwalItem.mataKuliah,
-                                slot,
-                                jadwalItem.slot,
-                                ruangan,
-                                jadwalItem.ruangan
-                            )
-                        ) {
-                            adaKonflik = true
-                            break
-                        }
-                    }
-
-                    if (!adaKonflik) {
-                        jadwal.add(JadwalItem(mataKuliah, ruangan, slot, pertemuanKe))
-                        berhasilDijadwalkan = true
-                        val suffix =
-                            if (mataKuliah.pertemuanPerMinggu > 1) " (Pertemuan $pertemuanKe)" else ""
-                        println("✓ ${mataKuliah.nama}$suffix dijadwalkan: ${slot.hari} ${slot.jamMulai}:00-${slot.jamSelesai}:00 di $ruangan (Prioritas: $prioritas)")
-                        break
-                    }
-                }
-
-                if (berhasilDijadwalkan) break
+            if (availableSlots.isEmpty()) {
+                println("⚠ Tidak ada slot tersedia untuk durasi ${mataKuliah.durasiJam} jam!")
+                isSuccess = false
+                continue
             }
 
-            if (!berhasilDijadwalkan) {
+            val slotsWithPriority = availableSlots
+                .map { slot ->
+                    SlotPriority(slot, hitungPrioritasSlot(slot, jadwal, mataKuliah, pertemuanKe))
+                }
+                .sortedByDescending { it.priority }
+
+            // Ruangan yang cocok, diurutkan: khusus (supports.size==1) dulu
+            val ruanganCocok = daftarRuangan
+                .filter { isRuanganCocok(mataKuliah, it) }
+                .sortedBy { if (it.supports.size == 1) 0 else 1 }
+
+            var berhasil = false
+
+            outer@ for ((slot, _) in slotsWithPriority) {
+                for (ruangan in ruanganCocok) {
+                    val adaKonflik = jadwal.any { item ->
+                        isConflict(
+                            mataKuliah,
+                            item.mataKuliah,
+                            slot,
+                            item.slot,
+                            ruangan,
+                            item.ruangan
+                        )
+                    }
+                    if (!adaKonflik) {
+                        jadwal.add(JadwalItem(mataKuliah, ruangan, slot, pertemuanKe))
+                        berhasil = true
+                        val suffix =
+                            if (mataKuliah.pertemuanPerMinggu > 1) " (Pertemuan $pertemuanKe)" else ""
+                        println("✓ ${mataKuliah.nama}$suffix → ${slot.hari.nama} ${slot.jamMulai}:00-${slot.jamSelesai}:00 | ${ruangan.nama}")
+                        break@outer
+                    }
+                }
+            }
+
+            if (!berhasil) {
                 isSuccess = false
                 val suffix =
                     if (mataKuliah.pertemuanPerMinggu > 1) " (Pertemuan $pertemuanKe)" else ""
-                println("⚠ PERINGATAN: ${mataKuliah.nama}$suffix tidak bisa dijadwalkan!")
+                println("✗ GAGAL: ${mataKuliah.nama}$suffix tidak bisa dijadwalkan!")
             }
         }
 
-        val jadwalFinal = jadwal.sortedWith(compareBy<JadwalItem> {
-            daftarHari.indexOfFirst { map ->
-                map.nama.contains(
-                    it.slot.hari.nama,
-                    ignoreCase = true
-                )
-            }
-        }.thenBy { it.slot.jamMulai })
-        return Pair(isSuccess, jadwalFinal.toList())
+        val jadwalFinal = jadwal.sortedWith(
+            compareBy<JadwalItem> { item ->
+                daftarHari.indexOfFirst { it.nama.equals(item.slot.hari.nama, ignoreCase = true) }
+            }.thenBy { it.slot.jamMulai }
+        )
+
+        return Pair(isSuccess, jadwalFinal)
     }
 
-    // Tampilkan hasil jadwal dengan analisis distribusi
+    // ─── Display ─────────────────────────────────────────────────────────────────
+
     fun tampilkanJadwal(jadwal: List<JadwalItem>, daftarRuangan: List<Ruangan>) {
         println("=".repeat(80))
         println("JADWAL MATA KULIAH")
         println("=".repeat(80))
-        println("📝 Keterangan Jam Istirahat:")
-        println("   • Senin-Kamis: Istirahat jam 12:00-13:00")
-        println("   • Jumat: Istirahat jam 11:00-13:00")
-        println("=".repeat(80))
 
         for (hari in daftarHari) {
-            val hariString = hari.nama
-            val jadwalHari = jadwal.filter { it.slot.hari.nama == hariString }
-            val jamIstirahat = if (hariString == "Jumat") "11:00-13:00" else "12:00-13:00"
+            val jadwalHari = jadwal.filter { it.slot.hari.nama == hari.nama }
+                .sortedBy { it.slot.jamMulai }
+            val jamIstirahatStr = if (hari.jamIstirahat != IntRange.EMPTY)
+                "${hari.jamIstirahat.first}:00-${hari.jamIstirahat.last + 1}:00"
+            else "—"
 
-            println("\n$hariString (${jadwalHari.size} sesi) - Istirahat: $jamIstirahat:")
-            println("-".repeat(40))
-            if (jadwalHari.isNotEmpty()) {
-                jadwalHari.sortedBy { it.slot.jamMulai }.forEach { item ->
+            println("\n${hari.nama} (${jadwalHari.size} sesi) — Istirahat: $jamIstirahatStr")
+            println("-".repeat(60))
+
+            if (jadwalHari.isEmpty()) {
+                println("  Tidak ada jadwal")
+            } else {
+                jadwalHari.forEach { item ->
                     println(
-                        "${item.slot.jamMulai}:00-${item.slot.jamSelesai}:00 | " +
-                                "${item.ruangan.nama.padEnd(12)} | " +
-                                "${item.getNamaLengkap().padEnd(30)} | " +
-                                "${item.mataKuliah.dosen.nama} (${item.mataKuliah.sks} SKS)"
+                        "  ${item.slot.jamMulai}:00-${item.slot.jamSelesai}:00 | " +
+                                "${item.ruangan.nama.padEnd(14)} | " +
+                                "${item.getNamaLengkap().padEnd(32)} | " +
+                                "${item.mataKuliah.dosen.nama} " +
+                                "(${item.mataKuliah.sksTeori + item.mataKuliah.sksPraktek} SKS)"
                     )
                 }
-
-                // Tampilkan analisis celah waktu
-                println("📊 Analisis penggunaan waktu:")
                 analyzeTimeGaps(jadwalHari, hari)
-            } else {
-                println("Tidak ada mata kuliah terjadwal")
             }
         }
 
         println("\n" + "=".repeat(80))
-        println("STATISTIK PENJADWALAN")
+        println("STATISTIK")
         println("=".repeat(80))
+        println("Total sesi: ${jadwal.size}")
+        println(
+            "MK unik: ${
+                jadwal.map { it.mataKuliah.nama }.toSet().size
+            } / ${daftarMataKuliah.size}"
+        )
 
-        // Hitung total sesi dan mata kuliah unik
-        val totalSesi = jadwal.size
-        val mataKuliahUnik = jadwal.map { it.mataKuliah.nama }.toSet().size
-        val totalMataKuliah = daftarMataKuliah.size
-
-        println("Total sesi terjadwal: $totalSesi")
-        println("Mata kuliah unik terjadwal: $mataKuliahUnik dari $totalMataKuliah")
-
-        // Distribusi per hari
-        println("\nDistribusi Sesi per Hari:")
+        println("\nDistribusi per hari:")
         daftarHari.forEach { hari ->
-            val hari = hari.nama
-            val count = jadwal.count { it.slot.hari.nama == hari }
-            println("$hari: $count sesi")
+            val c = jadwal.count { it.slot.hari.nama == hari.nama }
+            println("  ${hari.nama}: $c sesi")
         }
 
-        // Statistik mata kuliah 2x seminggu
-        val mk2xSeminggu = jadwal.filter { it.mataKuliah.pertemuanPerMinggu == 2 }
-        if (mk2xSeminggu.isNotEmpty()) {
-            println("\nMata Kuliah 2x Seminggu:")
-            mk2xSeminggu.groupBy { it.mataKuliah.nama }.forEach { (nama, sesi) ->
-                if (sesi.size == 2) {
-                    val hari1 = sesi[0].slot.hari
-                    val hari2 = sesi[1].slot.hari
-                    println("$nama: $hari1 & $hari2")
-                } else {
-                    println("$nama: ${sesi.size}/2 sesi terjadwal ⚠")
-                }
-            }
+        println("\nPenggunaan ruangan:")
+        daftarRuangan.forEach { r ->
+            println("  ${r.nama}: ${jadwal.count { it.ruangan == r }} sesi")
         }
 
-        // Statistik ruangan
-        println("\nPenggunaan Ruangan:")
-        daftarRuangan.forEach { ruangan ->
-            val count = jadwal.count { it.ruangan == ruangan }
-            println("$ruangan: $count sesi")
-        }
-
-        // Statistik dosen
-        println("\nBeban Mengajar Dosen:")
+        println("\nBeban dosen:")
         jadwal.groupBy { it.mataKuliah.dosen.nama }.forEach { (dosen, items) ->
-            val totalSKS = items.map { it.mataKuliah }.toSet().sumOf { it.sks }
-            val totalSesi = items.size
-            println("$dosen: $totalSesi sesi, $totalSKS SKS")
+            val sks = items.map { it.mataKuliah }.toSet().sumOf { it.sksTeori + it.sksPraktek }
+            println("  $dosen: ${items.size} sesi, $sks SKS")
         }
 
-        // Cek mata kuliah yang belum terjadwal lengkap
-        println("\n⚠ Status Penjadwalan per Mata Kuliah:")
+        println("\nStatus per MK:")
         daftarMataKuliah.forEach { mk ->
-            val sesiTerjadwal = jadwal.count { it.mataKuliah == mk }
-            val sesiDibutuhkan = mk.pertemuanPerMinggu
-
-            when {
-                sesiTerjadwal == sesiDibutuhkan -> println("✓ ${mk.nama}: Lengkap ($sesiTerjadwal/$sesiDibutuhkan)")
-                sesiTerjadwal > 0 -> println("⚠ ${mk.nama}: Tidak lengkap ($sesiTerjadwal/$sesiDibutuhkan)")
-                else -> println("✗ ${mk.nama}: Belum terjadwal ($sesiTerjadwal/$sesiDibutuhkan)")
+            val terjadwal = jadwal.count { it.mataKuliah == mk }
+            val dibutuhkan = mk.pertemuanPerMinggu
+            val status = when {
+                terjadwal == dibutuhkan -> "✓"
+                terjadwal > 0 -> "⚠ tidak lengkap"
+                else -> "✗ belum terjadwal"
             }
+            println("  $status ${mk.nama}: $terjadwal/$dibutuhkan")
         }
     }
 
-    // Fungsi baru untuk menganalisis celah waktu dan memberikan saran
-    private fun analyzeTimeGaps(
-        jadwalHari: List<JadwalItem>,
-        hari: Hari
-    ) {
-        if (jadwalHari.isEmpty()) {
-            println("   📭 Tidak ada jadwal")
-            return
-        }
+    private fun analyzeTimeGaps(jadwalHari: List<JadwalItem>, hari: Hari) {
+        val sorted = jadwalHari.sortedBy { it.slot.jamMulai }
+        val gaps = mutableListOf<Triple<Int, Int, Int>>()
 
-        val sortedJadwal = jadwalHari.sortedBy { it.slot.jamMulai }
-        val gaps = mutableListOf<Triple<Int, Int, Int>>() // start, end, duration
-
-        val jamMulaiHari = hari.jamPelajaran.first()
-        val jamAkhirHari = hari.jamPelajaran.last()
-
-        // Break opsional
-
-        val breakRange: IntRange = hari.jamIstirahat
-
-        fun addGapConsideringBreak(start: Int, end: Int) {
+        fun addGap(start: Int, end: Int) {
             if (start >= end) return
-
-            if (breakRange != IntRange.EMPTY &&
-                start < breakRange.last &&
-                end > breakRange.first
-            ) {
-                // gap sebelum break
-                if (start < breakRange.first) {
-                    gaps.add(
-                        Triple(start, breakRange.first, breakRange.first - start)
-                    )
-                }
-                // gap setelah break
-                if (end > breakRange.last) {
-                    gaps.add(
-                        Triple(breakRange.last, end, end - breakRange.last)
-                    )
-                }
+            val br = hari.jamIstirahat
+            if (br != IntRange.EMPTY && start < br.last + 1 && end > br.first) {
+                if (start < br.first) gaps.add(Triple(start, br.first, br.first - start))
+                if (end > br.last + 1) gaps.add(Triple(br.last + 1, end, end - br.last - 1))
             } else {
                 gaps.add(Triple(start, end, end - start))
             }
         }
 
-        // Gap dari awal hari
-        addGapConsideringBreak(
-            jamMulaiHari,
-            sortedJadwal.first().slot.jamMulai
-        )
+        val firstJam = hari.jamPelajaran.first()
+        val lastJam = hari.jamPelajaran.last() + 1
 
-        // Gap antar slot
-        for (i in 0..<sortedJadwal.size - 1) {
-            val currentEnd = sortedJadwal[i].slot.jamSelesai
-            val nextStart = sortedJadwal[i + 1].slot.jamMulai
-            addGapConsideringBreak(currentEnd, nextStart)
-        }
+        addGap(firstJam, sorted.first().slot.jamMulai)
+        for (i in 0 until sorted.lastIndex)
+            addGap(sorted[i].slot.jamSelesai, sorted[i + 1].slot.jamMulai)
+        addGap(sorted.last().slot.jamSelesai, lastJam)
 
-        // Gap sampai akhir hari
-        addGapConsideringBreak(
-            sortedJadwal.last().slot.jamSelesai,
-            jamAkhirHari
-        )
-
-        // ===== OUTPUT GAP =====
         if (gaps.isNotEmpty()) {
-            val totalGapTime = gaps.sumOf { it.third }
-            println("   ⚠️ Total celah waktu: $totalGapTime jam")
-
-            gaps.forEach { (start, end, duration) ->
-                when {
-                    duration >= 4 ->
-                        println("   🔴 Celah besar: $start:00-$end:00 ($duration jam)")
-
-                    duration >= 2 ->
-                        println("   🟡 Celah sedang: $start:00-$end:00 ($duration jam)")
-
-                    else ->
-                        println("   🟢 Celah kecil: $start:00-$end:00 ($duration jam)")
+            val total = gaps.sumOf { it.third }
+            println("  ⚡ Celah total: $total jam")
+            gaps.forEach { (s, e, d) ->
+                val mark = when {
+                    d >= 4 -> "🔴"; d >= 2 -> "🟡"; else -> "🟢"
                 }
-            }
-
-            if (totalGapTime >= 4) {
-                println("   💡 Saran: Pertimbangkan penjadwalan yang lebih kompak")
+                println("    $mark $s:00-$e:00 ($d jam)")
             }
         } else {
-            println("   ✅ Tidak ada celah waktu - Optimal!")
+            println("  ✅ Tidak ada celah — optimal!")
         }
 
-        // ===== EFISIENSI =====
-        val firstStart = sortedJadwal.first().slot.jamMulai
-        val lastEnd = sortedJadwal.last().slot.jamSelesai
-
-        val usedTime = sortedJadwal.sumOf {
-            it.slot.jamSelesai - it.slot.jamMulai
-        }
-
-        val totalSpan = lastEnd - firstStart
-
-        val breakTimeInSpan =
-            if (breakRange != IntRange.EMPTY &&
-                firstStart < breakRange.last &&
-                lastEnd > breakRange.first
-            ) {
-                minOf(lastEnd, breakRange.last) -
-                        maxOf(firstStart, breakRange.first)
-            } else 0
-
-        val effectiveSpan = totalSpan - breakTimeInSpan
-
-        val efficiency =
-            if (effectiveSpan > 0)
-                (usedTime.toDouble() / effectiveSpan * 100).toInt()
-            else 100
-
-        println(
-            "   📊 Efisiensi waktu: $usedTime/$effectiveSpan jam ($efficiency%)" +
-                    (breakRange?.let {
-                        " [Istirahat: ${it.first}:00-${it.last}:00]"
-                    } ?: " [Tanpa istirahat]")
-        )
+        val usedTime = sorted.sumOf { it.slot.jamSelesai - it.slot.jamMulai }
+        val span = sorted.last().slot.jamSelesai - sorted.first().slot.jamMulai
+        val brInSpan = if (hari.jamIstirahat != IntRange.EMPTY) {
+            (maxOf(sorted.first().slot.jamMulai, hari.jamIstirahat.first)
+                    until minOf(sorted.last().slot.jamSelesai, hari.jamIstirahat.last + 1)).count()
+        } else 0
+        val eff = if (span - brInSpan > 0) usedTime * 100 / (span - brInSpan) else 100
+        println("  📊 Efisiensi: $usedTime/${span - brInSpan} jam ($eff%)")
     }
 
+    // ─── JSON conversion ─────────────────────────────────────────────────────────
 
     fun jadwalToJson(
         isSuccess: Boolean,
         jadwal: List<JadwalItem>,
         semester: String
     ): Jadwal {
-
-        val hariMap = mapOf(
-            "senin" to 1,
-            "selasa" to 2,
-            "rabu" to 3,
-            "kamis" to 4,
-            "jumat" to 5,
-            "sabtu" to 6,
-            "minggu" to 7
+        val hariOrder = mapOf(
+            "senin" to 1, "selasa" to 2, "rabu" to 3,
+            "kamis" to 4, "jumat" to 5, "sabtu" to 6, "minggu" to 7
         )
 
-        // 1️⃣ Transform sekali
-        val jadwalData = jadwal.map { value ->
+        val jadwalData = jadwal.map { item ->
             JadwalDataItem(
-                namaJadwal = value.mataKuliah.nama,
-                hari = value.slot.hari.nama,
-                jamMulai = value.slot.jamMulai,
-                jamSelesai = value.slot.jamSelesai,
-                namaDosen = value.mataKuliah.dosen.nama,
-                semester = value.mataKuliah.semester,
-                sks = value.mataKuliah.sks,
-                namaRuangan = value.ruangan.nama
+                namaJadwal = item.getNamaLengkap(),      // gunakan nama lengkap termasuk "(Pertemuan X)"
+                hari = item.slot.hari.nama,
+                jamMulai = item.slot.jamMulai,
+                jamSelesai = item.slot.jamSelesai,
+                namaDosen = item.mataKuliah.dosen.nama,
+                semester = item.mataKuliah.semester,
+                sks = item.mataKuliah.sksTeori + item.mataKuliah.sksPraktek,  // ✅ fix: sksTeori + sksPraktek
+                namaRuangan = item.ruangan.nama
             )
         }
 
-        // 2️⃣ Group by Ruangan (urut alfabet ruangan)
-        val groupedByRuangan =
-            jadwalData
-                .groupBy { it.namaRuangan }
-                .entries
-                .sortedBy { it.key }
-                .associate { it.key to it.value }.map { (ruangan, items) ->
-                    JadwalPerItem(ruangan, items)
-                }
+        val groupedByRuangan = jadwalData
+            .groupBy { it.namaRuangan }
+            .entries
+            .sortedBy { it.key }
+            .map { (ruangan, items) -> JadwalPerItem(ruangan, items) }
 
-
-        // 3️⃣ Group by Hari (urut sesuai urutan minggu)
-        val groupedByHari =
-            jadwalData
-                .groupBy { it.hari }
-                .toList()
-                .sortedBy { (hari, _) ->
-                    hariMap[hari.lowercase()] ?: Int.MAX_VALUE
-                }
-                .map { (hari, items) ->
-                    JadwalPerItem(hari, items)
-                }
-
+        val groupedByHari = jadwalData
+            .groupBy { it.hari }
+            .entries
+            .sortedBy { (hari, _) -> hariOrder[hari.lowercase()] ?: Int.MAX_VALUE }
+            .map { (hari, items) -> JadwalPerItem(hari, items) }
 
         return Jadwal(
             isSuccess = isSuccess,
@@ -770,5 +555,4 @@ class WelchPowellAlgorithm {
             semester = semester
         )
     }
-
 }

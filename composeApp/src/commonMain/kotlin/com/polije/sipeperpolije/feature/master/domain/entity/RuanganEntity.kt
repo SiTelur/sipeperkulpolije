@@ -1,7 +1,8 @@
 package com.polije.sipeperpolije.feature.master.domain.entity
 
+import com.polije.sipeperpolije.core.algoritm.TipePenggunaan
 import com.polije.sipeperpolije.feature.master.data.model.RuanganModel
 
-data class RuanganEntity(val id: Int, val nama: String, val isWorkshop: Boolean)
+data class RuanganEntity(val id: Int, val nama: String, val tipeRuangan: List<TipePenggunaan>)
 
-fun RuanganEntity.toModel(): RuanganModel = RuanganModel(id, nama, isWorkshop)
+fun RuanganEntity.toModel(): RuanganModel = RuanganModel(id, nama, tipeRuangan)
