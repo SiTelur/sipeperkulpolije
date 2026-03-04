@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndSelectAll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -62,12 +62,12 @@ fun UpdateMataKuliahModal(
     listDosen: List<DosenUI>,
     onSave: (nama: String, kode: String, sksTeori: Int, sksPraktek: Int, semester: Int, idDosen: Int?, isActive: Boolean) -> Unit
 ) {
-    val namaMataKuliahState = TextFieldState(initialText = initialMataKuliah)
-    val kodeMataKuliahState = TextFieldState(initialText = initialKodeMataKuliah)
-    val namaDosenState = TextFieldState()
-    val sksTeoriState = TextFieldState("$initialSKSTeori")
-    val sksPraktekState = TextFieldState("$initialSKSPraktek")
-    val semesterState = TextFieldState("Semester ke $initialSemester")
+    val namaMataKuliahState = rememberTextFieldState(initialText = initialMataKuliah)
+    val kodeMataKuliahState = rememberTextFieldState(initialText = initialKodeMataKuliah)
+    val namaDosenState = rememberTextFieldState()
+    val sksTeoriState = rememberTextFieldState("$initialSKSTeori")
+    val sksPraktekState = rememberTextFieldState("$initialSKSPraktek")
+    val semesterState = rememberTextFieldState("Semester ke $initialSemester")
     var expandedSks by remember { mutableStateOf(false) }
     var expandedSemester by remember { mutableStateOf(false) }
     var expandedDosen by remember { mutableStateOf(false) }

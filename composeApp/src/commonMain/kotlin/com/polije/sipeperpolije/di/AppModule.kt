@@ -34,7 +34,7 @@ import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmo
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.viewmodel.JadwalViewModel
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.viewmodel.DetailMataKuliahViewModel
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahViewModel
-import com.polije.sipeperpolije.feature.master.presentation.settings.hari.viewmodel.HariSettingsViewModel
+import com.polije.sipeperpolije.feature.master.presentation.settings.hari.edit.viewmodel.HariSettingsViewModel
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.FlowType
 import io.github.jan.supabase.createSupabaseClient
