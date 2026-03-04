@@ -1,7 +1,7 @@
 package com.polije.sipeperpolije.feature.master.domain.entity
 
 import com.polije.sipeperpolije.feature.master.data.model.HariModel
-import com.polije.sipeperpolije.feature.master.presentation.settings.viewmodel.HariUI
+import com.polije.sipeperpolije.feature.master.presentation.settings.hari.viewmodel.HariUI
 
 data class HariEntity(
     val id: Int = 0,

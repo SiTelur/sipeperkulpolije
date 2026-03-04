@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.settings.viewmodel
+package com.polije.sipeperpolije.feature.master.presentation.settings.hari.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SettingsViewModel(private val listHariUseCase: ListHariUseCase) : ViewModel() {
+class HariSettingsViewModel(private val listHariUseCase: ListHariUseCase) : ViewModel() {
     private val _settings = MutableStateFlow(SettingsState())
     val settings: StateFlow<SettingsState> = _settings.asStateFlow()
 
@@ -21,9 +21,9 @@ class SettingsViewModel(private val listHariUseCase: ListHariUseCase) : ViewMode
     private fun fetchSettings() {
         _settings.update { it.copy(isLoading = true) }
         viewModelScope.launch {
-            listHariUseCase().onSuccess {
+            listHariUseCase().onSuccess { haris ->
                 _settings.value =
-                    SettingsState(isLoading = false, listOfHari = it.map { it.toUI() })
+                    SettingsState(isLoading = false, listOfHari = haris.map { it.toUI() })
             }.onFailure {
                 _settings.value =
                     SettingsState(isLoading = false)

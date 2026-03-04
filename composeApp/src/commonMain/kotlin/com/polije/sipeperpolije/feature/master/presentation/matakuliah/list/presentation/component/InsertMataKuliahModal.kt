@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.setTextAndSelectAll
 import androidx.compose.foundation.verticalScroll
@@ -29,6 +30,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,7 +47,6 @@ import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel
 fun InsertMataKuliahModal(
     modalBottomSheetState: SheetState,
     onDismiss: () -> Unit,
-    onDosenSearch: (String) -> Unit,
     listDosen: List<DosenUI>,
     onSave: (nama: String, kode: String, sksTeori: Int, sksPraktek: Int, semester: Int, idDosen: Int?, isActive: Boolean, namaDosen: String?) -> Unit
 ) {
@@ -66,6 +67,17 @@ fun InsertMataKuliahModal(
     var sksPraktekInsert = 0
     var semester = 0
     var idDosen: Int? = null
+
+    val isFormValid by remember {
+        derivedStateOf {
+            namaMataKuliahState.text.isNotBlank() &&
+                    kodeMataKuliahState.text.isNotBlank() &&
+                    namaDosenState.text.isNotBlank() &&
+                    sksTeori.text.toString().toIntOrNull() != null &&
+                    sksPraktek.text.toString().toIntOrNull() != null &&
+                    semesterState.text.toString().toIntOrNull() != null
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -119,103 +131,84 @@ fun InsertMataKuliahModal(
                             namaDosenState.setTextAndSelectAll(it.nama)
                         })
 
+                    ExposedDropdownMenuBox(
+                        expanded = expandedSemester,
+                        onExpandedChange = { expandedSemester = !expandedSemester },
+                    ) {
+                        OutlinedTextField(
+                            state = semesterState,
+                            readOnly = true,
+                            label = { Text("Semester") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSemester)
+                            },
+                            modifier = Modifier.menuAnchor(
+                                ExposedDropdownMenuAnchorType.PrimaryEditable,
+                                enabled = true
+                            ).fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expandedSemester,
+                            onDismissRequest = { expandedSemester = false }
+                        ) {
+                            semesterOptions.forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text("Semester ke $option") },
+                                    onClick = {
+                                        semesterState.setTextAndSelectAll("Semester ke $option")
+                                        semester = option
+                                        expandedSemester = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        ExposedDropdownMenuBox(
-                            expanded = expandedSks,
-                            onExpandedChange = { expandedSks = !expandedSks },
+                        OutlinedTextField(
+                            state = sksTeori,
+                            label = { Text("Jumlah SKS Praktek") },
+                            inputTransformation = InputTransformation {
+                                val filtered = asCharSequence().filter { it.isDigit() }.take(1)
+                                replace(0, length, filtered)
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f)
-                        ) {
-                            OutlinedTextField(
-                                state = sksTeori,
-                                readOnly = true,
-                                label = { Text("Jumlah SKS") },
-                                trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSks)
-                                },
-                                modifier = Modifier.menuAnchor(
-                                    ExposedDropdownMenuAnchorType.PrimaryEditable,
-                                    enabled = true
-                                ).fillMaxWidth()
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expandedSks,
-                                onDismissRequest = { expandedSks = false }
-                            ) {
-                                sksOptions.forEach { option ->
-                                    DropdownMenuItem(
-                                        text = { Text("$option SKS") },
-                                        onClick = {
-                                            sksTeori.setTextAndSelectAll("$option SKS")
-                                            sksTeoriInsert = option
-                                            expandedSks = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
+                        )
 
                         OutlinedTextField(
                             state = sksPraktek,
-                            readOnly = true,
-                            label = { Text("Jumlah SKS") },
-                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                            label = { Text("Jumlah SKS Praktek") },
+                            inputTransformation = InputTransformation {
+                                val filtered = asCharSequence().filter { it.isDigit() }.take(1)
+                                replace(0, length, filtered)
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f)
                         )
                     }
                 }
 
+                Spacer(Modifier.height(8.dp))
 
-                ExposedDropdownMenuBox(
-                    expanded = expandedSemester,
-                    onExpandedChange = { expandedSemester = !expandedSemester },
-                    modifier = Modifier.weight(1f)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedTextField(
-                        state = semesterState,
-                        readOnly = true,
-                        label = { Text("Semester") },
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSemester)
-                        },
-                        modifier = Modifier.menuAnchor(
-                            ExposedDropdownMenuAnchorType.PrimaryEditable,
-                            enabled = true
-                        ).fillMaxWidth()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = expandedSemester,
-                        onDismissRequest = { expandedSemester = false }
-                    ) {
-                        semesterOptions.forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text("Semester ke $option") },
-                                onClick = {
-                                    semesterState.setTextAndSelectAll("Semester ke $option")
-                                    semester = option
-                                    expandedSemester = false
-                                }
-                            )
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Aktif")
-                        Switch(
-                            checked = isActive,
-                            onCheckedChange = { checked -> isActive = checked })
-                    }
+                    Text("Aktif")
+                    Switch(
+                        checked = isActive,
+                        onCheckedChange = { checked -> isActive = checked })
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Button(
+                    enabled = isFormValid,
                     onClick = {
                         onSave(
                             namaMataKuliahState.text.toString(),

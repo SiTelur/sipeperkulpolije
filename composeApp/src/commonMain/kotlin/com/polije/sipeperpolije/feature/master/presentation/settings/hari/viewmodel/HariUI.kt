@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.master.presentation.settings.viewmodel
+package com.polije.sipeperpolije.feature.master.presentation.settings.hari.viewmodel
 
 class HariUI(
     val id: Int,

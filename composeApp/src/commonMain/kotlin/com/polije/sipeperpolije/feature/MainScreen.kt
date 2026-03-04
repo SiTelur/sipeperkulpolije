@@ -26,7 +26,7 @@ import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.JadwalSc
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.screen.MataKuliahDetailScreen
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.screens.MataKuliahScreen
 import com.polije.sipeperpolije.feature.master.presentation.settings.SettingsScreen
-import com.polije.sipeperpolije.feature.master.presentation.settings.edit.EditHariScreen
+import com.polije.sipeperpolije.feature.master.presentation.settings.hari.edit.EditHariScreen
 import kotlinx.serialization.Serializable
 
 @Composable

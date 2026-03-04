@@ -186,9 +186,10 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                         "kode",
                         "nama",
                         "semester",
-                        "jumlah_sks",
-                        "id_pengampu_pertama",
-                        "is_workshop"
+                        "sks_teori",
+                        "sks_praktek",
+                        "id_pengampu",
+                        "is_active"
                     )
                 )
             }
@@ -256,9 +257,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                         "jam_mulai_istirahat",
                         "jam_selesai_istirahat"
                     )
-                ) {
-
-                }.decodeList<HariModel>().map {
+                ).decodeList<HariModel>().map {
                     it.toEntity()
                 }
             data

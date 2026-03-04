@@ -203,13 +203,6 @@ fun MataKuliahScreen(
                             }
                         }
                     },
-                    onDosenSearch = { value ->
-                        listMataKuliahViewModel.onAction(
-                            ListMataKuliahAction.OnSearcDosen(
-                                value
-                            )
-                        )
-                    },
                     listDosen = state.result
                 )
             }

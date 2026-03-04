@@ -33,6 +33,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,6 +79,17 @@ fun UpdateMataKuliahModal(
     var sksPraktek = initialSKSPraktek
     var semester = initialSemester
     var idDosen: Int? = initialIDDosen
+
+    val isFormValid by remember {
+        derivedStateOf {
+            namaMataKuliahState.text.isNotBlank() &&
+                    kodeMataKuliahState.text.isNotBlank() &&
+                    namaDosenState.text.isNotBlank() &&
+                    sksTeoriState.text.toString().toIntOrNull() != null &&
+                    sksPraktekState.text.toString().toIntOrNull() != null &&
+                    semesterState.text.toString().toIntOrNull() != null
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -211,6 +223,7 @@ fun UpdateMataKuliahModal(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
+                    enabled = isFormValid,
                     onClick = {
                         onSave(
                             namaMataKuliahState.text.toString(),
