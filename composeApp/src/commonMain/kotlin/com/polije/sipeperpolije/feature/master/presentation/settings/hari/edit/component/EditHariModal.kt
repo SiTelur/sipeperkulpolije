@@ -55,7 +55,6 @@ fun EditHariModal(
 
     val isFormValid by remember {
         derivedStateOf {
-
             val mulai = jamMulai.text.toString().toIntOrNull()
             val selesai = jamSelesai.text.toString().toIntOrNull()
 

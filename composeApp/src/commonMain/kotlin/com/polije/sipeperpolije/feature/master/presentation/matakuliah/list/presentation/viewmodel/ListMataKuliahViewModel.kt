@@ -3,12 +3,11 @@ package com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.pre
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.polije.sipeperpolije.feature.master.domain.usecase.InsertMataKuliahUseCase
-import com.polije.sipeperpolije.feature.master.domain.usecase.ListMataKuliahPagingUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.ListMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.SearchDosenUseCase
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.toUI
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahEvent.OnSaveFailure
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahEvent.OnSaveSuccess
-import com.polije.sipeperpolije.utils.Paginator
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +18,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(FlowPreview::class)
 class ListMataKuliahViewModel(
-    private val listMataKuliahPagingUseCase: ListMataKuliahPagingUseCase,
+    private val listMataKuliahUseCase: ListMataKuliahUseCase,
     private val insertMataKuliahUseCase: InsertMataKuliahUseCase,
     val searchDosenUseCase: SearchDosenUseCase
 ) :
@@ -29,53 +28,27 @@ class ListMataKuliahViewModel(
     private val _event = Channel<ListMataKuliahEvent>()
     val events = _event.receiveAsFlow()
 
-    private val pageSize = 10
-    private val paginator = Paginator(
-        initialKey = 0,
-        onLoadUpdated = { isLoading ->
-            _state.update { it.copy(isLoadingMore = isLoading) }
-        },
-        onRequest = { currentKey ->
-            listMataKuliahPagingUseCase(
-                currentKey,
-                pageSize
-            ).map { value -> value.map { it.toUI() } }
-        },
-        getNextKey = { currentKey, result ->
-            currentKey + result.size
-        },
-        onError = { throwable ->
-            _state.update { it.copy(hasError = throwable?.message) }
-//            _event.send(ListDosenEvent.OnLoadError(throwable?.message ?: "Terjadi error"))
-        },
-        onSuccess = { items, newKey ->
-            _state.update {
-                it.copy(
-                    mataKuliahs = it.mataKuliahs + items
-                )
-            }
-
-        }, endReached = { _, response -> response.isEmpty() }
-    )
-
     init {
-        loadNextItems()
+        loadItems()
         initiateDosenList()
     }
 
-    fun loadNextItems() {
+    fun loadItems() {
         viewModelScope.launch {
-            paginator.loadNextItems()
+            _state.update { it.copy(isLoading = true) }
+            listMataKuliahUseCase().onSuccess { mataKuliah ->
+                _state.update {
+                    it.copy(
+                        mataKuliahs = mataKuliah.map { it.toUI() },
+                        isLoading = false
+                    )
+                }
+            }.onFailure {
+                _event.send(ListMataKuliahEvent.OnLoadError(it.message ?: "Terjadi error"))
+            }
         }
     }
 
-    fun resetItems() {
-        viewModelScope.launch {
-            paginator.reset()
-            _state.update { it.copy(mataKuliahs = emptyList()) }
-            paginator.loadNextItems()
-        }
-    }
 
     private fun initiateDosenList() {
         viewModelScope.launch {
@@ -102,9 +75,8 @@ class ListMataKuliahViewModel(
                             isActive = listMataKuliahAction.isActive
                         ).toEntity()
                     ).onSuccess {
-                        resetItems()
                         _event.send(OnSaveSuccess(it.toUI()))
-                        loadNextItems()
+                        loadItems()
                     }.onFailure {
                         _event.send(
                             OnSaveFailure(

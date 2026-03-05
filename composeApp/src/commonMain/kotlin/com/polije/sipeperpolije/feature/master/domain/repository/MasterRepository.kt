@@ -9,7 +9,7 @@ import com.polije.sipeperpolije.feature.master.domain.entity.RuanganEntity
 interface MasterRepository {
     suspend fun getDosenPaging(offset: Int, limit: Int): Result<List<DosenEntity>>
     suspend fun getDetailDosenMataKuliah(id: Int): Result<List<MataKuliahEntity>>
-    suspend fun getMataKuliahPaging(offset: Int, limit: Int): Result<List<MataKuliahEntity>>
+    suspend fun getMataKuliah(): Result<List<MataKuliahEntity>>
     suspend fun updateDosen(dosen: DosenEntity): Result<Boolean>
     suspend fun getDetailMataKuliah(id: Int): Result<MataKuliahEntity>
     suspend fun updateMataKuliah(mataKuliah: MataKuliahEntity): Result<Boolean>

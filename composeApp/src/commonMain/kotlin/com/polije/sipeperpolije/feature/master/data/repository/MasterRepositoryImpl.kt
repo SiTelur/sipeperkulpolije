@@ -60,21 +60,12 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
         return Result.success(response)
     }
 
-    override suspend fun getMataKuliahPaging(
-        offset: Int,
-        limit: Int
-    ): Result<List<MataKuliahEntity>> {
+    override suspend fun getMataKuliah(): Result<List<MataKuliahEntity>> {
         val response = try {
-            val safeOffset = offset.coerceAtLeast(0)
-            val safeLimit = limit.coerceAtLeast(1)
 
             val data = supabase
                 .from("mata_kuliah_view")
                 .select {
-                    range(
-                        from = safeOffset.toLong(),
-                        to = (safeOffset + safeLimit - 1).toLong()
-                    )
                     order("nama", Order.ASCENDING)
                 }
                 .decodeList<MataKuliahModel>().map { it.toEntity() }

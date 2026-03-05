@@ -31,7 +31,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -45,7 +44,6 @@ import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.pres
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahViewModel
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.MataKuliahUI
 import com.polije.sipeperpolije.utils.ObserveAsEvent
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -110,25 +108,12 @@ fun MataKuliahScreen(
     LaunchedEffect(resultFromDetail) {
         resultFromDetail?.let {
             if (it) {
-                listMataKuliahViewModel.resetItems()
+                listMataKuliahViewModel.loadItems()
             }
         }
     }
 
     val lazyListState = rememberLazyListState()
-
-    LaunchedEffect(state.mataKuliahs) {
-        snapshotFlow {
-            lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-        }.distinctUntilChanged().collect {
-            if (it == state.mataKuliahs.lastIndex) {
-                listMataKuliahViewModel.loadNextItems()
-            }
-        }
-    }
-
-
-
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackBarHost) },
@@ -159,17 +144,19 @@ fun MataKuliahScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(state.mataKuliahs, key = { it.id }) { item ->
-                MataKuliahListItem(mataKuliah = item, onItemClick = { onItemClick(item) })
-            }
-
-            if (state.isLoadingMore) {
+            if (state.isLoading) {
                 item {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
                 }
             }
+
+            items(state.mataKuliahs, key = { it.id }) { item ->
+                MataKuliahListItem(mataKuliah = item, onItemClick = { onItemClick(item) })
+            }
+
+
         }
 
         when {
