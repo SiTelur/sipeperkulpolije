@@ -48,7 +48,8 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    navigateToEditHari: () -> Unit
+    navigateToEditHari: () -> Unit,
+    navigateToEditRuangan: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -154,7 +155,8 @@ fun SettingsScreen(
                 Card(
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    modifier = Modifier.clickable { navigateToEditRuangan() }
                 ) {
                     Column(Modifier.padding(20.dp)) {
                         Row(

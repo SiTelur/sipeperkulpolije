@@ -27,6 +27,7 @@ import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.sc
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.screens.MataKuliahScreen
 import com.polije.sipeperpolije.feature.master.presentation.settings.SettingsScreen
 import com.polije.sipeperpolije.feature.master.presentation.settings.hari.edit.EditHariScreen
+import com.polije.sipeperpolije.feature.master.presentation.settings.ruangan.edit.EditRuanganScreen
 import kotlinx.serialization.Serializable
 
 @Composable
@@ -117,7 +118,11 @@ fun MainScreen(
             }
 
             composable(DashboardRoute.Settings.route) {
-                SettingsScreen { navController.navigate(EditJadwalHariScreen) }
+                SettingsScreen(navigateToEditHari = {
+                    navController.navigate(EditJadwalHariScreen)
+                }, navigateToEditRuangan = {
+                    navController.navigate(EditJadwalRuanganScreen)
+                })
             }
 
             composable<DetailDosen> { backStackEntry ->
@@ -179,6 +184,12 @@ fun MainScreen(
                 }
             }
 
+            composable<EditJadwalRuanganScreen> {
+                EditRuanganScreen() {
+
+                }
+            }
+
         }
 
         NavHost(navController = navController, graph = graph)
@@ -214,3 +225,6 @@ data class DetailJadwal(val id: Int)
 
 @Serializable
 object EditJadwalHariScreen
+
+@Serializable
+object EditJadwalRuanganScreen
