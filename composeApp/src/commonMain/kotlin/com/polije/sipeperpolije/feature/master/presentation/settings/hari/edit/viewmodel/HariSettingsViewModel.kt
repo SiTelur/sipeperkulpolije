@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.polije.sipeperpolije.feature.master.domain.entity.toUI
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListHariUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.UpdateJamHariUseCase
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,12 +13,15 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class HariSettingsViewModel(private val listHariUseCase: ListHariUseCase) : ViewModel() {
+class HariSettingsViewModel(
+    private val listHariUseCase: ListHariUseCase,
+    private val updateHariUseCase: UpdateJamHariUseCase
+) : ViewModel() {
     private val _settings = MutableStateFlow(HariState())
     val settings: StateFlow<HariState> = _settings.asStateFlow()
 
-    private val _action = Channel<HariAction>()
-    val action = _action.receiveAsFlow()
+    private val _events = Channel<HariEvent>()
+    val events = _events.receiveAsFlow()
 
     init {
         fetchSettings()
@@ -45,6 +49,18 @@ class HariSettingsViewModel(private val listHariUseCase: ListHariUseCase) : View
             HariAction.OnDismissHari -> {
                 _settings.update { it.copy(selectedHari = null) }
             }
+
+            is HariAction.OnUpdateHari -> {
+                viewModelScope.launch {
+                    updateHariUseCase(action.hari.toEntity()).onSuccess {
+                        fetchSettings()
+                        _events.send(HariEvent.OnUpdateSuccess)
+                    }.onFailure {
+                        _events.send(HariEvent.OnUpdateFailure(it.message ?: "Unknown error"))
+                    }
+                }
+            }
+
         }
     }
 }

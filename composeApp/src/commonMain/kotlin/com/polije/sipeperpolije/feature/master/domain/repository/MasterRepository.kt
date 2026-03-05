@@ -23,8 +23,6 @@ interface MasterRepository {
     suspend fun getHari(): Result<List<HariEntity>>
     suspend fun updateHari(hari: HariEntity): Result<Boolean>
     suspend fun deleteHari(id: Int): Result<Boolean>
-    suspend fun insertHari(hari: HariEntity): Result<Boolean>
-
     suspend fun getRuangan(): Result<List<RuanganEntity>>
     suspend fun updateRuangan(ruangan: RuanganEntity): Result<Boolean>
     suspend fun deleteRuangan(id: Int): Result<Boolean>

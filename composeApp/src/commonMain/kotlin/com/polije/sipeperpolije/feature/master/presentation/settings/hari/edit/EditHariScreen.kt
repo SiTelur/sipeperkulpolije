@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -34,9 +35,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.polije.sipeperpolije.LocalSnackbarHostState
 import com.polije.sipeperpolije.feature.master.presentation.settings.hari.edit.component.EditHariModal
 import com.polije.sipeperpolije.feature.master.presentation.settings.hari.edit.viewmodel.HariAction
+import com.polije.sipeperpolije.feature.master.presentation.settings.hari.edit.viewmodel.HariEvent
 import com.polije.sipeperpolije.feature.master.presentation.settings.hari.edit.viewmodel.HariSettingsViewModel
+import com.polije.sipeperpolije.utils.ObserveAsEvent
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -47,8 +51,23 @@ fun EditHariScreen(
     onBackButtonPressed: () -> Unit
 ) {
     val state by hariSettingsViewModel.settings.collectAsStateWithLifecycle()
+    val snackbarHost = LocalSnackbarHostState.current
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
+
+    ObserveAsEvent(hariSettingsViewModel.events){ event ->
+        when (event){
+            is HariEvent.OnUpdateSuccess -> {
+                sheetState.hide()
+            }
+
+            is HariEvent.OnUpdateFailure -> {
+                sheetState.hide()
+                snackbarHost.showSnackbar(event.message)
+            }
+
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -60,6 +79,8 @@ fun EditHariScreen(
                     }
                 }
             )
+        }, snackbarHost = {
+            SnackbarHost(snackbarHost)
         }
     ) { paddingValues ->
         LazyColumn(
@@ -99,11 +120,15 @@ fun EditHariScreen(
     state.selectedHari?.let {
         EditHariModal(
             modalBottomSheetState = sheetState,
+            id = it.id,
             initialNamaHari = it.nama,
             initialJamMulai = it.jamMulai,
             initialJamSelesai = it.jamSelesai,
             initialJamMulaiIstirahat = it.jamIstirahatMulai,
             initialJamSelesaiIstirahat = it.jamIstirahatSelesai,
+            onSave = { hariUI ->
+                hariSettingsViewModel.onAction(HariAction.OnUpdateHari(hariUI))
+            },
             onDismissRequest = {
                 hariSettingsViewModel.onAction(HariAction.OnDismissHari)
                 scope.launch {

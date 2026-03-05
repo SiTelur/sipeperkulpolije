@@ -13,9 +13,9 @@ data class HariModel(
     @SerialName("jam_selesai")
     val jamSelesai: Int,
     @SerialName("jam_mulai_istirahat")
-    val jamIstirahatMulai: Int?,
+    val jamMulaiIstirahat: Int?,
     @SerialName("jam_selesai_istirahat")
-    val jamIstirahatSelesai: Int?
+    val jamSelesaiIstirahat: Int?
 )
 
 fun HariModel.toEntity() = HariEntity(
@@ -23,7 +23,7 @@ fun HariModel.toEntity() = HariEntity(
     this.nama,
     this.jamMulai,
     this.jamSelesai,
-    this.jamIstirahatMulai,
-    this.jamIstirahatSelesai
+    this.jamMulaiIstirahat,
+    this.jamSelesaiIstirahat
 
 )

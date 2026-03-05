@@ -275,8 +275,8 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                 HariModel::nama setTo hari.nama
                 HariModel::jamMulai setTo hari.jamMulai
                 HariModel::jamSelesai setTo hari.jamSelesai
-                HariModel::jamIstirahatMulai setTo hari.jamIstirahatMulai
-                HariModel::jamIstirahatSelesai setTo hari.jamIstirahatSelesai
+                HariModel::jamMulaiIstirahat setTo hari.jamIstirahatMulai
+                HariModel::jamSelesaiIstirahat setTo hari.jamIstirahatSelesai
             }) {
                 filter {
                     eq("id", hari.id)
@@ -297,7 +297,6 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                 filter {
                     eq("id", id)
                 }
-
             }
             true
         } catch (e: Exception) {
@@ -307,16 +306,6 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
         return Result.success(response)
     }
 
-    override suspend fun insertHari(hari: HariEntity): Result<Boolean> {
-        val response = try {
-            supabase.from("hari").insert(hari.toModel())
-            true
-        } catch (e: Exception) {
-            currentCoroutineContext().ensureActive()
-            return Result.failure(e)
-        }
-        return Result.success(response)
-    }
 
     override suspend fun getRuangan(): Result<List<RuanganEntity>> {
         val response = try {
@@ -324,7 +313,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                 .select(
                     Columns.list(
                         "id", "nama",
-                        "is_workshop",
+                        "tipe_penggunaan",
                     )
                 ).decodeList<RuanganModel>().map {
                     it.toEntity()

@@ -10,7 +10,6 @@ class RuanganModel(
     val id: Int,
     val nama: String,
     @SerialName("kegunaan_ruangan")
-
     val tipeRuangan: List<TipePenggunaan>? = null
 )
 

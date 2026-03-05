@@ -25,6 +25,6 @@ fun HariEntity.toModel() = HariModel(
     nama = nama,
     jamMulai = jamMulai,
     jamSelesai = jamSelesai,
-    jamIstirahatMulai = jamIstirahatMulai,
-    jamIstirahatSelesai = jamIstirahatSelesai
+    jamMulaiIstirahat = jamIstirahatMulai,
+    jamSelesaiIstirahat = jamIstirahatSelesai
 )
