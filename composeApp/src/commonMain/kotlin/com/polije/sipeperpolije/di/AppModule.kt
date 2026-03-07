@@ -16,19 +16,23 @@ import com.polije.sipeperpolije.feature.master.data.repository.MasterRepositoryI
 import com.polije.sipeperpolije.feature.master.domain.repository.MasterRepository
 import com.polije.sipeperpolije.feature.master.domain.usecase.DeleteDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.DeleteMataKuliahUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.DeleteRuanganUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.DetailDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.GetDetailJadwalUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.GetDetailMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.InsertDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.InsertMataKuliahUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.InsertRuanganUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListDosenPagingUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListHariUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListJadwalUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListMataKuliahUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.ListRuanganUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.SearchDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.UpdateDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.UpdateJamHariUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.UpdateMataKuliahUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.UpdateRuanganUseCase
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.viewmodel.DetailDosenViewModel
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.ListDosenViewModel
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalViewModel
@@ -36,6 +40,7 @@ import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.viewmode
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.viewmodel.DetailMataKuliahViewModel
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahViewModel
 import com.polije.sipeperpolije.feature.master.presentation.settings.hari.edit.viewmodel.HariSettingsViewModel
+import com.polije.sipeperpolije.feature.master.presentation.settings.ruangan.edit.viewmodel.EditRuanganViewModel
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.FlowType
 import io.github.jan.supabase.createSupabaseClient
@@ -104,5 +109,11 @@ fun appModule() = module {
     singleOf(::ListHariUseCase)
     singleOf(::UpdateJamHariUseCase)
     viewModelOf(::HariSettingsViewModel)
+
+    singleOf(::ListRuanganUseCase)
+    singleOf(::InsertRuanganUseCase)
+    singleOf(::UpdateRuanganUseCase)
+    singleOf(::DeleteRuanganUseCase)
+    singleOf(::EditRuanganViewModel)
 }
 

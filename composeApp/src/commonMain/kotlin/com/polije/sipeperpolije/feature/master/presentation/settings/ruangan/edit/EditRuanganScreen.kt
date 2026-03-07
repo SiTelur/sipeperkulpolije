@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,7 +29,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.polije.sipeperpolije.LocalSnackbarHostState
+import com.polije.sipeperpolije.feature.master.presentation.settings.ruangan.edit.component.AddRuanganModal
+import com.polije.sipeperpolije.feature.master.presentation.settings.ruangan.edit.component.EditRuanganModal
 import com.polije.sipeperpolije.feature.master.presentation.settings.ruangan.edit.viewmodel.EditRuanganViewModel
 import com.polije.sipeperpolije.feature.master.presentation.settings.ruangan.edit.viewmodel.RuanganAction
 import com.polije.sipeperpolije.feature.master.presentation.settings.ruangan.edit.viewmodel.RuanganEvent
@@ -51,20 +57,28 @@ fun EditRuanganScreen(
 ) {
     val state by editRuanganViewModel.ruangan.collectAsStateWithLifecycle()
     val snackbarHost = LocalSnackbarHostState.current
-    val sheetState = rememberModalBottomSheetState()
+    val editSheetState = rememberModalBottomSheetState()
+    val addSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(false) }
 
     ObserveAsEvent(editRuanganViewModel.events) { event ->
         when (event) {
             is RuanganEvent.OnUpdateSuccess -> {
-                sheetState.hide()
+                editSheetState.hide()
             }
 
-            is RuanganEvent.OnUpdateFailure -> {
-                sheetState.hide()
+            is RuanganEvent.OnFailure -> {
                 snackbarHost.showSnackbar(event.message)
             }
 
+            RuanganEvent.OnDeleteSuccess -> {
+
+            }
+
+            RuanganEvent.OnInsertSuccess -> {
+
+            }
         }
     }
 
@@ -75,6 +89,13 @@ fun EditRuanganScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackButtonPressed) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        showBottomSheet = true
+                    }) {
+                        Icon(Icons.Default.Add, "Add Ruangan")
                     }
                 }
             )
@@ -106,7 +127,7 @@ fun EditRuanganScreen(
                 ClassItem(it.nama) {
                     editRuanganViewModel.onAction(RuanganAction.OnRuanganSelected(it))
                     scope.launch {
-                        sheetState.show()
+                        editSheetState.show()
                     }
                 }
             }
@@ -116,8 +137,36 @@ fun EditRuanganScreen(
         }
     }
 
-    state.selectedRuangan?.let {
+    if (showBottomSheet) {
+        AddRuanganModal(
+            modalBottomSheetState = addSheetState,
+            onSave = {
+                editRuanganViewModel.onAction(RuanganAction.OnInsertRuangan(it))
+            },
+            onDismissRequest = {
+                scope.launch {
+                    addSheetState.hide()
+                }.invokeOnCompletion {
+                    showBottomSheet = false
+                }
+            }
+        )
+    }
 
+    state.selectedRuangan?.let {
+        EditRuanganModal(
+            modalBottomSheetState = editSheetState,
+            id = it.id,
+            initialNamaRuangan = it.nama,
+            initialTipeRuangan = it.tipeRuangan, onDismissRequest = {
+                scope.launch {
+                    editSheetState.hide()
+                }.invokeOnCompletion {
+                    editRuanganViewModel.onAction(RuanganAction.OnDismissRuangan)
+                }
+            }, onSave = { ruangan ->
+                editRuanganViewModel.onAction(RuanganAction.OnUpdateRuangan(ruangan))
+            })
     }
 }
 

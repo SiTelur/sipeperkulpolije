@@ -5,7 +5,11 @@ import com.polije.sipeperpolije.feature.master.data.model.RuanganModel
 import com.polije.sipeperpolije.feature.master.presentation.settings.ruangan.edit.viewmodel.RuanganUI
 import com.polije.sipeperpolije.feature.master.presentation.settings.ruangan.edit.viewmodel.TipeRuangan
 
-data class RuanganEntity(val id: Int, val nama: String, val tipeRuangan: List<TipePenggunaan>)
+data class RuanganEntity(
+    val id: Int,
+    val nama: String,
+    val tipeRuangan: List<TipePenggunaan> = emptyList()
+)
 
 fun RuanganEntity.toModel(): RuanganModel = RuanganModel(id, nama, tipeRuangan)
 

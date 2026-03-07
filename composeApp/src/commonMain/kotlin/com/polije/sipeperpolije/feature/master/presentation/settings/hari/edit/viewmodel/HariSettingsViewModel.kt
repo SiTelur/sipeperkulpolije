@@ -54,9 +54,15 @@ class HariSettingsViewModel(
                 viewModelScope.launch {
                     updateHariUseCase(action.hari.toEntity()).onSuccess {
                         fetchSettings()
+                        _settings.update { it.copy(selectedHari = null) }
                         _events.send(HariEvent.OnUpdateSuccess)
-                    }.onFailure {
-                        _events.send(HariEvent.OnUpdateFailure(it.message ?: "Unknown error"))
+                    }.onFailure { throwable ->
+                        _settings.update { it.copy(selectedHari = null) }
+                        _events.send(
+                            HariEvent.OnUpdateFailure(
+                                throwable.message ?: "Unknown error"
+                            )
+                        )
                     }
                 }
             }

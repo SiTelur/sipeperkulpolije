@@ -186,7 +186,7 @@ fun MainScreen(
 
             composable<EditJadwalRuanganScreen> {
                 EditRuanganScreen() {
-
+                    navController.popBackStack()
                 }
             }
 

@@ -10,8 +10,8 @@ class RuanganModel(
     val id: Int,
     val nama: String,
     @SerialName("kegunaan_ruangan")
-    val tipeRuangan: List<TipePenggunaan>? = null
+    val kegunaanRuangan: List<TipePenggunaan>? = null
 )
 
 fun RuanganModel.toEntity(): RuanganEntity =
-    RuanganEntity(this.id, this.nama, this.tipeRuangan ?: listOf())
+    RuanganEntity(this.id, this.nama, this.kegunaanRuangan ?: listOf())

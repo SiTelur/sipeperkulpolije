@@ -7,5 +7,6 @@ sealed class RuanganAction {
         val ruangan: RuanganUI
     ) : RuanganAction()
 
-
+    data class OnInsertRuangan(val ruangan: RuanganUI) : RuanganAction()
+    data class OnDeleteRuangan(val id: Int) : RuanganAction()
 }

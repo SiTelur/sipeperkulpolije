@@ -300,11 +300,11 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
 
     override suspend fun getRuangan(): Result<List<RuanganEntity>> {
         val response = try {
-            val data = supabase.from("hari")
+            val data = supabase.from("ruangan")
                 .select(
                     Columns.list(
                         "id", "nama",
-                        "tipe_penggunaan",
+                        "kegunaan_ruangan",
                     )
                 ).decodeList<RuanganModel>().map {
                     it.toEntity()
@@ -323,7 +323,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
         val response = try {
             supabase.from("ruangan").update({
                 RuanganModel::nama setTo ruangan.nama
-                RuanganModel::tipeRuangan setTo ruangan.tipeRuangan
+                RuanganModel::kegunaanRuangan setTo ruangan.tipeRuangan
             }) {
                 filter {
                     eq("id", ruangan.id)
