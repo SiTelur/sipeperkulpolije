@@ -354,7 +354,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
 
     override suspend fun insertRuangan(ruangan: RuanganEntity): Result<Boolean> {
         val response = try {
-            supabase.from("hari").insert(ruangan.toModel())
+            supabase.from("ruangan").insert(ruangan.toModel())
             true
         } catch (e: Exception) {
             currentCoroutineContext().ensureActive()

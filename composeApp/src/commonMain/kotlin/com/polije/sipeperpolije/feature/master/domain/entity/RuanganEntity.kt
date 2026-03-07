@@ -14,4 +14,4 @@ data class RuanganEntity(
 fun RuanganEntity.toModel(): RuanganModel = RuanganModel(id, nama, tipeRuangan)
 
 fun RuanganEntity.toUI() =
-    RuanganUI(id, nama, TipeRuangan.entries.first { it.value == tipeRuangan })
+    RuanganUI(id, nama, TipeRuangan.entries.first { it.listPenggunaan == tipeRuangan })

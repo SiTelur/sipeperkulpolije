@@ -40,7 +40,6 @@ import com.polije.sipeperpolije.feature.master.presentation.settings.ruangan.edi
 fun AddRuanganModal(
     modifier: Modifier = Modifier,
     modalBottomSheetState: SheetState,
-
     onSave: (hari: RuanganUI) -> Unit,
     onDismissRequest: () -> Unit
 ) {
@@ -70,17 +69,17 @@ fun AddRuanganModal(
             )
         ) {
             Text(
-                "Ubah Jadwal Ruangan",
+                "Tambah Ruangan",
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
             )
             Text(
-                "Isi dengan memasukkan data dalam bentuk jam",
+                "Isi data ruangan dengan tipe ruangannya",
                 style = MaterialTheme.typography.bodyMedium
             )
             OutlinedTextField(
                 namaRuangan,
                 label = { Text("Nama Ruangan") },
-                placeholder = { Text("Senin") },
+                placeholder = { Text("Lab RSI") },
                 modifier = Modifier.fillMaxWidth()
             )
             ExposedDropdownMenuBox(isExpanded, { isExpanded = !isExpanded }) {
@@ -88,7 +87,7 @@ fun AddRuanganModal(
                     tipeRuanganText,
                     label = {
                         Text(
-                            "Nama Ruangan",
+                            "Jenis Ruangan",
                         )
                     },
                     readOnly = true,
@@ -125,7 +124,7 @@ fun AddRuanganModal(
                         RuanganUI(
                             0,
                             namaRuangan.text.toString(),
-                            TipeRuangan.valueOf(tipeRuanganText.text.toString())
+                            tipeRuangan
                         )
                     )
                 },
