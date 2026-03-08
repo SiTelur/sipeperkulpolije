@@ -525,13 +525,13 @@ class WelchPowellAlgorithm {
 
         val jadwalData = jadwal.map { item ->
             JadwalDataItem(
-                namaJadwal = item.getNamaLengkap(),      // gunakan nama lengkap termasuk "(Pertemuan X)"
+                namaJadwal = item.getNamaLengkap(),
                 hari = item.slot.hari.nama,
                 jamMulai = item.slot.jamMulai,
                 jamSelesai = item.slot.jamSelesai,
                 namaDosen = item.mataKuliah.dosen.nama,
                 semester = item.mataKuliah.semester,
-                sks = item.mataKuliah.sksTeori + item.mataKuliah.sksPraktek,  // ✅ fix: sksTeori + sksPraktek
+                sks = item.mataKuliah.sksTeori + item.mataKuliah.sksPraktek,
                 namaRuangan = item.ruangan.nama
             )
         }
@@ -540,7 +540,20 @@ class WelchPowellAlgorithm {
             .groupBy { it.namaRuangan }
             .entries
             .sortedBy { it.key }
-            .map { (ruangan, items) -> JadwalPerItem(ruangan, items) }
+            .map { (ruangan, items) ->
+
+                val sortedItems = items.sortedWith(
+                    compareBy(
+                        { hariOrder[it.hari.lowercase()] ?: Int.MAX_VALUE },
+                        { it.jamMulai }
+                    )
+                )
+
+                JadwalPerItem(
+                    nama = ruangan,
+                    items = sortedItems
+                )
+            }
 
         val groupedByHari = jadwalData
             .groupBy { it.hari }

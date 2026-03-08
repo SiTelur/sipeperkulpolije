@@ -18,8 +18,12 @@ kotlin {
         }
     }
 
-    js {
-        browser()
+    js(IR) {
+        browser {
+            commonWebpackConfig {
+                cssSupport { enabled.set(true) }
+            }
+        }
         binaries.executable()
     }
 
@@ -54,6 +58,7 @@ kotlin {
         }
         jsMain.dependencies {
             implementation(libs.ktor.client.js)
+            implementation(npm("xlsx", "0.18.5"))
         }
 
     }
