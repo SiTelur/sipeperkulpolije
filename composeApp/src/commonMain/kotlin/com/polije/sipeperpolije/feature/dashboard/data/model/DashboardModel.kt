@@ -40,7 +40,7 @@ fun ActivityItemModel.toEntity(): ActivityItemEntity {
     if (tableName == "jadwal") {
         
         val isSuccess = dataNew?.getValue("is_success")?.asBoolean() ?: false
-        val semester = (dataNew?.getValue("semester")?.asReadableString()
+        val semester = (dataNew?.getValue("text")?.asReadableString()
             ?: "").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
 
         return ActivityItemEntity(

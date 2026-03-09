@@ -18,6 +18,7 @@ import androidx.navigation.createGraph
 import androidx.navigation.toRoute
 import com.polije.sipeperpolije.feature.dashboard.presentation.component.navigationItems
 import com.polije.sipeperpolije.feature.dashboard.presentation.screen.DashboardScreen
+import com.polije.sipeperpolije.feature.dashboard.presentation.screen.GenerateJadwalScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.screen.DetailDosenScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.screen.DosenScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.DosenUI
@@ -69,7 +70,9 @@ fun MainScreen(
     ) {
         val graph = navController.createGraph(startDestination = DashboardRoute.Dashboard.route) {
             composable(DashboardRoute.Dashboard.route) {
-                DashboardScreen(onLogout = onLogout)
+                DashboardScreen(onLogout = onLogout, onGenerateJadwalPressed = {
+                    navController.navigate(GenerateJadwalScreen)
+                })
             }
 
             composable(DashboardRoute.Dosen.route) {
@@ -192,6 +195,12 @@ fun MainScreen(
                 }
             }
 
+            composable<GenerateJadwalScreen> {
+                GenerateJadwalScreen() {
+                    navController.popBackStack()
+                }
+            }
+
         }
 
         NavHost(navController = navController, graph = graph)
@@ -230,3 +239,6 @@ object EditJadwalHariScreen
 
 @Serializable
 object EditJadwalRuanganScreen
+
+@Serializable
+object GenerateJadwalScreen

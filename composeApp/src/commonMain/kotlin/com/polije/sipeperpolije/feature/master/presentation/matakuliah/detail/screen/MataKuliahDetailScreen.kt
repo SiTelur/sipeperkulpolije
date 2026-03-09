@@ -209,7 +209,7 @@ fun MataKuliahDetailScreen(
         /**
          *  (){
          *             LazyColumn(contentPadding = paddingValues) {
-         *                 item { HeroSection(state.detail, semester = semester) }
+         *                 item { HeroSection(state.detail, text = text) }
          *                 item { QuickStats(kode, sks) }
          *                 item { InfoSection(pengampu, isWorkshop = isWorkshop) }
          *             }

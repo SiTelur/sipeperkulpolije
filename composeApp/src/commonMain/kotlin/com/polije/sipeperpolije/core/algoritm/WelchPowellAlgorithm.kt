@@ -171,7 +171,7 @@ class WelchPowellAlgorithm {
         // Ruangan yang sama tidak boleh dipakai bersamaan
         if (ruangan1 == ruangan2 && overlap) return true
 
-        // Mata kuliah non-workshop semester sama tidak boleh paralel
+        // Mata kuliah non-workshop text sama tidak boleh paralel
         if (!mk1.isWorkshop && !mk2.isWorkshop &&
             mk1.semester == mk2.semester && overlap
         ) return true

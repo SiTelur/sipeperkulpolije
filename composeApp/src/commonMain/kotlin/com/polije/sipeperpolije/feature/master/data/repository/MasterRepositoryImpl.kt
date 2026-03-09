@@ -119,7 +119,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
             supabase.from("mata_kuliah").update({
                 set("kode", mataKuliah.kode)
                 set("nama", mataKuliah.nama)
-                set("semester", mataKuliah.semester)
+                set("text", mataKuliah.semester)
                 set("sks_teori", mataKuliah.sksTeori)
                 set("sks_praktek", mataKuliah.sksPraktek)
                 set("is_active", mataKuliah.isActive)
@@ -177,7 +177,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                         "id",
                         "kode",
                         "nama",
-                        "semester",
+                        "text",
                         "sks_teori",
                         "sks_praktek",
                         "id_pengampu",
@@ -208,7 +208,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
     override suspend fun getJadwal(): Result<List<JadwalEntity>> {
         val response = try {
             val data = supabase.from("jadwal")
-                .select(Columns.list("id", "is_success", "semester")) {
+                .select(Columns.list("id", "is_success", "text")) {
                     order("created_at", Order.DESCENDING)
                 }.decodeList<JadwalModel>().map { it.toEntity() }
             logList("jadwal", data);
@@ -224,7 +224,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
     override suspend fun getJadwalDetail(id: Int): Result<JadwalEntity> {
         val response = try {
             val data = supabase.from("jadwal")
-                .select(Columns.list("id", "is_success", "semester", "jadwal", "jadwal_view")) {
+                .select(Columns.list("id", "is_success", "text", "jadwal", "jadwal_view")) {
                     filter {
                         JadwalModel::id eq id
                     }
@@ -367,7 +367,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
     override suspend fun downloadJadwal(id: Int): Result<Boolean> {
         val response = try {
             val data = supabase.from("jadwal")
-                .select(Columns.list("id", "is_success", "semester", "jadwal", "jadwal_view")) {
+                .select(Columns.list("id", "is_success", "text", "jadwal", "jadwal_view")) {
                     filter {
                         JadwalModel::id eq id
                     }

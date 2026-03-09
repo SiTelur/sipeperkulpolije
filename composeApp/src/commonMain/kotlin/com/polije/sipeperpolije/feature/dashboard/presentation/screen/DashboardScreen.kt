@@ -61,7 +61,7 @@ import com.polije.sipeperpolije.utils.ObserveAsEvent
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel(), onLogout: () -> Unit) {
+fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel(), onGenerateJadwalPressed : () -> Unit, onLogout: () -> Unit) {
 
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackBarState = LocalSnackbarHostState.current
@@ -107,7 +107,7 @@ fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel(), onLogout: (
                 isLoading = state.isLoading
             )
             QuickActionButton {
-                showGenerateJadwalDialog = true
+                onGenerateJadwalPressed()
             }
             RecentActivitySection(
                 isLoading = state.isLoading,
@@ -115,17 +115,7 @@ fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel(), onLogout: (
             )
         }
 
-        when {
-            showGenerateJadwalDialog -> {
-                GenerateJadwalDialog(
-                    onDismissRequest = { showGenerateJadwalDialog = false },
-                    onConfirmation = { semester ->
-                        viewModel.onAction(DashboardAction.OnGenerateJadwal(semester))
-                        showGenerateJadwalDialog = false
-                    }
-                )
-            }
-        }
+
     }
 
 
