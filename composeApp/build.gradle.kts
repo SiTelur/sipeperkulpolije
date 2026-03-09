@@ -19,6 +19,7 @@ kotlin {
     }
 
     js(IR) {
+        useEsModules()
         browser {
             commonWebpackConfig {
                 cssSupport { enabled.set(true) }

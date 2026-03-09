@@ -1,5 +1,6 @@
 package com.polije.sipeperpolije.feature.master.data.repository
 
+import com.polije.sipeperpolije.core.external.ExcelExporter
 import com.polije.sipeperpolije.core.log
 import com.polije.sipeperpolije.core.logList
 import com.polije.sipeperpolije.feature.master.data.model.DosenModel
@@ -361,6 +362,25 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
             return Result.failure(e)
         }
         return Result.success(response)
+    }
+
+    override suspend fun downloadJadwal(id: Int): Result<Boolean> {
+        val response = try {
+            val data = supabase.from("jadwal")
+                .select(Columns.list("id", "is_success", "semester", "jadwal", "jadwal_view")) {
+                    filter {
+                        JadwalModel::id eq id
+                    }
+                }.decodeSingle<JadwalModel>()
+            data
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive();
+            log("error ${e.message}")
+            return Result.failure(e)
+        }
+
+        ExcelExporter.exportJadwalExcel(jadwal = response)
+        return Result.success(true)
     }
 
 }

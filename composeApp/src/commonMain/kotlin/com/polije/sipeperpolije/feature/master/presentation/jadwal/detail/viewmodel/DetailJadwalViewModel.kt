@@ -3,7 +3,9 @@ package com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewm
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.polije.sipeperpolije.feature.master.domain.entity.toDetailUI
+import com.polije.sipeperpolije.feature.master.domain.usecase.DownloadJadwalUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.GetDetailJadwalUseCase
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalEvent.OnFailure
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,7 +13,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class DetailJadwalViewModel(private val detailJadwalUsecase: GetDetailJadwalUseCase) : ViewModel() {
+class DetailJadwalViewModel(
+    private val detailJadwalUseCase: GetDetailJadwalUseCase,
+    private val downloadJadwalUseCase: DownloadJadwalUseCase
+) : ViewModel() {
     private val _state = MutableStateFlow(DetailJadwalState(false, DetailJadwalUI()))
     val state = _state.asStateFlow()
 
@@ -24,7 +29,7 @@ class DetailJadwalViewModel(private val detailJadwalUsecase: GetDetailJadwalUseC
             is DetailJadwalAction.OnDetailInitial -> {
                 _state.value = _state.value.copy(isLoading = true)
                 viewModelScope.launch {
-                    detailJadwalUsecase(action.id).onSuccess { value ->
+                    detailJadwalUseCase(action.id).onSuccess { value ->
                         _state.update { state ->
                             state.copy(
                                 isLoading = false,
@@ -33,12 +38,21 @@ class DetailJadwalViewModel(private val detailJadwalUsecase: GetDetailJadwalUseC
                         }
                         _channel.send(DetailJadwalEvent.OnSuccess)
                     }.onFailure {
-                        _channel.send(DetailJadwalEvent.OnFailure(it.message.toString()))
+                        _channel.send(OnFailure(it.message.toString()))
                     }
                 }
                 _state.value = _state.value.copy(isLoading = false)
             }
 
+            is DetailJadwalAction.OnDownloadJadwal -> {
+                viewModelScope.launch {
+                    downloadJadwalUseCase(action.id).onSuccess {
+                        _channel.send(DetailJadwalEvent.OnSuccessDownloadJadwal)
+                    }.onFailure {
+                        _channel.send(DetailJadwalEvent.OnFailureDownloadJadwal(it.message.toString()))
+                    }
+                }
+            }
         }
     }
 }

@@ -18,6 +18,7 @@ import com.polije.sipeperpolije.feature.master.domain.usecase.DeleteDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.DeleteMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.DeleteRuanganUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.DetailDosenUseCase
+import com.polije.sipeperpolije.feature.master.domain.usecase.DownloadJadwalUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.GetDetailJadwalUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.GetDetailMataKuliahUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.InsertDosenUseCase
@@ -102,8 +103,8 @@ fun appModule() = module {
 
     singleOf(::ListJadwalUseCase)
     viewModelOf(::JadwalViewModel)
-
     singleOf(::GetDetailJadwalUseCase)
+    singleOf(::DownloadJadwalUseCase)
     viewModelOf(::DetailJadwalViewModel)
 
     singleOf(::ListHariUseCase)

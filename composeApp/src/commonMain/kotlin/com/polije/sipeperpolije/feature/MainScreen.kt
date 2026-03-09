@@ -175,7 +175,9 @@ fun MainScreen(
 
             composable<DetailJadwal> { backStackEntry ->
                 val detailJadwal: DetailJadwal = backStackEntry.toRoute()
-                DetailJadwalScreen(id = detailJadwal.id)
+                DetailJadwalScreen(id = detailJadwal.id) {
+                    navController.popBackStack()
+                }
             }
 
             composable<EditJadwalHariScreen> {

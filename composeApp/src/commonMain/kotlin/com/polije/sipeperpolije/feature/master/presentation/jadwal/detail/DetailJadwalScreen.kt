@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -18,11 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -43,9 +38,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.polije.sipeperpolije.LocalSnackbarHostState
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.component.JadwalItem
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalAction
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalEvent
-import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalItemUI
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalListUI
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalViewModel
 import com.polije.sipeperpolije.utils.ObserveAsEvent
@@ -55,7 +50,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun DetailJadwalScreen(
     id: Int,
-    detailJadwalViewModel: DetailJadwalViewModel = koinViewModel()
+    detailJadwalViewModel: DetailJadwalViewModel = koinViewModel(),
+    onBackPressed: () -> Unit
 ) {
 
     val state by detailJadwalViewModel.state.collectAsStateWithLifecycle()
@@ -75,6 +71,15 @@ fun DetailJadwalScreen(
             DetailJadwalEvent.OnSuccess -> {
                 snackbarHost.showSnackbar("Berhasil memuat jadwal")
             }
+
+            is DetailJadwalEvent.OnFailureDownloadJadwal -> {
+                snackbarHost.showSnackbar("Berhasil mengunduh jadwal")
+            }
+
+            DetailJadwalEvent.OnSuccessDownloadJadwal -> {
+                snackbarHost.showSnackbar("Gagal mengunduh jadwal")
+
+            }
         }
     }
 
@@ -84,13 +89,19 @@ fun DetailJadwalScreen(
             TopAppBar(
                 title = { Text("Detail Jadwal Akademik", fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = onBackPressed) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(Icons.Default.FilterList, contentDescription = "Filter")
+                    IconButton(onClick = {
+                        detailJadwalViewModel.onAction(
+                            DetailJadwalAction.OnDownloadJadwal(
+                                id
+                            )
+                        )
+                    }) {
+                        Icon(Icons.Default.Download, contentDescription = "Filter")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -105,7 +116,7 @@ fun DetailJadwalScreen(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            item {
+            stickyHeader {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         LegendChip(semester = 1)
@@ -199,79 +210,6 @@ fun DaySchedule(jadwalHarian: DetailJadwalListUI) {
             ) {
                 jadwalHarian.item.forEach {
                     JadwalItem(it)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun JadwalItem(jadwal: DetailJadwalItemUI) {
-    val semesterColor = when (jadwal.semester) {
-        1 -> Color(0xFFFACC15)
-        3 -> Color(0xFF10B981)
-        5 -> Color(0xFF3B82F6)
-        else -> MaterialTheme.colorScheme.secondary
-    }
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Row {
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .height(140.dp)
-                    .background(
-                        semesterColor,
-                        RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)
-                    )
-            )
-            Column(modifier = Modifier.padding(12.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = jadwal.jam,
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier
-                            .background(
-                                semesterColor.copy(alpha = 0.1f),
-                                RoundedCornerShape(50)
-                            )
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                    Text(jadwal.sks.toString(), style = MaterialTheme.typography.labelSmall)
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = jadwal.namaJadwal,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Person,
-                        contentDescription = "Dosen",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(jadwal.namaDosen, style = MaterialTheme.typography.bodySmall)
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Place,
-                        contentDescription = "Ruangan",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(jadwal.namaRuangan, style = MaterialTheme.typography.bodySmall)
                 }
             }
         }

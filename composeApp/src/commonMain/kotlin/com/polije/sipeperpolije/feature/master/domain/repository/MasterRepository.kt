@@ -27,6 +27,5 @@ interface MasterRepository {
     suspend fun updateRuangan(ruangan: RuanganEntity): Result<Boolean>
     suspend fun deleteRuangan(id: Int): Result<Boolean>
     suspend fun insertRuangan(ruangan: RuanganEntity): Result<Boolean>
-
-
+    suspend fun downloadJadwal(id: Int): Result<Boolean>
 }
