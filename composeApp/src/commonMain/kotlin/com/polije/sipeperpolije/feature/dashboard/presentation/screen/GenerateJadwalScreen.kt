@@ -63,8 +63,6 @@ import com.polije.sipeperpolije.theme.AppTheme
 fun GenerateJadwalScreen(
     onBackPressed: () -> Unit
 ) {
-
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -95,10 +93,7 @@ fun GenerateJadwalScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
 
-
             val isWideScreen = maxWidth > 800.dp
-
-
 
             if (isWideScreen) {
                 Row(

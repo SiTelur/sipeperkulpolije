@@ -11,7 +11,13 @@ import com.polije.sipeperpolije.core.log
 import com.polije.sipeperpolije.core.logList
 import com.polije.sipeperpolije.feature.dashboard.data.model.ActivityItemModel
 import com.polije.sipeperpolije.feature.dashboard.data.model.DashboardModel
+import com.polije.sipeperpolije.feature.dashboard.data.model.PreviewJadwalModel
+import com.polije.sipeperpolije.feature.dashboard.data.model.PreviewJadwalModelItem
+import com.polije.sipeperpolije.feature.dashboard.data.model.toEntity
+import com.polije.sipeperpolije.feature.dashboard.domain.entity.DashboardEntity
+import com.polije.sipeperpolije.feature.dashboard.domain.entity.PreviewJadwalEntity
 import com.polije.sipeperpolije.feature.dashboard.domain.repository.DashboardRepository
+import com.polije.sipeperpolije.feature.master.data.model.DosenModel
 import com.polije.sipeperpolije.feature.master.data.model.MataKuliahModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -27,7 +33,7 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
         supabase.auth.signOut()
     }
 
-    override suspend fun fetchDashboard(): Result<DashboardModel> = runCatching {
+    override suspend fun fetchDashboard(): Result<DashboardEntity> = runCatching {
         val dosenCount = supabase.from("dosen")
             .select {
                 count(Count.EXACT)
@@ -54,7 +60,7 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                 dosenCount ?: 0, matkulCount ?: 0,
                 isLastGeneratedScheduleSuccess = false,
                 recentActivity = recentActivities
-            )
+            ).toEntity()
         )
     }.onFailure {
         return Result.failure(it)
@@ -178,12 +184,23 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                     welchPowellAlgorithm.jadwalToJson(
                         jadwal.first,
                         jadwal.second,
-                        "SEMESTER ${semester.name}"
+                        "SEMESTER ${semester.name.uppercase()}"
                     )
                 )
             return Result.success(jadwal.first)
         } catch (e: Exception) {
             return Result.failure(e)
         }
+    }
+
+    override suspend fun previewJadwal(semester: Semester): List<PreviewJadwalEntity> {
+        val list = mutableListOf<PreviewJadwalModel>();
+
+        val dosen = supabase.from("dosen").select().decodeList<DosenModel>()
+            .map { PreviewJadwalModelItem(it.nama, it.nidn) }
+
+        list.add(PreviewJadwalModel("Dosen", dosen))
+
+        val mataKuliah = supabase.from()
     }
 }
