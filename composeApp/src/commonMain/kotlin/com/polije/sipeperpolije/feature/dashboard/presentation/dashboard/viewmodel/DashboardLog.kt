@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel
+package com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.viewmodel
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PersonAdd

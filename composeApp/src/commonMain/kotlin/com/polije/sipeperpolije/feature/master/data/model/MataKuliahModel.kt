@@ -11,7 +11,6 @@ class MataKuliahModel(
     val nama: String,
     val semester: Int,
     @SerialName("sks_teori")
-    
     val sksTeori: Int,
     @SerialName("sks_praktek")
     val sksPraktek: Int,

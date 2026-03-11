@@ -16,9 +16,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
 import androidx.navigation.toRoute
-import com.polije.sipeperpolije.feature.dashboard.presentation.component.navigationItems
-import com.polije.sipeperpolije.feature.dashboard.presentation.screen.DashboardScreen
-import com.polije.sipeperpolije.feature.dashboard.presentation.screen.GenerateJadwalScreen
+import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.component.navigationItems
+import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.screen.DashboardScreen
+import com.polije.sipeperpolije.feature.dashboard.presentation.generate.GenerateJadwalScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.screen.DetailDosenScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.screen.DosenScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.DosenUI

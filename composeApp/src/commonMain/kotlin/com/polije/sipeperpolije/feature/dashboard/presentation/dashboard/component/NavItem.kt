@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.dashboard.presentation.component
+package com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook

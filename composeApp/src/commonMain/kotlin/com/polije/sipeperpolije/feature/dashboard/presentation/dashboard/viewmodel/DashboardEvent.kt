@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel
+package com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.viewmodel
 
 sealed class DashboardEvent {
     object LogoutSuccess : DashboardEvent()

@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.dashboard.presentation.screen
+package com.polije.sipeperpolije.feature.dashboard.presentation.generate
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
@@ -39,11 +39,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,15 +57,36 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.SelectSemester
+import com.polije.sipeperpolije.LocalSnackbarHostState
+import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.viewmodel.SelectSemester
+import com.polije.sipeperpolije.feature.dashboard.presentation.generate.viewmodel.GenerateJadwalAction
+import com.polije.sipeperpolije.feature.dashboard.presentation.generate.viewmodel.GenerateJadwalEvent
+import com.polije.sipeperpolije.feature.dashboard.presentation.generate.viewmodel.GenerateJadwalViewModel
+import com.polije.sipeperpolije.feature.dashboard.presentation.generate.viewmodel.PreviewJadwalUI
+import com.polije.sipeperpolije.feature.dashboard.presentation.generate.viewmodel.PreviewJadwalUIItem
 import com.polije.sipeperpolije.theme.AppTheme
+import com.polije.sipeperpolije.utils.ObserveAsEvent
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GenerateJadwalScreen(
+    generateJadwalViewModel: GenerateJadwalViewModel = koinViewModel(),
     onBackPressed: () -> Unit
 ) {
+
+    val state by generateJadwalViewModel.state.collectAsState()
+    val snackBarState = LocalSnackbarHostState.current
+
+    ObserveAsEvent(generateJadwalViewModel.events) { event ->
+        when (event) {
+            is GenerateJadwalEvent.PreviewJadwalFailed -> {
+                snackBarState.showSnackbar(event.message)
+            }
+        }
+    }
     Scaffold(
+        snackbarHost = { SnackbarHost(snackBarState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -102,14 +125,20 @@ fun GenerateJadwalScreen(
                 ) {
                     // Left side: Config Form
                     Column(modifier = Modifier.weight(1f)) {
-                        GenerateForm(onGeneratePressed = {}, onPreviewPressed = {})
+                        GenerateForm(onGeneratePressed = {}, onPreviewPressed = { semester ->
+                            generateJadwalViewModel.onAction(
+                                GenerateJadwalAction.OnGenerateJadwal(
+                                    semester
+                                )
+                            )
+                        })
                     }
 
                     // Right side: Preview
                     Column(modifier = Modifier.weight(1.5f)) {
                         PreviewHeader()
                         Spacer(Modifier.height(16.dp))
-                        PreviewList(modifier = Modifier.weight(1f), listPreview = listPreview)
+                        PreviewList(modifier = Modifier.weight(1f), listPreview = state.list)
                     }
                 }
             } else {
@@ -133,7 +162,7 @@ fun GenerateJadwalScreen(
 }
 
 @Composable
-fun GenerateForm(onPreviewPressed: () -> Unit, onGeneratePressed: () -> Unit) {
+fun GenerateForm(onPreviewPressed: (SelectSemester) -> Unit, onGeneratePressed: () -> Unit) {
     val (semester, setSemester) = remember { mutableStateOf(SelectSemester.Ganjil) }
     val namaJadwalTextState = rememberTextFieldState()
     val overrideJamPraktikumTextState = rememberTextFieldState()
@@ -204,7 +233,7 @@ fun GenerateForm(onPreviewPressed: () -> Unit, onGeneratePressed: () -> Unit) {
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedButton(
-                onClick = { /* Preview action */ },
+                onClick = { onPreviewPressed(semester) },
                 modifier = Modifier.weight(1f).height(48.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -253,15 +282,15 @@ fun PreviewHeader() {
 }
 
 @Composable
-fun PreviewList(listPreview: List<JadwalPreview>, modifier: Modifier = Modifier) {
+fun PreviewList(listPreview: List<PreviewJadwalUI>, modifier: Modifier = Modifier) {
 
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         listPreview.forEach { preview ->
-            stickyHeader { Text(preview.header, fontWeight = FontWeight.Bold) }
-            items(preview.item, key = { it.title }) {
+            item { Text(preview.nama, fontWeight = FontWeight.Bold) }
+            items(preview.list) {
                 PreviewCard(it)
             }
         }
@@ -269,7 +298,7 @@ fun PreviewList(listPreview: List<JadwalPreview>, modifier: Modifier = Modifier)
 }
 
 @Composable
-fun PreviewCard(item: JadwalPreviewItem) {
+fun PreviewCard(item: PreviewJadwalUIItem) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -289,7 +318,7 @@ fun PreviewCard(item: JadwalPreviewItem) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            item.title,
+                            item.name,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -361,29 +390,6 @@ fun <S, T> DropdownField(
         }
     }
 }
-
-data class JadwalPreview(val header: String, val item: List<JadwalPreviewItem>)
-
-data class JadwalPreviewItem(
-    val title: String,
-    val desc: String,
-)
-
-val listPreview = listOf<JadwalPreview>(
-    JadwalPreview(
-        "Hari", listOf(
-            JadwalPreviewItem("Senin", "08:00 - 10:00"),
-            JadwalPreviewItem("Selasa", "08:00 - 10:00"),
-            JadwalPreviewItem("Rabu", "08:00 - 10:00")
-        )
-    ),
-    JadwalPreview("Ruangan", listOf(
-        JadwalPreviewItem("Ruangan 1", "08:00 - 10:00"),
-        JadwalPreviewItem("Ruangan 2", "08:00 - 10:00"),
-
-    ))
-)
-
 
 @Preview
 @Preview(device = "spec:width=1000dp,height=841dp,dpi=420")

@@ -1,9 +1,8 @@
-package com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel
+package com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.polije.sipeperpolije.feature.dashboard.domain.usecase.FetchDashboardUseCase
-import com.polije.sipeperpolije.feature.dashboard.domain.usecase.GenerateJadwalUseCase
 import com.polije.sipeperpolije.feature.dashboard.domain.usecase.LogoutUseCase
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,8 +13,6 @@ import kotlinx.coroutines.launch
 class DashboardViewModel(
     private val logoutUseCase: LogoutUseCase,
     private val fetchDashboardUseCase: FetchDashboardUseCase,
-
-    private val generateJadwalUseCase: GenerateJadwalUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(DashboardState())
     val state = _state.asStateFlow()
@@ -41,27 +38,6 @@ class DashboardViewModel(
                         _state.value = _state.value.copy(isLogoutLoading = false)
                         _events.send(DashboardEvent.LogoutFailed(it.message ?: "Unknown error"))
                     }
-                }
-            }
-
-            is DashboardAction.OnGenerateJadwal -> {
-                viewModelScope.launch {
-
-                    generateJadwalUseCase(dashboardAction.semester)
-                        .onSuccess {
-                            if (it) {
-                                _events.send(DashboardEvent.GenerateJadwalSuccess)
-                            } else {
-                                _events.send(DashboardEvent.GenerateJadwalFailed("Gagal generate jadwal"))
-                            }
-                        }
-                        .onFailure {
-                            _events.send(
-                                DashboardEvent.GenerateJadwalFailed(
-                                    it.message ?: "Unknown error"
-                                )
-                            )
-                        }
                 }
             }
 

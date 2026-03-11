@@ -6,7 +6,9 @@ import com.polije.sipeperpolije.feature.dashboard.domain.repository.DashboardRep
 import com.polije.sipeperpolije.feature.dashboard.domain.usecase.FetchDashboardUseCase
 import com.polije.sipeperpolije.feature.dashboard.domain.usecase.GenerateJadwalUseCase
 import com.polije.sipeperpolije.feature.dashboard.domain.usecase.LogoutUseCase
-import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardViewModel
+import com.polije.sipeperpolije.feature.dashboard.domain.usecase.PreviewJadwalUseCase
+import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.viewmodel.DashboardViewModel
+import com.polije.sipeperpolije.feature.dashboard.presentation.generate.viewmodel.GenerateJadwalViewModel
 import com.polije.sipeperpolije.feature.login.data.repository.LoginRepositoryImpl
 import com.polije.sipeperpolije.feature.login.domain.repository.LoginRepository
 import com.polije.sipeperpolije.feature.login.domain.usecase.IsLoginUseCase
@@ -76,10 +78,12 @@ fun appModule() = module {
     viewModelOf(::LoginViewModel)
 
     factoryOf(::DashboardRepositoryImpl) { bind<DashboardRepository>() }
+    singleOf(::PreviewJadwalUseCase)
     singleOf(::LogoutUseCase)
     singleOf(::FetchDashboardUseCase)
     singleOf(::GenerateJadwalUseCase)
     viewModelOf(::DashboardViewModel)
+    viewModelOf(::GenerateJadwalViewModel)
 
     factoryOf(::MasterRepositoryImpl) { bind<MasterRepository>() }
 
@@ -115,6 +119,7 @@ fun appModule() = module {
     singleOf(::InsertRuanganUseCase)
     singleOf(::UpdateRuanganUseCase)
     singleOf(::DeleteRuanganUseCase)
-    singleOf(::EditRuanganViewModel)
+    viewModelOf(::EditRuanganViewModel)
+
 }
 

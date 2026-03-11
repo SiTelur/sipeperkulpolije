@@ -17,11 +17,13 @@ import com.polije.sipeperpolije.feature.dashboard.data.model.toEntity
 import com.polije.sipeperpolije.feature.dashboard.domain.entity.DashboardEntity
 import com.polije.sipeperpolije.feature.dashboard.domain.entity.PreviewJadwalEntity
 import com.polije.sipeperpolije.feature.dashboard.domain.repository.DashboardRepository
-import com.polije.sipeperpolije.feature.master.data.model.DosenModel
+import com.polije.sipeperpolije.feature.master.data.model.HariModel
 import com.polije.sipeperpolije.feature.master.data.model.MataKuliahModel
+import com.polije.sipeperpolije.feature.master.data.model.RuanganModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Count
 import io.github.jan.supabase.postgrest.query.Order
 
@@ -193,14 +195,108 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
         }
     }
 
-    override suspend fun previewJadwal(semester: Semester): List<PreviewJadwalEntity> {
-        val list = mutableListOf<PreviewJadwalModel>();
+    override suspend fun previewJadwal(semester: Semester): Result<List<PreviewJadwalEntity>> {
+        try {
+            val list = mutableListOf<PreviewJadwalModel>()
 
-        val dosen = supabase.from("dosen").select().decodeList<DosenModel>()
-            .map { PreviewJadwalModelItem(it.nama, it.nidn) }
+            val mataKuliah = supabase
+                .from("mata_kuliah_view").select {
+                    order("nama", Order.ASCENDING)
+                }.decodeList<MataKuliahModel>()
+                .filter { semester.matches(it.semester) }
 
-        list.add(PreviewJadwalModel("Dosen", dosen))
+            logList("matakuliah", mataKuliah)
 
-        val mataKuliah = supabase.from()
+            val ruangan = supabase.from("ruangan")
+                .select(
+                    Columns.list(
+                        "id", "nama",
+                        "kegunaan_ruangan",
+                    )
+                ).decodeList<RuanganModel>()
+
+            val hariJam = supabase.from("hari")
+                .select(
+                    Columns.list(
+                        "id", "nama",
+                        "jam_mulai",
+                        "jam_selesai",
+                        "jam_mulai_istirahat",
+                        "jam_selesai_istirahat"
+                    )
+                ).decodeList<HariModel>()
+
+
+            val dosenCache = mutableMapOf<Int, Dosen>()
+
+            val rawJadwal = mataKuliah.map {
+                it.idPengampu?.let { id ->
+                    dosenCache.getOrPut(id) {
+                        Dosen(id, it.namaPengampu ?: "-")
+                    }
+                }
+
+                MataKuliahModel(
+                    kode = it.kode,
+                    nama = it.nama,
+                    sksTeori = it.sksTeori,
+                    sksPraktek = it.sksPraktek,
+                    semester = it.semester,
+                    idPengampu = it.idPengampu,
+                    namaPengampu = it.namaPengampu,
+                    isActive = it.isActive
+                )
+            }
+
+            list.add(
+                PreviewJadwalModel(
+                    "Mata Kuliah",
+                    rawJadwal.map {
+                        PreviewJadwalModelItem(
+                            "${it.kode} ${it.nama}",
+                            "${it.namaPengampu ?: "Belum ditentukan"} Semester ${it.semester} SKS T ${it.sksTeori} SKS P ${it.sksPraktek}"
+                        )
+                    })
+            )
+
+
+            list.add(
+                PreviewJadwalModel(
+                    name = "Dosen",
+                    listItem = dosenCache.map { it.value }.toList()
+                        .map { PreviewJadwalModelItem(it.nama, "") })
+            )
+
+            list.add(
+                PreviewJadwalModel(
+                    "Ruangan",
+                    listItem = ruangan.map {
+                        PreviewJadwalModelItem(
+                            it.nama,
+                            it.kegunaanRuangan?.joinToString(" & ") ?: "-"
+                        )
+                    })
+            )
+
+
+            list.add(
+                PreviewJadwalModel(
+                    "Hari & Jam",
+                    hariJam.map {
+                        PreviewJadwalModelItem(
+                            it.nama,
+                            "Jam Kuliah ${it.jamMulai} s/d ${it.jamSelesai} Jam Istirahat ${it.jamMulaiIstirahat ?: "-"} s/d ${it.jamSelesaiIstirahat ?: "-"}"
+                        )
+                    })
+            )
+
+            val result = list.map { it.toEntity() }.toList()
+            return Result.success(result)
+        } catch (e: Exception) {
+            log(e.toString())
+            return Result.failure(e)
+
+        }
+
     }
 }

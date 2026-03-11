@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.dashboard.presentation.component
+package com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement

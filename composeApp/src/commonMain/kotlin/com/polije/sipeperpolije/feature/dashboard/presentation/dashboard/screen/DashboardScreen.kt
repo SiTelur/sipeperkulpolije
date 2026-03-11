@@ -1,4 +1,4 @@
-package com.polije.sipeperpolije.feature.dashboard.presentation.screen
+package com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,21 +47,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.polije.sipeperpolije.LocalSnackbarHostState
-import com.polije.sipeperpolije.feature.dashboard.presentation.component.ActivityItem
-import com.polije.sipeperpolije.feature.dashboard.presentation.component.GenerateJadwalDialog
-import com.polije.sipeperpolije.feature.dashboard.presentation.component.QuickActionButton
-import com.polije.sipeperpolije.feature.dashboard.presentation.component.ShimmerActivityItem
-import com.polije.sipeperpolije.feature.dashboard.presentation.component.SummaryCard
-import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardAction
-import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardEvent
-import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardLog
-import com.polije.sipeperpolije.feature.dashboard.presentation.viewmodel.DashboardViewModel
+import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.component.ActivityItem
+import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.component.QuickActionButton
+import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.component.ShimmerActivityItem
+import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.component.SummaryCard
+import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.viewmodel.DashboardAction
+import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.viewmodel.DashboardEvent
+import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.viewmodel.DashboardLog
+import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.viewmodel.DashboardViewModel
 import com.polije.sipeperpolije.theme.AppTheme
 import com.polije.sipeperpolije.utils.ObserveAsEvent
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel(), onGenerateJadwalPressed : () -> Unit, onLogout: () -> Unit) {
+fun DashboardScreen(
+    viewModel: DashboardViewModel = koinViewModel(),
+    onGenerateJadwalPressed: () -> Unit,
+    onLogout: () -> Unit
+) {
 
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackBarState = LocalSnackbarHostState.current

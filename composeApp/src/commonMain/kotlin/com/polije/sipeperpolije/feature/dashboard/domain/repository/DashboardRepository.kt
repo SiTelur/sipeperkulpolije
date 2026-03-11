@@ -8,5 +8,5 @@ interface DashboardRepository {
     suspend fun logout()
     suspend fun fetchDashboard(): Result<DashboardEntity>
     suspend fun generateJadwal(semester: Semester, workshopTime: Int? = null): Result<Boolean>
-    suspend fun previewJadwal(semester: Semester): List<PreviewJadwalEntity>
+    suspend fun previewJadwal(semester: Semester): Result<List<PreviewJadwalEntity>>
 }
