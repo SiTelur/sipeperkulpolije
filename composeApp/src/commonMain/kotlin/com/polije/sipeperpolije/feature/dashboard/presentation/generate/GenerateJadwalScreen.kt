@@ -46,6 +46,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -125,9 +126,17 @@ fun GenerateJadwalScreen(
                 ) {
                     // Left side: Config Form
                     Column(modifier = Modifier.weight(1f)) {
-                        GenerateForm(onGeneratePressed = {}, onPreviewPressed = { semester ->
+                        GenerateForm(onGeneratePressed = { title, semester, override ->
                             generateJadwalViewModel.onAction(
                                 GenerateJadwalAction.OnGenerateJadwal(
+                                    title,
+                                    semester,
+                                    override
+                                )
+                            )
+                        }, onPreviewPressed = { semester ->
+                            generateJadwalViewModel.onAction(
+                                GenerateJadwalAction.OnPreviewJadwal(
                                     semester
                                 )
                             )
@@ -148,9 +157,21 @@ fun GenerateJadwalScreen(
                         .fillMaxSize()
                         .padding(horizontal = 20.dp, vertical = 24.dp)
                 ) {
-                    GenerateForm(
-                        onGeneratePressed = {},
-                        onPreviewPressed = {})
+                    GenerateForm(onGeneratePressed = { title, semester, override ->
+                        generateJadwalViewModel.onAction(
+                            GenerateJadwalAction.OnGenerateJadwal(
+                                title,
+                                semester,
+                                override
+                            )
+                        )
+                    }, onPreviewPressed = { semester ->
+                        generateJadwalViewModel.onAction(
+                            GenerateJadwalAction.OnPreviewJadwal(
+                                semester
+                            )
+                        )
+                    })
                     Spacer(Modifier.height(32.dp))
                     PreviewHeader()
                     Spacer(Modifier.height(16.dp))
@@ -162,11 +183,20 @@ fun GenerateJadwalScreen(
 }
 
 @Composable
-fun GenerateForm(onPreviewPressed: (SelectSemester) -> Unit, onGeneratePressed: () -> Unit) {
+fun GenerateForm(
+    onPreviewPressed: (SelectSemester) -> Unit,
+    onGeneratePressed: (String, SelectSemester, Int?) -> Unit
+) {
     val (semester, setSemester) = remember { mutableStateOf(SelectSemester.Ganjil) }
     val namaJadwalTextState = rememberTextFieldState()
     val overrideJamPraktikumTextState = rememberTextFieldState()
     var overridePraktikum by remember { mutableStateOf(false) }
+
+    val isFormValid by remember {
+        derivedStateOf {
+            namaJadwalTextState.text.isNotEmpty()
+        }
+    }
 
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Column {
@@ -246,7 +276,14 @@ fun GenerateForm(onPreviewPressed: (SelectSemester) -> Unit, onGeneratePressed: 
                 Text("PREVIEW", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
             }
             Button(
-                onClick = { /* Generate action */ },
+                onClick = {
+                    onGeneratePressed(
+                        namaJadwalTextState.text.toString(),
+                        semester,
+                        overrideJamPraktikumTextState.text.toString().toIntOrNull()
+                    )
+                },
+                enabled = isFormValid,
                 modifier = Modifier.weight(1f).height(48.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(

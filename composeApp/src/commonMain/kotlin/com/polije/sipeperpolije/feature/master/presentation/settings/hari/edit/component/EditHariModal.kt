@@ -198,8 +198,8 @@ fun EditHariModal(
                             namaHari.text.toString(),
                             jamMulai.text.toString().toInt(),
                             jamSelesai.text.toString().toInt(),
-                            jamMulaiIstirahat.text.toString().toInt(),
-                            jamSelesaiIstirahat.text.toString().toInt()
+                            jamMulaiIstirahat.text.toString().toIntOrNull(),
+                            jamSelesaiIstirahat.text.toString().toIntOrNull()
                         )
                     )
                 },

@@ -4,7 +4,7 @@ import com.polije.sipeperpolije.core.Semester
 import com.polije.sipeperpolije.feature.dashboard.domain.repository.DashboardRepository
 
 class GenerateJadwalUseCase(private val dashboardRepository: DashboardRepository) {
-    suspend operator fun invoke(semester: Semester): Result<Boolean> =
-        dashboardRepository.generateJadwal(semester)
+    suspend operator fun invoke(title : String, semester: Semester, overrideJamPraktek : Int? ): Result<Boolean> =
+        dashboardRepository.generateJadwal(title, semester, overrideJamPraktek)
 
 }

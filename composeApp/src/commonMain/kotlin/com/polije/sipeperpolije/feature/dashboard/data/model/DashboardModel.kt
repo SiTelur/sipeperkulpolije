@@ -38,9 +38,9 @@ fun ActivityItemModel.toEntity(): ActivityItemEntity {
     val changeTime = changedAt.toRelativeTime()
 
     if (tableName == "jadwal") {
-        
+
         val isSuccess = dataNew?.getValue("is_success")?.asBoolean() ?: false
-        val semester = (dataNew?.getValue("text")?.asReadableString()
+        val semester = (dataNew?.getValue("title")?.asReadableString()
             ?: "").replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
 
         return ActivityItemEntity(

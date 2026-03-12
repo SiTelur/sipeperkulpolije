@@ -64,7 +64,7 @@ fun UpdateMataKuliahModal(
 ) {
     val namaMataKuliahState = rememberTextFieldState(initialText = initialMataKuliah)
     val kodeMataKuliahState = rememberTextFieldState(initialText = initialKodeMataKuliah)
-    val namaDosenState = rememberTextFieldState()
+    val namaDosenState = rememberTextFieldState(initialText = initialNamaDosen)
     val sksTeoriState = rememberTextFieldState("$initialSKSTeori")
     val sksPraktekState = rememberTextFieldState("$initialSKSPraktek")
     val semesterState = rememberTextFieldState("Semester ke $initialSemester")
@@ -82,14 +82,16 @@ fun UpdateMataKuliahModal(
 
     val isFormValid by remember {
         derivedStateOf {
-            namaMataKuliahState.text.isNotBlank() &&
-                    kodeMataKuliahState.text.isNotBlank() &&
-                    namaDosenState.text.isNotBlank() &&
+
+            namaMataKuliahState.text.toString().isNotBlank() &&
+                    kodeMataKuliahState.text.toString().isNotBlank() &&
+                    namaDosenState.text.toString().isNotBlank() &&
                     sksTeoriState.text.toString().toIntOrNull() != null &&
-                    sksPraktekState.text.toString().toIntOrNull() != null &&
-                    semesterState.text.toString().toIntOrNull() != null
+                    sksPraktekState.text.toString().toIntOrNull() != null
         }
     }
+
+
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -149,33 +151,10 @@ fun UpdateMataKuliahModal(
                             namaDosenState.setTextAndSelectAll(it.nama)
                         })
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        OutlinedTextField(
-                            state = sksTeoriState,
-                            readOnly = true,
-                            label = { Text("Jumlah SKS") },
-                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        OutlinedTextField(
-                            state = sksPraktekState,
-                            readOnly = true,
-                            label = { Text("Jumlah SKS") },
-                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f)
-                        )
-
-
-                    }
-
                     ExposedDropdownMenuBox(
                         expanded = expandedSemester,
                         onExpandedChange = { expandedSemester = !expandedSemester },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         OutlinedTextField(
                             state = semesterState,
@@ -205,6 +184,28 @@ fun UpdateMataKuliahModal(
                             }
                         }
                     }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        OutlinedTextField(
+                            state = sksTeoriState,
+                            label = { Text("Jumlah SKS") },
+                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        OutlinedTextField(
+                            state = sksPraktekState,
+                            label = { Text("Jumlah SKS") },
+                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f)
+                        )
+
+
+                    }
+
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),

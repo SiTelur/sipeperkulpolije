@@ -82,7 +82,7 @@ fun JadwalScreen(
             }
             items(state.filteredJadwal) { log ->
                 LogListItem(
-                    title = log.semester,
+                    title = log.title,
                     semester = log.semester,
                     status = log.isSuccess,
                     onClick = { onItemClick(log.id) }

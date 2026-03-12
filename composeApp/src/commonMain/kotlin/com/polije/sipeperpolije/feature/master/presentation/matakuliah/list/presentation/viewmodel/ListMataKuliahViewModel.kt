@@ -35,7 +35,7 @@ class ListMataKuliahViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             listMataKuliahUseCase().onSuccess { mataKuliah ->
-                _state.update {
+                _state.update { it ->
                     it.copy(
                         mataKuliahs = mataKuliah.map { it.toUI() },
                         isLoading = false

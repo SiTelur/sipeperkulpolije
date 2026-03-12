@@ -233,7 +233,7 @@ fun MataKuliahDetailScreen(
                         },
                         initialMataKuliah = detail.nama,
                         initialKodeMataKuliah = detail.kode,
-                        initialNamaDosen = detail.nama,
+                        initialNamaDosen = detail.namaPenampu,
                         initialSKSTeori = detail.sksTeori,
                         initialSKSPraktek = detail.sksPraktek,
                         initialSemester = detail.semester,

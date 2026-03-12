@@ -7,10 +7,11 @@ import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.viewmode
 
 data class JadwalEntity(
     val id: Int,
+    val title: String,
     val isSuccess: Boolean,
     val jadwal: List<JadwalPerItemEntity>,
     val jadwalView: List<JadwalPerItemEntity>,
-    val semester: String
+    val semester: String,
 )
 
 data class JadwalPerItemEntity(
@@ -31,6 +32,7 @@ data class JadwalItemEntity(
 
 fun JadwalEntity.toUI() = JadwalUI(
     id,
+    title,
     isSuccess,
     semester
 )

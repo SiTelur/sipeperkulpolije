@@ -30,6 +30,7 @@ fun MataKuliahModel.toEntity() = MataKuliahEntity(
     sksTeori = sksTeori,
     sksPraktek = sksPraktek,
     idPengampu = idPengampu,
+    namaPengampu = namaPengampu,
     isActive = isActive
 )
 

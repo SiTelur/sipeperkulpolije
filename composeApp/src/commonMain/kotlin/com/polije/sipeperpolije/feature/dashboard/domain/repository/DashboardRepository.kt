@@ -7,6 +7,11 @@ import com.polije.sipeperpolije.feature.dashboard.domain.entity.PreviewJadwalEnt
 interface DashboardRepository {
     suspend fun logout()
     suspend fun fetchDashboard(): Result<DashboardEntity>
-    suspend fun generateJadwal(semester: Semester, workshopTime: Int? = null): Result<Boolean>
+    suspend fun generateJadwal(
+        title: String,
+        semester: Semester,
+        workshopTime: Int? = null
+    ): Result<Boolean>
+
     suspend fun previewJadwal(semester: Semester): Result<List<PreviewJadwalEntity>>
 }

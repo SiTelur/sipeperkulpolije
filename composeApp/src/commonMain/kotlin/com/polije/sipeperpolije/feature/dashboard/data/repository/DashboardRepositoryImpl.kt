@@ -5,7 +5,6 @@ import com.polije.sipeperpolije.core.algoritm.Dosen
 import com.polije.sipeperpolije.core.algoritm.Hari
 import com.polije.sipeperpolije.core.algoritm.MataKuliah
 import com.polije.sipeperpolije.core.algoritm.Ruangan
-import com.polije.sipeperpolije.core.algoritm.TipePenggunaan
 import com.polije.sipeperpolije.core.algoritm.WelchPowellAlgorithm
 import com.polije.sipeperpolije.core.log
 import com.polije.sipeperpolije.core.logList
@@ -69,20 +68,25 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
     }
 
     override suspend fun generateJadwal(
+        title: String,
         semester: Semester,
         workshopTime: Int?
     ): Result<Boolean> {
-        val responses = supabase
+        val mataKuliahs = supabase
             .from("mata_kuliah_view").select {
-                order("nama", Order.ASCENDING)
+                order("semester", Order.ASCENDING)
+                order("kode", Order.ASCENDING)
+                filter {
+                    MataKuliahModel::isActive eq true
+                }
             }.decodeList<MataKuliahModel>()
             .filter { semester.matches(it.semester) }
 
-        log("$responses")
+        log("$mataKuliahs")
 
-        logList("mataKuliah", responses)
+        logList("mataKuliah", mataKuliahs)
 
-        val isMataKuliahValid = responses.all { it.idPengampu != null }
+        val isMataKuliahValid = mataKuliahs.all { it.idPengampu != null }
 
         if (!isMataKuliahValid) {
             return Result.failure(Exception("Ada mata kuliah yang belum memiliki dosen pengampu"))
@@ -90,7 +94,7 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
 
         val dosenCache = mutableMapOf<Int, Dosen>()
 
-        val rawJadwal = responses.map {
+        val rawJadwal = mataKuliahs.map {
             val dosen = dosenCache.getOrPut(it.idPengampu!!) {
                 Dosen(it.idPengampu, it.namaPengampu.toString())
             }
@@ -102,8 +106,35 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                 it.sksPraktek,
                 semester = it.semester,
             )
-
         }
+
+        val ruangan = supabase.from("ruangan")
+            .select(
+                Columns.list(
+                    "id", "nama",
+                    "kegunaan_ruangan",
+                )
+            ).decodeList<RuanganModel>()
+            .map { Ruangan(it.nama, it.kegunaanRuangan?.toSet() ?: emptySet()) }
+
+        val hariJam = supabase.from("hari")
+            .select(
+                Columns.list(
+                    "id", "nama",
+                    "jam_mulai",
+                    "jam_selesai",
+                    "jam_mulai_istirahat",
+                    "jam_selesai_istirahat"
+                )
+            ).decodeList<HariModel>().map {
+                Hari(
+                    nama = it.nama,
+                    jamMulai = it.jamMulai,
+                    jamSelesai = it.jamSelesai,
+                    jamIstirahatMulai = it.jamMulaiIstirahat,
+                    jamIstirahatSelesai = it.jamSelesaiIstirahat
+                )
+            }
 
 //        val daftarMataKuliah = listOf(
 //            MataKuliah("Pancasila", asmunir, sks = 2),
@@ -140,53 +171,23 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
 //            MataKuliah("Aplikasi sistem tertanam", adi, 2)
 //        )
 
-        val daftarRuangan = listOf(
-            Ruangan("Aula", supports = setOf(TipePenggunaan.TEORI, TipePenggunaan.PRAKTIK)),
-            Ruangan("Ruang 101", setOf(TipePenggunaan.TEORI, TipePenggunaan.PRAKTIK)),
-            Ruangan("Lab RSI", setOf(TipePenggunaan.PRAKTIK)),
-            Ruangan("Lab SKK", setOf(TipePenggunaan.PRAKTIK))
-        )
-        val hari = listOf(
-            Hari(
-                "Senin",
-                jamMulai = 8, jamSelesai = 17,
-            ),
-            Hari(
-                "Selasa",
-                jamMulai = 8, jamSelesai = 17,
-            ),
-            Hari(
-                "Rabu",
-                jamMulai = 8, jamSelesai = 17,
-            ),
-            Hari(
-                "Kamis",
-                jamMulai = 8, jamSelesai = 17,
-            ),
-            Hari(
-                "Jumat",
-                jamMulai = 7, jamSelesai = 17,
-                jamIstirahatMulai = 11,
-                jamIstirahatSelesai = 12
-            )
-        )
-
 
         val jadwal = welchPowellAlgorithm.buatJadwal(
             rawJadwal,
-            daftarRuangan,
-            hari,
+            ruangan,
+            hariJam,
             overrideDurasiWorkshop = workshopTime
         )
-        welchPowellAlgorithm.tampilkanJadwal(jadwal.second, daftarRuangan)
+        welchPowellAlgorithm.tampilkanJadwal(jadwal.second, daftarRuangan = ruangan)
 
         try {
             supabase.from("jadwal")
                 .insert(
                     welchPowellAlgorithm.jadwalToJson(
+                        title = title,
                         jadwal.first,
                         jadwal.second,
-                        "SEMESTER ${semester.name.uppercase()}"
+                        " ${semester.name.uppercase()}"
                     )
                 )
             return Result.success(jadwal.first)
@@ -201,7 +202,10 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
 
             val mataKuliah = supabase
                 .from("mata_kuliah_view").select {
-                    order("nama", Order.ASCENDING)
+                    order("semester", Order.ASCENDING)
+                    filter {
+                        MataKuliahModel::isActive eq true
+                    }
                 }.decodeList<MataKuliahModel>()
                 .filter { semester.matches(it.semester) }
 
@@ -295,8 +299,6 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
         } catch (e: Exception) {
             log(e.toString())
             return Result.failure(e)
-
         }
-
     }
 }

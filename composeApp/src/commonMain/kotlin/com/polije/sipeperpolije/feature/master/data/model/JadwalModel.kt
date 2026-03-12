@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class JadwalModel(
     val id: Int,
+    val title: String,
     @SerialName("is_success")
     val isSuccess: Boolean,
     val jadwal: List<JadwalPerItemModel> = emptyList(),
@@ -47,6 +48,7 @@ private fun JadwalItemModel.toEntity() = JadwalItemEntity(
 
 fun JadwalModel.toEntity() = JadwalEntity(
     id = id,
+    title = title,
     isSuccess = isSuccess,
     semester = semester,
     jadwal = jadwal.map { entry ->
