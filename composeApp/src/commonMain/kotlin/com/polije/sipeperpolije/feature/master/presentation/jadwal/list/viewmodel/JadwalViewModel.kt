@@ -4,14 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.polije.sipeperpolije.feature.master.domain.entity.toUI
 import com.polije.sipeperpolije.feature.master.domain.usecase.ListJadwalUseCase
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class JadwalViewModel(private val listJadwalUseCase: ListJadwalUseCase) : ViewModel() {
     private val _state = MutableStateFlow(ListJadwalState())
     val state = _state.asStateFlow()
+
+    private val _event = Channel<ListJadwalEvent>()
+    val event = _event.receiveAsFlow()
 
     init {
         fetchJadwal()
@@ -30,7 +35,7 @@ class JadwalViewModel(private val listJadwalUseCase: ListJadwalUseCase) : ViewMo
                     }
 
                 }.onFailure {
-
+                    _event.send(ListJadwalEvent.OnFailure(it.message ?: "Unknown error"))
                 }
         }
     }
@@ -48,6 +53,15 @@ class JadwalViewModel(private val listJadwalUseCase: ListJadwalUseCase) : ViewMo
                     state.copy(filteredJadwal = filtered)
                 }
 
+            }
+
+            is ListJadwalAction.SearchJadwal -> _state.update { it ->
+                it.copy(filteredJadwal = it.jadwal.filter {
+                    it.title.contains(
+                        action.query,
+                        ignoreCase = true
+                    )
+                })
             }
         }
     }

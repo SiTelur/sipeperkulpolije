@@ -80,7 +80,7 @@ fun EditRuanganScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Availability", fontWeight = FontWeight.Bold) },
+                title = { Text("Ruangan", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBackButtonPressed) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -108,12 +108,12 @@ fun EditRuanganScreen(
             item {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "Set your weekly schedule",
+                    "Daftar Ruangan",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "Configure your active working days and hours for the upcoming week.",
+                    "Konfigurasi ruangan yang tersedia",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

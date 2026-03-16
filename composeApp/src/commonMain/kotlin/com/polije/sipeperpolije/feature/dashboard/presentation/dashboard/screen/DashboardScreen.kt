@@ -34,9 +34,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,6 +54,7 @@ import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.viewmod
 import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.viewmodel.DashboardViewModel
 import com.polije.sipeperpolije.theme.AppTheme
 import com.polije.sipeperpolije.utils.ObserveAsEvent
+import com.polije.sipeperpolije.utils.shimmerEffect
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -68,7 +66,6 @@ fun DashboardScreen(
 
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackBarState = LocalSnackbarHostState.current
-    var showGenerateJadwalDialog by remember { mutableStateOf(false) }
 
 
     ObserveAsEvent(viewModel.events) { event ->
@@ -107,7 +104,9 @@ fun DashboardScreen(
             SummaryStatisticsGrid(
                 dosenCount = state.dosenCount,
                 matkulCount = state.matkulCount,
-                isLoading = state.isLoading
+                isLoading = state.isLoading,
+                jadwalCount = state.totalGenerateJadwalCount,
+                isLastGeneratedScheduleSuccess = state.isLastGeneratedScheduleSuccess
             )
             QuickActionButton {
                 onGenerateJadwalPressed()
@@ -176,7 +175,13 @@ fun HeaderSection(isLogoutLoading: Boolean, onLogoutPressed: () -> Unit) {
 }
 
 @Composable
-fun SummaryStatisticsGrid(isLoading: Boolean, dosenCount: Int, matkulCount: Int) {
+fun SummaryStatisticsGrid(
+    isLoading: Boolean,
+    dosenCount: Int,
+    matkulCount: Int,
+    jadwalCount: Int,
+    isLastGeneratedScheduleSuccess: Boolean
+) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -201,13 +206,17 @@ fun SummaryStatisticsGrid(isLoading: Boolean, dosenCount: Int, matkulCount: Int)
                 modifier = Modifier.weight(1f),
             )
         }
-        ScheduleSummaryCard()
+        ScheduleSummaryCard(isLoading, jadwalCount, isLastGeneratedScheduleSuccess)
     }
 }
 
 
 @Composable
-fun ScheduleSummaryCard() {
+fun ScheduleSummaryCard(
+    isLoading: Boolean,
+    totalGenerateJadwal: Int,
+    isLastGeneratedScheduleSuccess: Boolean
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth(),
@@ -231,22 +240,24 @@ fun ScheduleSummaryCard() {
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "Jadwal Kelas",
+                    text = "Total Jadwal",
                     color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "120",
+                    text = "$totalGenerateJadwal",
                     color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 36.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = if (isLoading) Modifier.shimmerEffect() else Modifier
+
                 )
                 Text(
-                    text = "Status: Tergenerate",
+                    text = "Status: ${if (isLastGeneratedScheduleSuccess) "Berhasil" else "Gagal"}",
                     color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
                     fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = if (isLoading) Modifier.shimmerEffect() else Modifier.padding(top = 4.dp)
                 )
             }
             Box(

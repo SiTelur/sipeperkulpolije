@@ -10,6 +10,7 @@ import com.polije.sipeperpolije.core.log
 import com.polije.sipeperpolije.core.logList
 import com.polije.sipeperpolije.feature.dashboard.data.model.ActivityItemModel
 import com.polije.sipeperpolije.feature.dashboard.data.model.DashboardModel
+import com.polije.sipeperpolije.feature.dashboard.data.model.LastGenerteSchedule
 import com.polije.sipeperpolije.feature.dashboard.data.model.PreviewJadwalModel
 import com.polije.sipeperpolije.feature.dashboard.data.model.PreviewJadwalModelItem
 import com.polije.sipeperpolije.feature.dashboard.data.model.toEntity
@@ -48,6 +49,21 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                 count(Count.EXACT)
                 head = true
             }.countOrNull()?.toInt()
+
+        val jadwalCount = supabase.from("jadwal")
+            .select {
+                count(Count.EXACT)
+                head = true
+            }
+
+        val lastGenerateJadwalStatus = supabase.from("jadwal")
+            .select(Columns.list("is_success")) {
+                order("created_at", Order.DESCENDING)
+                limit(1)
+                single()
+            }
+            .decodeAs<LastGenerteSchedule>()
+
         val recentActivities = supabase
             .from("audit_log")
             .select {
@@ -59,7 +75,8 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
         return Result.success(
             DashboardModel(
                 dosenCount ?: 0, matkulCount ?: 0,
-                isLastGeneratedScheduleSuccess = false,
+                isLastGeneratedScheduleSuccess = lastGenerateJadwalStatus.isSuccess ?: false,
+                totalGenerateJadwalCount = jadwalCount.countOrNull()?.toInt() ?: 0,
                 recentActivity = recentActivities
             ).toEntity()
         )
@@ -136,42 +153,6 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                 )
             }
 
-//        val daftarMataKuliah = listOf(
-//            MataKuliah("Pancasila", asmunir, sks = 2),
-//            MataKuliah("Logika dan Algoritma", akas, sks = 2),
-//            MataKuliah("WSIBD A", rani, sks = 4, isWorkshop = true),
-//            MataKuliah("WSIBD B", sholihah, sks = 4, isWorkshop = true),
-//            MataKuliah("WSIBD C", rifqi, sks = 4, isWorkshop = true),
-//            MataKuliah("WBD A", akas, sks = 4, isWorkshop = true),
-//            MataKuliah("WBD B", dhonny, sks = 4, isWorkshop = true),
-//            MataKuliah("WBD C", dhonny, sks = 4, isWorkshop = true),
-//            MataKuliah("Interaksi Manusia Komputer", dhonny, sks = 2),
-//            MataKuliah("Pemrograman Dasar", sholihah, sks = 2),
-//            MataKuliah("Agama", aris, 2),
-//            MataKuliah("Inggris", iin, sks = 4),
-//            MataKuliah("WKPL A", rani, 4, isWorkshop = true),
-//            MataKuliah("WKPL B", dhonny, 4, isWorkshop = true),
-//            MataKuliah("WSIBW A", sholihah, 4, isWorkshop = true),
-//            MataKuliah("WSIBW B", akas, 4, isWorkshop = true),
-//            MataKuliah("Matematika Diskrit", dhonny, 2),
-//            MataKuliah("Interpesonal Skill", dhonny, 2),
-//            MataKuliah("Konsep Jaringan Komputer", rifqi, 2),
-//            MataKuliah("Struktur Data", adi, 2),
-//            MataKuliah("WMA A", adi, 4, isWorkshop = true),
-//            MataKuliah("WMA B", akas, 4, isWorkshop = true),
-//            MataKuliah("WSC A", sholihah, sks = 4, isWorkshop = true),
-//            MataKuliah("WSC B", akas, 4, isWorkshop = true),
-//            MataKuliah("WST A", adi, 4, isWorkshop = true),
-//            MataKuliah("WST B", rifqi, 4, isWorkshop = true),
-//            MataKuliah("WPCV A", rifqi, sks = 4, isWorkshop = true),
-//            MataKuliah("WPCV B", adi, 4, isWorkshop = true),
-//            MataKuliah("Sistem Informasi Enterprise", rani, 2),
-//            MataKuliah("Sistem Cerdas", sholihah, sks = 2),
-//            MataKuliah("Multimedia Permainan", rifqi, sks = 2),
-//            MataKuliah("Aplikasi sistem tertanam", adi, 2)
-//        )
-
-
         val jadwal = welchPowellAlgorithm.buatJadwal(
             rawJadwal,
             ruangan,
@@ -187,7 +168,8 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                         title = title,
                         jadwal.first,
                         jadwal.second,
-                        " ${semester.name.uppercase()}"
+                        " ${semester.name.uppercase()}",
+                        jadwal.third
                     )
                 )
             return Result.success(jadwal.first)
@@ -199,7 +181,6 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
     override suspend fun previewJadwal(semester: Semester): Result<List<PreviewJadwalEntity>> {
         try {
             val list = mutableListOf<PreviewJadwalModel>()
-
             val mataKuliah = supabase
                 .from("mata_kuliah_view").select {
                     order("semester", Order.ASCENDING)
@@ -281,7 +262,6 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                         )
                     })
             )
-
 
             list.add(
                 PreviewJadwalModel(

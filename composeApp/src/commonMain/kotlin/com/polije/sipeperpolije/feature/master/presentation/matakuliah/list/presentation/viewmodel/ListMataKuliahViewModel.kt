@@ -38,6 +38,7 @@ class ListMataKuliahViewModel(
                 _state.update { it ->
                     it.copy(
                         mataKuliahs = mataKuliah.map { it.toUI() },
+                        filteredMatakuliahs = mataKuliah.map { it.toUI() },
                         isLoading = false
                     )
                 }
@@ -86,7 +87,32 @@ class ListMataKuliahViewModel(
             }
 
             is ListMataKuliahAction.OnSearcDosen -> {
+                _state.update { state ->
+                    state.copy(
+                        filteredMatakuliahs = state.filteredMatakuliahs.filter {
+                            it.nama.contains(
+                                listMataKuliahAction.query,
+                                ignoreCase = true
+                            ) || it.kode.contains(
+                                listMataKuliahAction.query,
+                                ignoreCase = true
+                            ) || it.semester == (listMataKuliahAction.query.toIntOrNull()
+                                ?: "") || it.namaPenampu.contains(listMataKuliahAction.query, true)
+                        }
+                    )
+                }
+            }
 
+            is ListMataKuliahAction.OnChangeStatusChip -> {
+                _state.update { state ->
+                    val currentList = state.mataKuliahs
+
+                    val filtered = listMataKuliahAction.status?.let { status ->
+                        currentList.filter { it.isActive == status }
+                    } ?: currentList
+
+                    state.copy(filteredMatakuliahs = filtered)
+                }
             }
         }
     }

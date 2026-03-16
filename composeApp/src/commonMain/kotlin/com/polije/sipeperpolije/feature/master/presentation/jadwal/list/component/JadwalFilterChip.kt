@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.GenerationStatus
 
 @Composable
-fun FilterChips(
+fun JadwalFilterChips(
     selectedFilter: GenerationStatus,
     onFilterSelected: (GenerationStatus) -> Unit
 ) {

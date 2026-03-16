@@ -1,5 +1,3 @@
-@file:JsModule("xlsx")
-
 package com.polije.sipeperpolije.core.external
 
 import kotlin.js.Json

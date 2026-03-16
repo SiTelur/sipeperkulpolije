@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Card
@@ -32,12 +33,13 @@ import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmo
 @Composable
 fun JadwalItem(jadwal: DetailJadwalItemUI) {
     val semesterColor = when (jadwal.semester) {
-        1 -> Color(0xFFFACC15)
-        3 -> Color(0xFF10B981)
-        5 -> Color(0xFF3B82F6)
+        1, 2 -> Color(0xFFFACC15)
+        3, 4 -> Color(0xFF10B981)
+        5, 6 -> Color(0xFF3B82F6)
         else -> MaterialTheme.colorScheme.secondary
     }
     Card(
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -68,7 +70,7 @@ fun JadwalItem(jadwal: DetailJadwalItemUI) {
                             )
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
-                    Text(jadwal.sks.toString(), style = MaterialTheme.typography.labelSmall)
+                    Text("${jadwal.sks} SKS", style = MaterialTheme.typography.labelSmall)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -96,6 +98,17 @@ fun JadwalItem(jadwal: DetailJadwalItemUI) {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(jadwal.namaRuangan, style = MaterialTheme.typography.bodySmall)
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Book,
+                        contentDescription = "Semester",
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Semester ${jadwal.semester}", style = MaterialTheme.typography.bodySmall)
                 }
             }
         }

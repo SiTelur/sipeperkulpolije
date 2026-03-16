@@ -2,6 +2,7 @@ package com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.pre
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +40,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.polije.sipeperpolije.LocalSnackbarHostState
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.component.InsertMataKuliahModal
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.component.MataKuliahListItem
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.component.MataKuliahSearchBar
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.component.MataKuliahStatus
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.component.MataKuliahStatusChip
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahAction
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahEvent
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.ListMataKuliahViewModel
@@ -46,20 +50,6 @@ import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.pres
 import com.polije.sipeperpolije.utils.ObserveAsEvent
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
-
-data class MataKuliah(
-    val code: String,
-    val name: String,
-    val sks: Int,
-    val lecturer: String,
-)
-
-val sampleMataKuliahList = listOf(
-    MataKuliah("IF2024", "Pemrograman Web", 3, "Dr. Budi Santoso, M.Kom"),
-    MataKuliah("IF3050", "Algoritma & Struktur Data", 4, "Prof. Siti Aminah, Ph.D"),
-    MataKuliah("IF1010", "Dasar Sistem Komputer", 3, "Bambang S.T., M.T."),
-    MataKuliah("IF2200", "Matematika Diskrit", 3, "Dr. Eka Putra"),
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,6 +65,9 @@ fun MataKuliahScreen(
     val snackBarHost = LocalSnackbarHostState.current
 
     val state by listMataKuliahViewModel.state.collectAsStateWithLifecycle()
+
+    val (mataKuliahStatus, setMataKuliahStatus) = remember { mutableStateOf(MataKuliahStatus.SEMUA) }
+    val (searchMataKuliahStatus, setSearchMataKuliahStatus) = remember { mutableStateOf("") }
 
     ObserveAsEvent(listMataKuliahViewModel.events) { event ->
         when (event) {
@@ -144,6 +137,29 @@ fun MataKuliahScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
+            item {
+                Column {
+                    MataKuliahSearchBar(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        searchQuery,
+                        {
+                            searchQuery = it
+                            listMataKuliahViewModel.onAction(ListMataKuliahAction.OnSearcDosen(it))
+                        }
+                    )
+                    MataKuliahStatusChip(
+                        selectedFilter = mataKuliahStatus,
+                        {
+                            setMataKuliahStatus(it)
+                            listMataKuliahViewModel.onAction(
+                                ListMataKuliahAction.OnChangeStatusChip(
+                                    it.status
+                                )
+                            )
+                        })
+                }
+            }
             if (state.isLoading) {
                 item {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -152,7 +168,7 @@ fun MataKuliahScreen(
                 }
             }
 
-            items(state.mataKuliahs, key = { it.id }) { item ->
+            items(state.filteredMatakuliahs, key = { it.id }) { item ->
                 MataKuliahListItem(mataKuliah = item, onItemClick = { onItemClick(item) })
             }
 

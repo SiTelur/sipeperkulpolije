@@ -3,6 +3,7 @@ package com.polije.sipeperpolije.feature.master.domain.entity
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalItemUI
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalListUI
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.DetailJadwalUI
+import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmodel.UnscheduledItemUI
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.viewmodel.JadwalUI
 
 data class JadwalEntity(
@@ -12,6 +13,28 @@ data class JadwalEntity(
     val jadwal: List<JadwalPerItemEntity>,
     val jadwalView: List<JadwalPerItemEntity>,
     val semester: String,
+    val unscheduledCount: Int,
+    val unscheduledItems: List<UnscheduledItemEntity>
+)
+
+data class UnscheduledItemEntity(
+    val namaMk: String,
+    val semester: Int,
+    val sks: Int,
+    val namaDosen: String,
+    val pertemuanKe: Int,
+    val alasan: String = "Tidak ada slot/ruangan yang tersedia",
+    val degree: Int
+)
+
+fun UnscheduledItemEntity.toUI() = UnscheduledItemUI(
+    namaMk,
+    semester,
+    sks,
+    namaDosen,
+    pertemuanKe,
+    alasan,
+    degree
 )
 
 data class JadwalPerItemEntity(
@@ -48,6 +71,10 @@ fun JadwalItemEntity.toUI() = DetailJadwalItemUI(
 
 
 fun JadwalEntity.toDetailUI() = DetailJadwalUI(
+    isSuccess,
     jadwal.map { (nama, item) -> DetailJadwalListUI(nama, item.map { it.toUI() }) },
     jadwalView.map { (nama, item) -> DetailJadwalListUI(nama, item.map { it.toUI() }) },
+    unscheduledCount = unscheduledCount,
+    unscheduledItems = unscheduledItems.map { it.toUI() }
+
 )

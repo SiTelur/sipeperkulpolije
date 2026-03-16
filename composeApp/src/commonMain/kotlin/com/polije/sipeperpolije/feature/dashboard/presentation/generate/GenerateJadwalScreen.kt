@@ -116,7 +116,6 @@ fun GenerateJadwalScreen(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-
             val isWideScreen = maxWidth > 800.dp
 
             if (isWideScreen) {
@@ -239,7 +238,7 @@ fun GenerateForm(
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
-                            "Izinkan jadwal bertabrakan dengan praktikum",
+                            "Isi dengan format jam untuk mengubah jam praktikum",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

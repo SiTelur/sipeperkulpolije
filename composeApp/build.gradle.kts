@@ -19,7 +19,6 @@ kotlin {
     }
 
     js(IR) {
-        useEsModules()
         browser {
             commonWebpackConfig {
                 cssSupport { enabled.set(true) }
@@ -59,7 +58,7 @@ kotlin {
         }
         jsMain.dependencies {
             implementation(libs.ktor.client.js)
-            implementation(npm("xlsx", "0.18.5"))
+            implementation(npm("exceljs", "4.4.0"))
         }
 
     }

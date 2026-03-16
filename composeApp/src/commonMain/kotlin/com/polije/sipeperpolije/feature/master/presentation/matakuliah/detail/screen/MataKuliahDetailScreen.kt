@@ -233,7 +233,7 @@ fun MataKuliahDetailScreen(
                         },
                         initialMataKuliah = detail.nama,
                         initialKodeMataKuliah = detail.kode,
-                        initialNamaDosen = detail.namaPenampu,
+                        initialNamaDosen = if (detail.namaPenampu == "Belum ditentukan") "" else detail.namaPenampu,
                         initialSKSTeori = detail.sksTeori,
                         initialSKSPraktek = detail.sksPraktek,
                         initialSemester = detail.semester,

@@ -33,7 +33,7 @@ class DetailJadwalViewModel(
                         _state.update { state ->
                             state.copy(
                                 isLoading = false,
-                                jadwal = value.toDetailUI()
+                                jadwal = value.toDetailUI(),
                             )
                         }
                         _channel.send(DetailJadwalEvent.OnSuccess)

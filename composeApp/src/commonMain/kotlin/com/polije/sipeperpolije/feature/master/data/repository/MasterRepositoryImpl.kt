@@ -231,7 +231,9 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                         "title",
                         "jadwal",
                         "jadwal_view",
-                        "semester"
+                        "semester",
+                        "unscheduled_count",
+                        "unscheduled_items"
                     )
                 ) {
                     filter {
@@ -249,7 +251,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
 
     override suspend fun getHari(): Result<List<HariEntity>> {
         val response = try {
-            val data = supabase.from("hari")
+            val data = supabase.from("jadwal_sorted")
                 .select(
                     Columns.list(
                         "id", "nama",
@@ -258,7 +260,10 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                         "jam_mulai_istirahat",
                         "jam_selesai_istirahat"
                     )
-                ).decodeList<HariModel>().map {
+                ) {
+                    order("hari_order", Order.ASCENDING)
+                }
+                .decodeList<HariModel>().map {
                     it.toEntity()
                 }
             data
@@ -326,7 +331,6 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
             return Result.failure(e)
         }
         return Result.success(response)
-
     }
 
     override suspend fun updateRuangan(ruangan: RuanganEntity): Result<Boolean> {
@@ -401,4 +405,12 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
         return Result.success(true)
     }
 
+    companion object {
+        // Moved out of jadwalToJson so it's allocated once, not on every call
+        private val HARI_ORDER = mapOf(
+            "senin" to 1, "selasa" to 2, "rabu" to 3,
+            "kamis" to 4, "jumat" to 5, "sabtu" to 6, "minggu" to 7
+        )
+    }
 }
+

@@ -12,9 +12,16 @@ import kotlinx.serialization.json.JsonElement
 import kotlin.time.Instant
 
 @Serializable
+data class LastGenerteSchedule(
+    @SerialName("is_success")
+    val isSuccess: Boolean? = null
+)
+
+
 data class DashboardModel(
     val dosenActiveCount: Int,
     val matkulActiveCount: Int,
+    val totalGenerateJadwalCount: Int,
     val isLastGeneratedScheduleSuccess: Boolean,
     val recentActivity: List<ActivityItemModel>
 )
@@ -23,6 +30,7 @@ fun DashboardModel.toEntity(): DashboardEntity = DashboardEntity(
     this.dosenActiveCount,
     this.matkulActiveCount,
     this.isLastGeneratedScheduleSuccess,
+    this.totalGenerateJadwalCount,
     this.recentActivity.map { it.toEntity() })
 
 fun ActivityItemModel.toEntity(): ActivityItemEntity {

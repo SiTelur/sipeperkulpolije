@@ -13,4 +13,6 @@ sealed class ListMataKuliahAction {
     ) : ListMataKuliahAction()
 
     data class OnSearcDosen(val query: String) : ListMataKuliahAction()
+
+    data class OnChangeStatusChip(val status: Boolean?) : ListMataKuliahAction()
 }

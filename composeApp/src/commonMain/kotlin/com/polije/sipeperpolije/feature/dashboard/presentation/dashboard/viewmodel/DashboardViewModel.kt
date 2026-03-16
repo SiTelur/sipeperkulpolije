@@ -47,12 +47,14 @@ class DashboardViewModel(
     private fun fetchDashboard() {
         _state.value = _state.value.copy(isLoading = true)
         viewModelScope.launch {
-            fetchDashboardUseCase().onSuccess {
+            fetchDashboardUseCase().onSuccess { value ->
                 _state.value = _state.value.copy(
                     isLoading = false,
-                    dosenCount = it.dosenActiveCount,
-                    matkulCount = it.matkulActiveCount,
-                    list = it.recentActivities.map { value -> value.toUI() }
+                    dosenCount = value.dosenActiveCount,
+                    totalGenerateJadwalCount = value.totalGenerateJadwalCount,
+                    isLastGeneratedScheduleSuccess = value.isLastGeneratedScheduleSuccess,
+                    matkulCount = value.matkulActiveCount,
+                    list = value.recentActivities.map { value -> value.toUI() }
                 )
             }.onFailure {
                 _state.value = _state.value.copy(isLoading = false)
@@ -66,6 +68,8 @@ class DashboardViewModel(
 data class DashboardState(
     val dosenCount: Int = 0,
     val matkulCount: Int = 0,
+    val totalGenerateJadwalCount: Int = 0,
+    val isLastGeneratedScheduleSuccess: Boolean = false,
     val isLoading: Boolean = false,
     val isLogoutLoading: Boolean = false,
     val list: List<DashboardLog> = emptyList()

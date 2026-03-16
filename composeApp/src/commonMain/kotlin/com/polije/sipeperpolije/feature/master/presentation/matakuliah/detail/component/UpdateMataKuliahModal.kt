@@ -28,7 +28,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -97,166 +96,164 @@ fun UpdateMataKuliahModal(
         onDismissRequest = onDismiss,
         sheetState = modalBottomSheetState,
     ) {
-        Surface(
+
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight(),
-            shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
-            color = MaterialTheme.colorScheme.surface
+                .wrapContentHeight()
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState())
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .verticalScroll(rememberScrollState())
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Tambah Mata Kuliah",
-                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(bottom = 4.dp)
-                    )
-
-                    IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, contentDescription = "Close")
-                    }
-                }
                 Text(
-                    text = "Lengkapi detail mata kuliah baru di bawah ini.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 24.dp)
+                    text = "Tambah Mata Kuliah",
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(bottom = 4.dp)
                 )
-                Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+
+                IconButton(onClick = onDismiss) {
+                    Icon(Icons.Default.Close, contentDescription = "Close")
+                }
+            }
+            Text(
+                text = "Lengkapi detail mata kuliah baru di bawah ini.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                OutlinedTextField(
+                    state = namaMataKuliahState,
+                    label = { Text("Nama Mata Kuliah") },
+                    placeholder = { Text("Contoh: Pemrograman Web") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    state = kodeMataKuliahState,
+                    label = { Text("Kode Mata Kuliah") },
+                    placeholder = { Text("Contoh: IF-101") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                DosenSearchBar(
+                    namaDosenState,
+                    items = listDosen,
+                    label = "Dosen Pengampu",
+                    initialText = initialNamaDosen,
+                    onItemSelected = {
+                        idDosen = it.id
+                        namaDosenState.setTextAndSelectAll(it.nama)
+                    })
+
+                ExposedDropdownMenuBox(
+                    expanded = expandedSemester,
+                    onExpandedChange = { expandedSemester = !expandedSemester },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     OutlinedTextField(
-                        state = namaMataKuliahState,
-                        label = { Text("Nama Mata Kuliah") },
-                        placeholder = { Text("Contoh: Pemrograman Web") },
-                        modifier = Modifier.fillMaxWidth()
+                        state = semesterState,
+                        readOnly = true,
+                        label = { Text("Semester") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSemester)
+                        },
+                        modifier = Modifier.menuAnchor(
+                            ExposedDropdownMenuAnchorType.PrimaryEditable,
+                            enabled = true
+                        ).fillMaxWidth()
                     )
-
-                    OutlinedTextField(
-                        state = kodeMataKuliahState,
-                        label = { Text("Kode Mata Kuliah") },
-                        placeholder = { Text("Contoh: IF-101") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    DosenSearchBar(
-                        namaDosenState,
-                        items = listDosen,
-                        label = "Dosen Pengampu",
-                        initialText = initialNamaDosen,
-                        onItemSelected = {
-                            idDosen = it.id
-                            namaDosenState.setTextAndSelectAll(it.nama)
-                        })
-
-                    ExposedDropdownMenuBox(
+                    ExposedDropdownMenu(
                         expanded = expandedSemester,
-                        onExpandedChange = { expandedSemester = !expandedSemester },
-                        modifier = Modifier.fillMaxWidth()
+                        onDismissRequest = { expandedSemester = false }
                     ) {
-                        OutlinedTextField(
-                            state = semesterState,
-                            readOnly = true,
-                            label = { Text("Semester") },
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSemester)
-                            },
-                            modifier = Modifier.menuAnchor(
-                                ExposedDropdownMenuAnchorType.PrimaryEditable,
-                                enabled = true
-                            ).fillMaxWidth()
-                        )
-                        ExposedDropdownMenu(
-                            expanded = expandedSemester,
-                            onDismissRequest = { expandedSemester = false }
-                        ) {
-                            semesterOptions.forEach { option ->
-                                DropdownMenuItem(
-                                    text = { Text("Semester ke $option") },
-                                    onClick = {
-                                        semesterState.setTextAndSelectAll("Semester ke $option")
-                                        semester = option
-                                        expandedSemester = false
-                                    }
-                                )
-                            }
+                        semesterOptions.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text("Semester ke $option") },
+                                onClick = {
+                                    semesterState.setTextAndSelectAll("Semester ke $option")
+                                    semester = option
+                                    expandedSemester = false
+                                }
+                            )
                         }
                     }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        OutlinedTextField(
-                            state = sksTeoriState,
-                            label = { Text("Jumlah SKS") },
-                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        OutlinedTextField(
-                            state = sksPraktekState,
-                            label = { Text("Jumlah SKS") },
-                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f)
-                        )
-
-
-                    }
-
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Workshop")
-                        Switch(
-                            checked = isActive,
-                            onCheckedChange = { checked -> isActive = checked })
-                    }
-
-
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
-                    enabled = isFormValid,
-                    onClick = {
-                        onSave(
-                            namaMataKuliahState.text.toString(),
-                            kodeMataKuliahState.text.toString(),
-                            sksTeoriState.text.toString().toInt(),
-                            sksPraktekState.text.toString().toInt(),
-                            semester, idDosen, isActive
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(16.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text(
-                        text = "Simpan Mata Kuliah",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                    OutlinedTextField(
+                        state = sksTeoriState,
+                        label = { Text("Jumlah SKS Teori") },
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
                     )
+
+                    OutlinedTextField(
+                        state = sksPraktekState,
+                        label = { Text("Jumlah SKS Praktek") },
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
+                    )
+
+
                 }
-                TextButton(
-                    onClick = onDismiss,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
+
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Batal",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text("Aktif")
+                    Switch(
+                        checked = isActive,
+                        onCheckedChange = { checked -> isActive = checked })
                 }
-                Spacer(modifier = Modifier.height(40.dp))
+
+
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                enabled = isFormValid,
+                onClick = {
+                    onSave(
+                        namaMataKuliahState.text.toString(),
+                        kodeMataKuliahState.text.toString(),
+                        sksTeoriState.text.toString().toInt(),
+                        sksPraktekState.text.toString().toInt(),
+                        semester, idDosen, isActive
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(
+                    text = "Simpan Mata Kuliah",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                )
+            }
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+            ) {
+                Text(
+                    text = "Batal",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(modifier = Modifier.height(40.dp))
         }
     }
 }

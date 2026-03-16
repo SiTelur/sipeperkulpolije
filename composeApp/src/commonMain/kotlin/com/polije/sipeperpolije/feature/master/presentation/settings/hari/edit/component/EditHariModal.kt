@@ -50,8 +50,8 @@ fun EditHariModal(
     val namaHari = rememberTextFieldState(initialNamaHari)
     val jamMulai = rememberTextFieldState(initialJamMulai.toString())
     val jamSelesai = rememberTextFieldState(initialJamSelesai.toString())
-    val jamMulaiIstirahat = rememberTextFieldState(initialJamMulaiIstirahat.toString())
-    val jamSelesaiIstirahat = rememberTextFieldState(initialJamSelesaiIstirahat.toString())
+    val jamMulaiIstirahat = rememberTextFieldState((initialJamMulaiIstirahat ?: "").toString())
+    val jamSelesaiIstirahat = rememberTextFieldState((initialJamSelesaiIstirahat ?: "").toString())
 
     val isFormValid by remember {
         derivedStateOf {
@@ -120,7 +120,6 @@ fun EditHariModal(
                             "Jam Mulai Pelajaran",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.fillMaxWidth()
                         )
                     },
                     inputTransformation = InputTransformation {
@@ -137,7 +136,6 @@ fun EditHariModal(
                             "Jam Selesai Pelajaran",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.fillMaxWidth()
                         )
                     },
                     inputTransformation = InputTransformation {
@@ -160,7 +158,6 @@ fun EditHariModal(
                             "Jam Mulai Istirahat",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.fillMaxWidth()
                         )
                     },
                     inputTransformation = InputTransformation {
@@ -174,10 +171,9 @@ fun EditHariModal(
                     jamSelesaiIstirahat,
                     label = {
                         Text(
-                            "Jam Selesai Pelajaran",
+                            "Jam Selesai Istirahat",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.fillMaxWidth()
                         )
                     },
                     inputTransformation = InputTransformation {
