@@ -66,9 +66,9 @@ class GenerateJadwalViewModel(
                         actualSemester,
                         overrideJamPraktek = action.overrideJamPraktikum
                     ).onSuccess {
-
+                        _events.send(GenerateJadwalEvent.GenerateJadwal(it.id, it.isSuccess))
                     }.onFailure {
-                        
+                        _events.send(GenerateJadwalEvent.GenerateJadwalFailed)
                     }
                 }
             }

@@ -40,6 +40,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -55,7 +56,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.polije.sipeperpolije.LocalSnackbarHostState
@@ -65,7 +65,6 @@ import com.polije.sipeperpolije.feature.dashboard.presentation.generate.viewmode
 import com.polije.sipeperpolije.feature.dashboard.presentation.generate.viewmodel.GenerateJadwalViewModel
 import com.polije.sipeperpolije.feature.dashboard.presentation.generate.viewmodel.PreviewJadwalUI
 import com.polije.sipeperpolije.feature.dashboard.presentation.generate.viewmodel.PreviewJadwalUIItem
-import com.polije.sipeperpolije.theme.AppTheme
 import com.polije.sipeperpolije.utils.ObserveAsEvent
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -73,6 +72,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun GenerateJadwalScreen(
     generateJadwalViewModel: GenerateJadwalViewModel = koinViewModel(),
+    onDetailJadwalPressed: (Int) -> Unit,
     onBackPressed: () -> Unit
 ) {
 
@@ -83,6 +83,26 @@ fun GenerateJadwalScreen(
         when (event) {
             is GenerateJadwalEvent.PreviewJadwalFailed -> {
                 snackBarState.showSnackbar(event.message)
+            }
+
+            is GenerateJadwalEvent.GenerateJadwal -> {
+                val result = snackBarState.showSnackbar(
+                    if (event.status) "Jadwal tergenerate berstatus sukses" else "Jadwal Tergenerate berstatus gagal",
+                    withDismissAction = true,
+                    actionLabel = "Lihat Jadwal"
+                )
+
+                when (result) {
+                    SnackbarResult.ActionPerformed -> {
+                        onDetailJadwalPressed(event.id)
+                    }
+
+                    SnackbarResult.Dismissed -> {}
+                }
+            }
+
+            is GenerateJadwalEvent.GenerateJadwalFailed -> {
+                snackBarState.showSnackbar("Gagal generate jadwal")
             }
         }
     }
@@ -424,16 +444,5 @@ fun <S, T> DropdownField(
                 }
             }
         }
-    }
-}
-
-@Preview
-@Preview(device = "spec:width=1000dp,height=841dp,dpi=420")
-@Composable
-fun GenerateJadwalScreenPreview() {
-    AppTheme {
-
-
-        GenerateJadwalScreen() {}
     }
 }

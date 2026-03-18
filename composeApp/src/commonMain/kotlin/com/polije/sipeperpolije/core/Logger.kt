@@ -9,5 +9,5 @@ fun log(message: String) {
 
 @JsName("logList")
 fun logList(label: String, list: List<Any?>) {
-//    console.log(label, list.toTypedArray())
+    console.log(label, list.toTypedArray())
 }

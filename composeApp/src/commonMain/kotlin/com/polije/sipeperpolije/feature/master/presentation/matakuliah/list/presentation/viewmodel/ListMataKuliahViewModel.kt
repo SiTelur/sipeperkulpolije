@@ -71,7 +71,8 @@ class ListMataKuliahViewModel(
                             idPengampu = listMataKuliahAction.dosenID,
                             namaPenampu = listMataKuliahAction.namaDosen
                                 ?: "Belum ditentukan",
-                            isActive = listMataKuliahAction.isActive
+                            isActive = listMataKuliahAction.isActive,
+                            namaKelas = listMataKuliahAction.namaKelas
                         ).toEntity()
                     ).onSuccess {
                         _event.send(OnSaveSuccess(it.toUI()))

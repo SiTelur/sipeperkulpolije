@@ -18,8 +18,11 @@ import com.polije.sipeperpolije.feature.dashboard.domain.entity.DashboardEntity
 import com.polije.sipeperpolije.feature.dashboard.domain.entity.PreviewJadwalEntity
 import com.polije.sipeperpolije.feature.dashboard.domain.repository.DashboardRepository
 import com.polije.sipeperpolije.feature.master.data.model.HariModel
+import com.polije.sipeperpolije.feature.master.data.model.JadwalModel
 import com.polije.sipeperpolije.feature.master.data.model.MataKuliahModel
 import com.polije.sipeperpolije.feature.master.data.model.RuanganModel
+import com.polije.sipeperpolije.feature.master.data.model.toEntity
+import com.polije.sipeperpolije.feature.master.domain.entity.JadwalEntity
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
@@ -88,7 +91,7 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
         title: String,
         semester: Semester,
         workshopTime: Int?
-    ): Result<Boolean> {
+    ): Result<JadwalEntity> {
         val mataKuliahs = supabase
             .from("mata_kuliah_view").select {
                 order("semester", Order.ASCENDING)
@@ -98,10 +101,6 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                 }
             }.decodeList<MataKuliahModel>()
             .filter { semester.matches(it.semester) }
-
-        log("$mataKuliahs")
-
-        logList("mataKuliah", mataKuliahs)
 
         val isMataKuliahValid = mataKuliahs.all { it.idPengampu != null }
 
@@ -122,6 +121,7 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                 it.sksTeori,
                 it.sksPraktek,
                 semester = it.semester,
+                it.namaKelas
             )
         }
 
@@ -132,7 +132,17 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                     "kegunaan_ruangan",
                 )
             ).decodeList<RuanganModel>()
-            .map { Ruangan(it.nama, it.kegunaanRuangan?.toSet() ?: emptySet()) }
+            .map { Ruangan(it.nama, it.kegunaanRuangan.toSet()) }
+
+
+        val testruangan = supabase.from("ruangan")
+            .select(
+                Columns.list(
+                    "id", "nama",
+                    "kegunaan_ruangan",
+                )
+            ).decodeList<RuanganModel>()
+        logList("ruangan", testruangan)
 
         val hariJam = supabase.from("hari")
             .select(
@@ -162,7 +172,7 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
         welchPowellAlgorithm.tampilkanJadwal(jadwal.second, daftarRuangan = ruangan)
 
         try {
-            supabase.from("jadwal")
+            val result = supabase.from("jadwal")
                 .insert(
                     welchPowellAlgorithm.jadwalToJson(
                         title = title,
@@ -171,8 +181,10 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                         " ${semester.name.uppercase()}",
                         jadwal.third
                     )
-                )
-            return Result.success(jadwal.first)
+                ) {
+                    select(Columns.list("id", "is_success", "title", "semester"))
+                }.decodeSingle<JadwalModel>()
+            return Result.success(result.toEntity())
         } catch (e: Exception) {
             return Result.failure(e)
         }

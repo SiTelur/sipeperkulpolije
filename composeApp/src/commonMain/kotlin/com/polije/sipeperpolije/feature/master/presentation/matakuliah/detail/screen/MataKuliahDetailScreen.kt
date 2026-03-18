@@ -187,7 +187,13 @@ fun MataKuliahDetailScreen(
         when {
             state.detail != null && !state.isLoading -> {
                 LazyColumn(contentPadding = paddingValues) {
-                    item { HeroSection(state.detail!!.nama, semester = state.detail!!.semester) }
+                    item {
+                        HeroSection(
+                            state.detail!!.nama,
+                            kelas = state.detail!!.namaKelas,
+                            semester = state.detail!!.semester
+                        )
+                    }
                     item { QuickStats(state.detail!!.kode, state.detail!!.sksTeori) }
                     item {
                         InfoSection(
@@ -239,7 +245,8 @@ fun MataKuliahDetailScreen(
                         initialSemester = detail.semester,
                         initialIDDosen = detail.idPengampu,
                         initialIsActive = detail.isActive,
-                        onSave = { nama, kode, sksTeori, sksPraktek, semester, idDosen, isActive ->
+                        initialNamaKelas = detail.namaKelas,
+                        onSave = { nama, kode, sksTeori, sksPraktek, semester, idDosen, isActive, namaKelas ->
                             detailMataKuliahViewModel.onAction(
                                 DetailMataKuliahAction.OnDetailMataKuliahUpdate(
                                     id = id,
@@ -249,7 +256,8 @@ fun MataKuliahDetailScreen(
                                     sksPraktek = sksPraktek,
                                     semester = semester,
                                     idDosen = idDosen,
-                                    isActive
+                                    isActive, kelas = ""
+
                                 )
                             )
 
@@ -285,7 +293,7 @@ fun MataKuliahDetailScreen(
 }
 
 @Composable
-private fun HeroSection(name: String, semester: Int) {
+private fun HeroSection(name: String, kelas: String, semester: Int) {
     Box(
         modifier = Modifier
             .padding(16.dp)
@@ -318,7 +326,7 @@ private fun HeroSection(name: String, semester: Int) {
             Spacer(modifier = Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = name,
+                    text = "$name $kelas",
                     style = MaterialTheme.typography.headlineSmall,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
@@ -477,6 +485,6 @@ private fun InfoRow(
 @Preview
 fun HeroSectionPreview() {
     AppTheme {
-        HeroSection("Logika dan bisnis", 3)
+        HeroSection("Logika dan bisnis", "A", semester = 3)
     }
 }

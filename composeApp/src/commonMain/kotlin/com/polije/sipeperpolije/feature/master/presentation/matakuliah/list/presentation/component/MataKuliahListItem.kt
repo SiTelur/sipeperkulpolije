@@ -45,7 +45,7 @@ fun MataKuliahListItem(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = mataKuliah.nama,
+                    text = "${mataKuliah.nama} ${mataKuliah.namaKelas}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier,

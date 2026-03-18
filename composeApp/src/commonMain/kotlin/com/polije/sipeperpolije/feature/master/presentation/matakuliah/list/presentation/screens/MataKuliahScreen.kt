@@ -188,13 +188,18 @@ fun MataKuliahScreen(
                             }
                         }
                     },
-                    onSave = { nama, kode, sksTeori, sksPraktek, semester, dosenID, isWorkshop, namaDosen ->
+                    onSave = { nama, kode, sksTeori, sksPraktek, semester, dosenID, isWorkshop, namaDosen, namaKelas ->
                         listMataKuliahViewModel.onAction(
                             ListMataKuliahAction.OnSaveMataKuliah(
                                 nama,
                                 kode,
-                                sksTeori, sksPraktek,
-                                semester, dosenID, namaDosen = namaDosen, isWorkshop
+                                sksTeori,
+                                sksPraktek,
+                                semester,
+                                dosenID,
+                                namaDosen = namaDosen,
+                                isWorkshop,
+                                namaKelas = namaKelas
                             )
                         )
 

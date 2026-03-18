@@ -20,6 +20,8 @@ class MataKuliahModel(
     val namaPengampu: String? = null,
     @SerialName("is_active")
     val isActive: Boolean,
+    @SerialName("kelas")
+    val namaKelas: String = ""
 )
 
 fun MataKuliahModel.toEntity() = MataKuliahEntity(
@@ -31,6 +33,7 @@ fun MataKuliahModel.toEntity() = MataKuliahEntity(
     sksPraktek = sksPraktek,
     idPengampu = idPengampu,
     namaPengampu = namaPengampu,
-    isActive = isActive
+    isActive = isActive,
+    namaKelas = namaKelas
 )
 

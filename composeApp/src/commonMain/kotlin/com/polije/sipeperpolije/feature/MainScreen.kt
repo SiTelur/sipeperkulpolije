@@ -196,7 +196,15 @@ fun MainScreen(
             }
 
             composable<GenerateJadwalScreen> {
-                GenerateJadwalScreen() {
+                GenerateJadwalScreen(
+                    onDetailJadwalPressed = {
+                        navController.navigate(DetailJadwal(it)) {
+                            popUpTo(GenerateJadwalScreen) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                ) {
                     navController.popBackStack()
                 }
             }

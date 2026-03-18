@@ -100,16 +100,14 @@ fun DetailJadwalScreen(
                     }
                 },
                 actions = {
-                    if (state.jadwal.isSuccess){
-                        IconButton(onClick = {
-                            detailJadwalViewModel.onAction(
-                                DetailJadwalAction.OnDownloadJadwal(
-                                    id
-                                )
+                    IconButton(onClick = {
+                        detailJadwalViewModel.onAction(
+                            DetailJadwalAction.OnDownloadJadwal(
+                                id
                             )
-                        }) {
-                            Icon(Icons.Default.Download, contentDescription = "Filter")
-                        }
+                        )
+                    }) {
+                        Icon(Icons.Default.Download, contentDescription = "Filter")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

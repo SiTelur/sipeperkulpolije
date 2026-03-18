@@ -9,7 +9,8 @@ sealed class DetailMataKuliahAction {
         val sksPraktek: Int,
         val semester: Int,
         val idDosen: Int?,
-        val isActive: Boolean
+        val isActive: Boolean,
+        val kelas : String
     ) : DetailMataKuliahAction()
 
     data class OnDetailMataKuliahDelete(val id: Int) : DetailMataKuliahAction()

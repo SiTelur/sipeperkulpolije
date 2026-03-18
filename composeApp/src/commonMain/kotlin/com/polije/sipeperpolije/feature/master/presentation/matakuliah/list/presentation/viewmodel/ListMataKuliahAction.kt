@@ -9,7 +9,8 @@ sealed class ListMataKuliahAction {
         val semester: Int,
         val dosenID: Int?,
         val namaDosen: String?,
-        val isActive: Boolean
+        val isActive: Boolean,
+        val namaKelas: String
     ) : ListMataKuliahAction()
 
     data class OnSearcDosen(val query: String) : ListMataKuliahAction()

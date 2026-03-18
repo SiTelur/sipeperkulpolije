@@ -46,7 +46,7 @@ fun InsertMataKuliahModal(
     modalBottomSheetState: SheetState,
     onDismiss: () -> Unit,
     listDosen: List<DosenUI>,
-    onSave: (nama: String, kode: String, sksTeori: Int, sksPraktek: Int, semester: Int, idDosen: Int?, isActive: Boolean, namaDosen: String?) -> Unit
+    onSave: (nama: String, kode: String, sksTeori: Int, sksPraktek: Int, semester: Int, idDosen: Int?, isActive: Boolean, namaDosen: String?, namaKelas: String) -> Unit
 ) {
     val namaMataKuliahState = rememberTextFieldState()
     val kodeMataKuliahState = rememberTextFieldState()
@@ -54,10 +54,8 @@ fun InsertMataKuliahModal(
     val sksTeori = rememberTextFieldState()
     val sksPraktek = rememberTextFieldState()
     val semesterState = rememberTextFieldState()
-    var expandedSks by remember { mutableStateOf(false) }
     var expandedSemester by remember { mutableStateOf(false) }
-    var expandedDosen by remember { mutableStateOf(false) }
-    val sksOptions = listOf(1, 2, 3, 4, 6)
+    var namaKelasMataKuliahState = rememberTextFieldState()
     val semesterOptions = (1..6)
     var isActive by remember { mutableStateOf(false) }
 
@@ -104,6 +102,18 @@ fun InsertMataKuliahModal(
                     state = namaMataKuliahState,
                     label = { Text("Nama Mata Kuliah") },
                     placeholder = { Text("Contoh: Pemrograman Web") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    state = namaKelasMataKuliahState,
+                    label = { Text("Nama Kelas Mata Kuliah") },
+                    placeholder = { Text("Contoh : A, B, C, D") },
+                    inputTransformation = InputTransformation {
+                        val filtered =
+                            asCharSequence().filter { it.isLetter() }.take(1).toString().uppercase()
+                        replace(0, length, filtered)
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -211,6 +221,7 @@ fun InsertMataKuliahModal(
                         idDosen,
                         isActive,
                         namaDosenState.text.toString(),
+                        namaKelasMataKuliahState.text.toString()
                     )
                 },
                 modifier = Modifier

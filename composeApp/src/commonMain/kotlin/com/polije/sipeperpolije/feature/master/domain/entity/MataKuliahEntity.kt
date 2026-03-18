@@ -8,7 +8,7 @@ data class MataKuliahEntity(
     val nama: String,
     val semester: Int,
     val sksTeori: Int, val sksPraktek: Int, val idPengampu: Int? = null, val namaPengampu: String?,
-    val isActive: Boolean
+    val isActive: Boolean, val namaKelas: String = ""
 )
 
 fun MataKuliahEntity.toModel() = MataKuliahModel(
@@ -20,5 +20,6 @@ fun MataKuliahEntity.toModel() = MataKuliahModel(
     sksPraktek = sksPraktek,
     idPengampu = idPengampu,
     namaPengampu = namaPengampu,
-    isActive = isActive
+    isActive = isActive,
+    namaKelas = namaKelas
 )

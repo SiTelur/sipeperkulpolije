@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndSelectAll
 import androidx.compose.foundation.verticalScroll
@@ -49,6 +50,7 @@ import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.pres
 @Composable
 fun UpdateMataKuliahModal(
     initialMataKuliah: String,
+    initialNamaKelas: String,
     initialKodeMataKuliah: String,
     initialNamaDosen: String,
     initialSKSTeori: Int,
@@ -59,9 +61,10 @@ fun UpdateMataKuliahModal(
     modalBottomSheetState: SheetState,
     onDismiss: () -> Unit,
     listDosen: List<DosenUI>,
-    onSave: (nama: String, kode: String, sksTeori: Int, sksPraktek: Int, semester: Int, idDosen: Int?, isActive: Boolean) -> Unit
+    onSave: (nama: String, kode: String, sksTeori: Int, sksPraktek: Int, semester: Int, idDosen: Int?, isActive: Boolean, namaKelas: String) -> Unit
 ) {
     val namaMataKuliahState = rememberTextFieldState(initialText = initialMataKuliah)
+    val namaKelasMataKuliahState = rememberTextFieldState(initialText = initialNamaKelas)
     val kodeMataKuliahState = rememberTextFieldState(initialText = initialKodeMataKuliah)
     val namaDosenState = rememberTextFieldState(initialText = initialNamaDosen)
     val sksTeoriState = rememberTextFieldState("$initialSKSTeori")
@@ -129,6 +132,18 @@ fun UpdateMataKuliahModal(
                     state = namaMataKuliahState,
                     label = { Text("Nama Mata Kuliah") },
                     placeholder = { Text("Contoh: Pemrograman Web") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    state = namaKelasMataKuliahState,
+                    label = { Text("Nama Kelas Mata Kuliah") },
+                    placeholder = { Text("Contoh : A, B, C, D") },
+                    inputTransformation = InputTransformation {
+                        val filtered =
+                            asCharSequence().filter { it.isLetter() }.take(1).toString().uppercase()
+                        replace(0, length, filtered)
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -229,7 +244,7 @@ fun UpdateMataKuliahModal(
                         kodeMataKuliahState.text.toString(),
                         sksTeoriState.text.toString().toInt(),
                         sksPraktekState.text.toString().toInt(),
-                        semester, idDosen, isActive
+                        semester, idDosen, isActive, namaKelasMataKuliahState.text.toString()
                     )
                 },
                 modifier = Modifier
