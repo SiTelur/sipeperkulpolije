@@ -119,6 +119,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
             supabase.from("mata_kuliah").update({
                 set("kode", mataKuliah.kode)
                 set("nama", mataKuliah.nama)
+                set("kelas", mataKuliah.namaKelas)
                 set("text", mataKuliah.semester)
                 set("sks_teori", mataKuliah.sksTeori)
                 set("sks_praktek", mataKuliah.sksPraktek)
@@ -177,6 +178,7 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                         "id",
                         "kode",
                         "nama",
+                        "kelas",
                         "text",
                         "sks_teori",
                         "sks_praktek",

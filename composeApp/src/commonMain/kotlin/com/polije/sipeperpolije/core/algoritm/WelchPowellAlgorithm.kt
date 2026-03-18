@@ -6,25 +6,26 @@ import kotlinx.serialization.Serializable
 data class Dosen(val id: Int, val nama: String)
 
 data class MataKuliah(
+    val kode: String,
     val nama: String,
     val dosen: Dosen,
     val sksTeori: Int,
     val sksPraktek: Int,
     val semester: Int,
+    val kelas: String = "" // ← FIX DI SINI
 ) {
     val isWorkshop: Boolean = (sksPraktek == 4)
     val pertemuanPerMinggu: Int = if (isWorkshop) 2 else 1
 
-    // Key unik untuk identifikasi kelompok mahasiswa yang sama
-
-    val kelas = nama.split(" ").map { it.first() }.joinToString("")
-
-    val kelasKey: String = "$semester-$kelas"  // e.g. "1-A", "1-B", "1-"
+    val kelasKey: String = "$semester-$kelas"
 
     val durasiJam: Int = run {
         val teori = sksTeori * DurasiConfig.jamPerSksTeori
-        val praktik =
-            (if (sksPraktek > 2) sksPraktek / 2 else sksPraktek) * DurasiConfig.jamPerSksPraktik
+        val praktik = if (isWorkshop) {
+            (sksPraktek / 2) * DurasiConfig.jamPerSksPraktik 
+        } else {
+            sksPraktek * DurasiConfig.jamPerSksPraktik // 1 SKS Praktek = 2 Jam
+        }
         teori + praktik
     }
 }
@@ -77,8 +78,9 @@ data class JadwalItem(
     val pertemuanKe: Int = 1
 ) {
     fun getNamaLengkap(): String {
+        val kelasLabel = if (mataKuliah.kelas.isNotEmpty()) " ${mataKuliah.kelas}" else ""
         return if (mataKuliah.pertemuanPerMinggu > 1) {
-            "${mataKuliah.nama} (Pertemuan $pertemuanKe)"
+            "${mataKuliah.nama}$kelasLabel (Pertemuan $pertemuanKe)"
         } else {
             mataKuliah.nama
         }
@@ -148,6 +150,13 @@ private class ConflictIndex {
         bySemester[mk.semester]?.let { result.addAll(it) }
         return result
     }
+
+    fun remove(item: JadwalItem) {
+        byHari[item.slot.hari.nama]?.remove(item)
+        byDosen[item.mataKuliah.dosen.id]?.remove(item)
+        byRuangan[item.ruangan.nama]?.remove(item)
+        bySemester[item.mataKuliah.semester]?.remove(item)
+    }
 }
 
 class WelchPowellAlgorithm {
@@ -186,26 +195,76 @@ class WelchPowellAlgorithm {
         return slot1.jamMulai < slot2.jamSelesai && slot2.jamMulai < slot1.jamSelesai
     }
 
+    private fun getRuanganCocok(
+        mk: MataKuliah,
+        semuaRuangan: List<Ruangan>
+    ): List<Ruangan> {
+
+        return semuaRuangan
+            .filter { ruang ->
+                when {
+                    mk.sksPraktek <= 1 -> TipePenggunaan.TEORI in ruang.supports
+
+                    else -> TipePenggunaan.PRAKTIK in ruang.supports
+                }
+            }
+            .sortedByDescending { ruang ->
+                // Jika mata kuliah ini butuh Praktik/Workshop
+                if (mk.sksPraktek > 1) {
+                    when {
+                        // 1. Sangat diprioritaskan: Ruangan khusus Lab (nama ada kata Lab, atau murni cuma bisa praktik)
+                        ruang.nama.contains("Lab", ignoreCase = true) -> 4
+                        ruang.supports.size == 1 && ruang.supports.contains(TipePenggunaan.PRAKTIK) -> 3
+                        // 2. Ruangan hybrid yang bisa praktik
+                        ruang.supports.contains(TipePenggunaan.PRAKTIK) -> 2
+                        else -> 1
+                    }
+                } else {
+                    // Jika mata kuliah Teori
+                    when {
+                        // 1. Sangat diprioritaskan: Ruangan murni teori (bukan lab)
+                        ruang.supports.size == 1 && ruang.supports.contains(TipePenggunaan.TEORI) -> 3
+                        // 2. Ruangan hybrid
+                        ruang.supports.size == 2 -> 2
+                        else -> 1
+                    }
+                }
+            }
+    }
+
     private fun isConflict(
         mk1: MataKuliah, mk2: MataKuliah,
         slot1: Slot, slot2: Slot,
         ruangan1: Ruangan, ruangan2: Ruangan
     ): Boolean {
-        if (mk1 == mk2 && mk1.isWorkshop && slot1.hari == slot2.hari) return true
 
+        // 1. Jika ini adalah mata kuliah yang SAMA tapi beda pertemuan, HARAM berada di hari yang sama
+        if (mk1 == mk2 && slot1.hari == slot2.hari) return true
+
+        // 2. Tidak overlap waktu → aman
         if (!isTimeOverlap(slot1, slot2)) return false
 
+        // 3. Dosen sama → bentrok
         if (mk1.dosen == mk2.dosen) return true
+
+        // 4. Ruangan sama → bentrok
         if (ruangan1 == ruangan2) return true
 
-        if (mk1.semester == mk2.semester) {
-            // Workshop vs workshop = boleh paralel (beda mahasiswa, beda ruangan)
-            if (mk1.isWorkshop && mk2.isWorkshop) return false
-            // Workshop vs teori, atau teori vs teori = KONFLIK
-            return true
-        }
+        // 5. Semester beda → bebas
+        if (mk1.semester != mk2.semester) return false
 
-        return false
+        val mk1Umum = mk1.kelas.isEmpty()
+        val mk2Umum = mk2.kelas.isEmpty()
+
+        // 5. Kalau salah satu adalah kelas umum (tidak punya label grup) → bentrok dengan semua kelas lain di semester yang sama
+        if (mk1Umum || mk2Umum) return true
+
+        // 6. Keduanya ditujukan untuk grup spesifik
+        // beda kelas → BOLEH paralel
+        if (mk1.kelas != mk2.kelas) return false
+
+        // kelas sama → bentrok
+        return true
     }
 
     // ─── Degree Computation ───────────────────────────────────────────────────
@@ -250,6 +309,7 @@ class WelchPowellAlgorithm {
      */
     private fun hitungPrioritasSlot(
         slot: Slot,
+        mataKuliah: MataKuliah,
         jadwalPerHari: Map<Hari, List<JadwalItem>>,
         pertemuanKe: Int,
         pertemuan1Slot: Slot?
@@ -257,24 +317,68 @@ class WelchPowellAlgorithm {
         var prioritas = 100
         val jadwalHariIni = jadwalPerHari[slot.hari] ?: emptyList()
 
-        prioritas -= jadwalHariIni.size * 3
-
         if (pertemuanKe == 2 && pertemuan1Slot != null) {
             if (pertemuan1Slot.hari == slot.hari) prioritas -= 50
             else prioritas += 10
         }
 
-        for (existing in jadwalHariIni) {
-            if (existing.slot.jamSelesai == slot.jamMulai) prioritas += 25
-            if (slot.jamSelesai == existing.slot.jamMulai) prioritas += 25
+        // Filter jadwal yang "berkaitan" (Dosen sama ATAU Mahasiswa yang sama [semester + kelas sama])
+        // Termasuk jika salah satu adalah kelas umum (kelas kosong) di semester yang sama
+        val jadwalTerkait = jadwalHariIni.filter {
+            it.mataKuliah.dosen == mataKuliah.dosen ||
+            (it.mataKuliah.semester == mataKuliah.semester &&
+             (it.mataKuliah.kelas == mataKuliah.kelas || it.mataKuliah.kelas.isEmpty() || mataKuliah.kelas.isEmpty()))
         }
 
-        if (jadwalHariIni.isEmpty() && slot.jamMulai == slot.hari.jamPelajaran.first()) {
-            prioritas += 20
+        if (jadwalTerkait.isNotEmpty()) {
+            prioritas += 20 // Bonus karena jadwal berada di hari yang sudah ada target mahasiswa/dosen
+            
+            // Penalti agar kelas dari SATU GRUP (atau dosen) tidak terlalu menumpuk/overload di 1 hari (>3 kelas)
+            if (jadwalTerkait.size >= 3) {
+                prioritas -= (jadwalTerkait.size - 2) * 20
+            } else {
+                prioritas -= jadwalTerkait.size * 5
+            }
+        } else {
+            // Penalti sedang jika membuka HARI BARU untuk mahasiswa/dosen ini.
+            prioritas -= 15
+        }
+
+        // --- GLOBAL WORKSHOP DISTRIBUTION --- 
+        // Jika ini adalah kelas Workshop, kita SANGAT MENCEGAH agar tidak menumpuk di hari yang sama 
+        // dengan workshop lain (bahkan untuk dosen/mahasiswa beda) supaya ruangan/hari terdistribusi merata hingga Kamis/Jumat.
+        if (mataKuliah.isWorkshop) {
+            val totalWorkshopHariIni = jadwalHariIni.count { it.mataKuliah.isWorkshop }
+            prioritas -= totalWorkshopHariIni * 50 // Penalti brutal setiap kali nambah workshop di hari yang sama
+        } else {
+            // Penalti ringan untuk kelas biasa meratakan ruang
+            prioritas -= jadwalHariIni.size * 2
+        }
+
+        // SNAP TO GRID: Beri bonus agar kelas SELALU menempel pada pinggir pagi atau pasca istirahat
+        val isAwalHari = slot.jamMulai == slot.hari.jamPelajaran.first()
+        val isSetelahIstirahat = slot.hari.jamIstirahat != IntRange.EMPTY && slot.jamMulai == slot.hari.jamIstirahat.last + 1
+        if (isAwalHari || isSetelahIstirahat) {
+            prioritas += 10
+        }
+
+        // 2. Bonus "back-to-back" / jadwal nempel
+        for (existing in jadwalTerkait) {
+            val isMemangNempel = existing.slot.jamSelesai == slot.jamMulai || slot.jamSelesai == existing.slot.jamMulai
+            
+            val br = slot.hari.jamIstirahat
+            val isNempelKarenaIstirahat = if (br != IntRange.EMPTY) {
+                (existing.slot.jamSelesai == br.first && slot.jamMulai == br.last + 1) ||
+                (slot.jamSelesai == br.first && existing.slot.jamMulai == br.last + 1)
+            } else false
+
+            if (isMemangNempel || isNempelKarenaIstirahat) {
+                prioritas += 35 // Reward sangat tinggi untuk jadwal nempel
+            }
         }
 
         val allStarts = buildList {
-            jadwalHariIni.forEach { add(it.slot.jamMulai to it.slot.jamSelesai) }
+            jadwalTerkait.forEach { add(it.slot.jamMulai to it.slot.jamSelesai) }
             add(slot.jamMulai to slot.jamSelesai)
         }.sortedBy { it.first }
 
@@ -287,18 +391,18 @@ class WelchPowellAlgorithm {
                 val breakInGap = if (br != IntRange.EMPTY)
                     (maxOf(end, br.first) until minOf(start, br.last + 1)).count()
                 else 0
-                gapPenalty += (start - end - breakInGap).coerceAtLeast(0) * 8
+                gapPenalty += (start - end - breakInGap).coerceAtLeast(0) * 10 // Penalti lubang waktu = 10 per jam
             }
         }
         prioritas -= gapPenalty
 
-        if (jadwalHariIni.isNotEmpty()) {
-            val minStart = minOf(slot.jamMulai, jadwalHariIni.minOf { it.slot.jamMulai })
-            val maxEnd = maxOf(slot.jamSelesai, jadwalHariIni.maxOf { it.slot.jamSelesai })
+        if (jadwalTerkait.isNotEmpty()) {
+            val minStart = minOf(slot.jamMulai, jadwalTerkait.minOf { it.slot.jamMulai })
+            val maxEnd = maxOf(slot.jamSelesai, jadwalTerkait.maxOf { it.slot.jamSelesai })
             val usedTime = (slot.jamSelesai - slot.jamMulai) +
-                    jadwalHariIni.sumOf { it.slot.jamSelesai - it.slot.jamMulai }
+                    jadwalTerkait.sumOf { it.slot.jamSelesai - it.slot.jamMulai }
             val span = (maxEnd - minStart).coerceAtLeast(1)
-            prioritas += (usedTime * 100 / span) / 10
+            prioritas += (usedTime * 100 / span) / 8 // Bonus kepadatan waktu harian
         }
 
         return prioritas
@@ -321,9 +425,9 @@ class WelchPowellAlgorithm {
         val expandedMK = daftarMataKuliah.flatMap { mk ->
             (1..mk.pertemuanPerMinggu).map { MKDegree(mk, it, degreeMap[mk] ?: 0) }
         }.sortedWith(
-            compareByDescending<MKDegree> { it.degree }
-                .thenByDescending { it.mk.durasiJam }
-                .thenByDescending { it.mk.isWorkshop }
+            compareByDescending<MKDegree> { it.mk.durasiJam } // 🔥 1. Prioritaskan kelas berdurasi panjang (4 jam) terlebih dahulu agar blok rapi
+                .thenByDescending { it.degree }               // 🔥 2. Jika durasi seri, atasi yang paling rentan konflik duluan
+                .thenByDescending { it.mk.kelas.isEmpty() }   // 🔥 3. Atasi kelas umum
         )
 
         println("Urutan mata kuliah berdasarkan degree:")
@@ -333,12 +437,6 @@ class WelchPowellAlgorithm {
         }
         println()
 
-        val ruanganTeori = daftarRuangan
-            .filter { TipePenggunaan.TEORI in it.supports }
-            .sortedBy { if (it.supports.size == 1) 0 else 1 }
-        val ruanganPraktik = daftarRuangan
-            .filter { TipePenggunaan.PRAKTIK in it.supports }
-            .sortedBy { if (it.supports.size == 1) 0 else 1 }
 
         val jadwal = mutableListOf<JadwalItem>()
         val conflictIndex = ConflictIndex()
@@ -380,12 +478,17 @@ class WelchPowellAlgorithm {
                 .map { slot ->
                     SlotPriority(
                         slot,
-                        hitungPrioritasSlot(slot, jadwalPerHari, pertemuanKe, pertemuan1Slot)
+                        hitungPrioritasSlot(slot, mataKuliah, jadwalPerHari, pertemuanKe, pertemuan1Slot)
                     )
                 }
-                .sortedByDescending { it.priority }
+                .sortedWith(
+                    compareBy<SlotPriority> { item ->
+                        daftarHari.indexOfFirst { it.nama.equals(item.slot.hari.nama, ignoreCase = true) }
+                    }.thenBy { it.slot.jamMulai }
+                     .thenByDescending { it.priority } // Heuristic sebagai tie-breaker
+                )
 
-            val ruanganCocok = if (mataKuliah.isWorkshop) ruanganPraktik else ruanganTeori
+            val ruanganCocok = getRuanganCocok(mataKuliah, daftarRuangan)
             var berhasil = false
 
             outer@ for ((slot, _) in slotsWithPriority) {
@@ -439,6 +542,80 @@ class WelchPowellAlgorithm {
                         degree = degree
                     )
                 )
+            }
+        }
+
+        // --- COMPACTION PASS (Left-Shift) ---
+        // Mencoba memindahkan jadwal yang sudah jadi ke hari/jam yang lebih awal jika ada ruangan kosong.
+        var adaPerubahan = true
+        var compactionLoop = 0
+        while (adaPerubahan && compactionLoop < 3) { // Max 3 shift passes
+            adaPerubahan = false
+            compactionLoop++
+            
+            // Urutkan dari yang paling akhir untuk digeser ke awal
+            val snapshotJadwal = jadwal.sortedWith(
+                compareByDescending<JadwalItem> { item ->
+                    daftarHari.indexOfFirst { it.nama.equals(item.slot.hari.nama, ignoreCase = true) }
+                }.thenByDescending { it.slot.jamMulai }
+            )
+            
+            for (item in snapshotJadwal) {
+                // Cabut sementara item
+                jadwal.remove(item)
+                conflictIndex.remove(item)
+                jadwalPerHari[item.slot.hari]?.remove(item)
+                
+                val durasi = item.slot.jamSelesai - item.slot.jamMulai
+                val availableSlots = generateSlotsForDuration(durasi)
+                val ruanganCocok = getRuanganCocok(item.mataKuliah, daftarRuangan)
+                
+                var slotBaruDitemukan: JadwalItem? = null
+                
+                searchSlot@ for (kandidatSlot in availableSlots) {
+                    val candHariIdx = daftarHari.indexOfFirst { it.nama.equals(kandidatSlot.hari.nama, ignoreCase = true) }
+                    val currHariIdx = daftarHari.indexOfFirst { it.nama.equals(item.slot.hari.nama, ignoreCase = true) }
+                    
+                    // Hanya target slot yg benar-benar LUAR BIASA lebih awal
+                    if (candHariIdx > currHariIdx) continue
+                    if (candHariIdx == currHariIdx && kandidatSlot.jamMulai >= item.slot.jamMulai) continue
+                    
+                    // Kalau praktek > 1 pertemuan per minggu, jangan sampai nimpa hari yg sama
+                    var melanggarHariSama = false
+                    if (item.mataKuliah.pertemuanPerMinggu > 1) {
+                        melanggarHariSama = jadwal.any { 
+                            it.mataKuliah == item.mataKuliah && it.slot.hari == kandidatSlot.hari 
+                        }
+                    }
+                    if (melanggarHariSama) continue
+                    
+                    for (kandidatRuangan in ruanganCocok) {
+                        val adaKonflik = conflictIndex
+                            .candidates(item.mataKuliah, kandidatSlot, kandidatRuangan)
+                            .any { existing ->
+                                isConflict(
+                                    item.mataKuliah, existing.mataKuliah,
+                                    kandidatSlot, existing.slot,
+                                    kandidatRuangan, existing.ruangan
+                                )
+                            }
+                            
+                        if (!adaKonflik) {
+                            slotBaruDitemukan = JadwalItem(item.mataKuliah, kandidatRuangan, kandidatSlot, item.pertemuanKe)
+                            break@searchSlot
+                        }
+                    }
+                }
+                
+                val targetItem = slotBaruDitemukan ?: item
+                if (slotBaruDitemukan != null) {
+                    adaPerubahan = true
+                    println("➜ COMPACTION PASS: Menggeser ${item.getNamaLengkap()} dari ${item.slot.hari.nama} ${item.slot.jamMulai} ke ${targetItem.slot.hari.nama} ${targetItem.slot.jamMulai}")
+                }
+                
+                jadwal.add(targetItem)
+                conflictIndex.add(targetItem)
+                jadwalPerHari.getOrPut(targetItem.slot.hari) { mutableListOf() }.add(targetItem)
             }
         }
 

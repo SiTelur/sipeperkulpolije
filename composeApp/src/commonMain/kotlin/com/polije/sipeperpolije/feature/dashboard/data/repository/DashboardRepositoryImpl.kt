@@ -116,11 +116,12 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
             }
 
             MataKuliah(
+                it.kode,
                 it.nama,
                 dosen,
                 it.sksTeori,
                 it.sksPraktek,
-                semester = it.semester,
+                it.semester,
                 it.namaKelas
             )
         }
@@ -241,16 +242,17 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                     semester = it.semester,
                     idPengampu = it.idPengampu,
                     namaPengampu = it.namaPengampu,
-                    isActive = it.isActive
+                    isActive = it.isActive, namaKelas = it.namaKelas
                 )
             }
+
 
             list.add(
                 PreviewJadwalModel(
                     "Mata Kuliah",
                     rawJadwal.map {
                         PreviewJadwalModelItem(
-                            "${it.kode} ${it.nama}",
+                            "${it.kode} ${it.nama} ${it.namaKelas}",
                             "${it.namaPengampu ?: "Belum ditentukan"} Semester ${it.semester} SKS T ${it.sksTeori} SKS P ${it.sksPraktek}"
                         )
                     })
@@ -270,7 +272,7 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                     listItem = ruangan.map {
                         PreviewJadwalModelItem(
                             it.nama,
-                            it.kegunaanRuangan?.joinToString(" & ") ?: "-"
+                            it.kegunaanRuangan.joinToString(" & ")
                         )
                     })
             )

@@ -112,7 +112,7 @@ fun UpdateMataKuliahModal(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Tambah Mata Kuliah",
+                    text = "Perbarui Mata Kuliah",
                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
