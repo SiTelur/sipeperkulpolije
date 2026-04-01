@@ -57,7 +57,7 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
             .select {
                 count(Count.EXACT)
                 head = true
-            }
+            }.countOrNull()
 
         val lastGenerateJadwalStatus = supabase.from("jadwal")
             .select(Columns.list("is_success")) {
@@ -79,7 +79,7 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
             DashboardModel(
                 dosenCount ?: 0, matkulCount ?: 0,
                 isLastGeneratedScheduleSuccess = lastGenerateJadwalStatus.isSuccess ?: false,
-                totalGenerateJadwalCount = jadwalCount.countOrNull()?.toInt() ?: 0,
+                totalGenerateJadwalCount = jadwalCount?.toInt() ?: 0,
                 recentActivity = recentActivities
             ).toEntity()
         )

@@ -55,7 +55,7 @@ fun ActivityItemModel.toEntity(): ActivityItemEntity {
             id = id,
             action = action,
             title = "Jadwal $semester",
-            subTitle = if (isSuccess) "Jadwal Baru Ditambahkan" else "Gagal menambahkan jadwal",
+            subTitle = if (isSuccess) "Jadwal berhasil baru ditambahkan" else "Jadwal gagal baru ditambahkan",
             changeTime = changeTime
         )
     }

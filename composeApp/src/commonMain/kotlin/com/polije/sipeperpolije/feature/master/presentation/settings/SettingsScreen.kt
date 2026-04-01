@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -29,6 +28,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -42,14 +42,39 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.polije.sipeperpolije.LocalSnackbarHostState
+import com.polije.sipeperpolije.feature.master.presentation.settings.viewmodel.SettingsAction
+import com.polije.sipeperpolije.feature.master.presentation.settings.viewmodel.SettingsEvent
+import com.polije.sipeperpolije.feature.master.presentation.settings.viewmodel.SettingsViewModel
+import com.polije.sipeperpolije.utils.ObserveAsEvent
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    settingsViewModel: SettingsViewModel = koinViewModel(),
     navigateToEditHari: () -> Unit,
-    navigateToEditRuangan: () -> Unit
+    navigateToEditRuangan: () -> Unit,
+    onLogout: () -> Unit
 ) {
+
+    val snackbarHostState = LocalSnackbarHostState.current
+
+    ObserveAsEvent(settingsViewModel.events) {
+        when (it) {
+            is SettingsEvent.LogoutSuccess -> {
+                onLogout()
+                snackbarHostState.showSnackbar("User Logout")
+            }
+
+            is SettingsEvent.LogoutFailed -> {
+
+            }
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -192,21 +217,21 @@ fun SettingsScreen(
             Spacer(Modifier.height(32.dp))
 
             // Akun & Aplikasi
-            Column(Modifier.fillMaxWidth()) {
-                Text(
-                    text = "Akun & Aplikasi",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
-                )
-                SettingsItem(Icons.Outlined.Lock, "Ganti Password", onClick = {})
-            }
-
-
-            Spacer(Modifier.height(24.dp))
+//            Column(Modifier.fillMaxWidth()) {
+//                Text(
+//                    text = "Akun & Aplikasi",
+//                    style = MaterialTheme.typography.labelMedium,
+//                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+//                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
+//                )
+//                SettingsItem(Icons.Outlined.Lock, "Ganti Password", onClick = {})
+//            }
+//
+//
+//            Spacer(Modifier.height(24.dp))
 
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { settingsViewModel.onAction(SettingsAction.OnLogoutPressed) },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(12.dp),
             ) {

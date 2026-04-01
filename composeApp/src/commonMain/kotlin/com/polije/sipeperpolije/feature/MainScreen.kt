@@ -125,7 +125,7 @@ fun MainScreen(
                     navController.navigate(EditJadwalHariScreen)
                 }, navigateToEditRuangan = {
                     navController.navigate(EditJadwalRuanganScreen)
-                })
+                }, onLogout = onLogout)
             }
 
             composable<DetailDosen> { backStackEntry ->

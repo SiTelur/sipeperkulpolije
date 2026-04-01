@@ -12,17 +12,24 @@ data class MataKuliah(
     val sksTeori: Int,
     val sksPraktek: Int,
     val semester: Int,
-    val kelas: String = "" // ← FIX DI SINI
+    val kelas: String = ""
 ) {
     val isWorkshop: Boolean = (sksPraktek == 4)
     val pertemuanPerMinggu: Int = if (isWorkshop) 2 else 1
 
-    val kelasKey: String = "$semester-$kelas"
+    fun getNamaLengkap(): String {
+        val kelasLabel = if (kelas.isNotEmpty()) " $kelas" else ""
+        return if (pertemuanPerMinggu > 1) {
+            "${nama}$kelasLabel"
+        } else {
+            nama
+        }
+    }
 
     val durasiJam: Int = run {
         val teori = sksTeori * DurasiConfig.jamPerSksTeori
         val praktik = if (isWorkshop) {
-            (sksPraktek / 2) * DurasiConfig.jamPerSksPraktik 
+            (sksPraktek / 2) * DurasiConfig.jamPerSksPraktik
         } else {
             sksPraktek * DurasiConfig.jamPerSksPraktik // 1 SKS Praktek = 2 Jam
         }
@@ -326,13 +333,13 @@ class WelchPowellAlgorithm {
         // Termasuk jika salah satu adalah kelas umum (kelas kosong) di semester yang sama
         val jadwalTerkait = jadwalHariIni.filter {
             it.mataKuliah.dosen == mataKuliah.dosen ||
-            (it.mataKuliah.semester == mataKuliah.semester &&
-             (it.mataKuliah.kelas == mataKuliah.kelas || it.mataKuliah.kelas.isEmpty() || mataKuliah.kelas.isEmpty()))
+                    (it.mataKuliah.semester == mataKuliah.semester &&
+                            (it.mataKuliah.kelas == mataKuliah.kelas || it.mataKuliah.kelas.isEmpty() || mataKuliah.kelas.isEmpty()))
         }
 
         if (jadwalTerkait.isNotEmpty()) {
             prioritas += 20 // Bonus karena jadwal berada di hari yang sudah ada target mahasiswa/dosen
-            
+
             // Penalti agar kelas dari SATU GRUP (atau dosen) tidak terlalu menumpuk/overload di 1 hari (>3 kelas)
             if (jadwalTerkait.size >= 3) {
                 prioritas -= (jadwalTerkait.size - 2) * 20
@@ -357,19 +364,21 @@ class WelchPowellAlgorithm {
 
         // SNAP TO GRID: Beri bonus agar kelas SELALU menempel pada pinggir pagi atau pasca istirahat
         val isAwalHari = slot.jamMulai == slot.hari.jamPelajaran.first()
-        val isSetelahIstirahat = slot.hari.jamIstirahat != IntRange.EMPTY && slot.jamMulai == slot.hari.jamIstirahat.last + 1
+        val isSetelahIstirahat =
+            slot.hari.jamIstirahat != IntRange.EMPTY && slot.jamMulai == slot.hari.jamIstirahat.last + 1
         if (isAwalHari || isSetelahIstirahat) {
             prioritas += 10
         }
 
         // 2. Bonus "back-to-back" / jadwal nempel
         for (existing in jadwalTerkait) {
-            val isMemangNempel = existing.slot.jamSelesai == slot.jamMulai || slot.jamSelesai == existing.slot.jamMulai
-            
+            val isMemangNempel =
+                existing.slot.jamSelesai == slot.jamMulai || slot.jamSelesai == existing.slot.jamMulai
+
             val br = slot.hari.jamIstirahat
             val isNempelKarenaIstirahat = if (br != IntRange.EMPTY) {
                 (existing.slot.jamSelesai == br.first && slot.jamMulai == br.last + 1) ||
-                (slot.jamSelesai == br.first && existing.slot.jamMulai == br.last + 1)
+                        (slot.jamSelesai == br.first && existing.slot.jamMulai == br.last + 1)
             } else false
 
             if (isMemangNempel || isNempelKarenaIstirahat) {
@@ -433,7 +442,7 @@ class WelchPowellAlgorithm {
         println("Urutan mata kuliah berdasarkan degree:")
         expandedMK.forEach { (mk, pertemuan, degree) ->
             val suffix = if (mk.pertemuanPerMinggu > 1) " (Pertemuan $pertemuan)" else ""
-            println("  ${mk.nama}$suffix — Degree: $degree, Durasi: ${mk.durasiJam} jam")
+            println("  ${mk.getNamaLengkap()}$suffix — Degree: $degree, Durasi: ${mk.durasiJam} jam")
         }
         println()
 
@@ -459,7 +468,7 @@ class WelchPowellAlgorithm {
                 isSuccess = false
                 unscheduledList.add(
                     UnscheduledItem(
-                        namaMk = mataKuliah.nama,
+                        namaMk = mataKuliah.getNamaLengkap(),
                         semester = mataKuliah.semester,
                         sks = mataKuliah.sksTeori + mataKuliah.sksPraktek,
                         namaDosen = mataKuliah.dosen.nama,
@@ -478,14 +487,25 @@ class WelchPowellAlgorithm {
                 .map { slot ->
                     SlotPriority(
                         slot,
-                        hitungPrioritasSlot(slot, mataKuliah, jadwalPerHari, pertemuanKe, pertemuan1Slot)
+                        hitungPrioritasSlot(
+                            slot,
+                            mataKuliah,
+                            jadwalPerHari,
+                            pertemuanKe,
+                            pertemuan1Slot
+                        )
                     )
                 }
                 .sortedWith(
                     compareBy<SlotPriority> { item ->
-                        daftarHari.indexOfFirst { it.nama.equals(item.slot.hari.nama, ignoreCase = true) }
+                        daftarHari.indexOfFirst {
+                            it.nama.equals(
+                                item.slot.hari.nama,
+                                ignoreCase = true
+                            )
+                        }
                     }.thenBy { it.slot.jamMulai }
-                     .thenByDescending { it.priority } // Heuristic sebagai tie-breaker
+                        .thenByDescending { it.priority } // Heuristic sebagai tie-breaker
                 )
 
             val ruanganCocok = getRuanganCocok(mataKuliah, daftarRuangan)
@@ -533,7 +553,7 @@ class WelchPowellAlgorithm {
                 println("✗ GAGAL: ${mataKuliah.nama}$suffix tidak bisa dijadwalkan!")
                 unscheduledList.add(
                     UnscheduledItem(
-                        namaMk = mataKuliah.nama,
+                        namaMk = mataKuliah.getNamaLengkap(),
                         semester = mataKuliah.semester,
                         sks = mataKuliah.sksTeori + mataKuliah.sksPraktek,
                         namaDosen = mataKuliah.dosen.nama,
@@ -552,43 +572,58 @@ class WelchPowellAlgorithm {
         while (adaPerubahan && compactionLoop < 3) { // Max 3 shift passes
             adaPerubahan = false
             compactionLoop++
-            
+
             // Urutkan dari yang paling akhir untuk digeser ke awal
             val snapshotJadwal = jadwal.sortedWith(
                 compareByDescending<JadwalItem> { item ->
-                    daftarHari.indexOfFirst { it.nama.equals(item.slot.hari.nama, ignoreCase = true) }
+                    daftarHari.indexOfFirst {
+                        it.nama.equals(
+                            item.slot.hari.nama,
+                            ignoreCase = true
+                        )
+                    }
                 }.thenByDescending { it.slot.jamMulai }
             )
-            
+
             for (item in snapshotJadwal) {
                 // Cabut sementara item
                 jadwal.remove(item)
                 conflictIndex.remove(item)
                 jadwalPerHari[item.slot.hari]?.remove(item)
-                
+
                 val durasi = item.slot.jamSelesai - item.slot.jamMulai
                 val availableSlots = generateSlotsForDuration(durasi)
                 val ruanganCocok = getRuanganCocok(item.mataKuliah, daftarRuangan)
-                
+
                 var slotBaruDitemukan: JadwalItem? = null
-                
+
                 searchSlot@ for (kandidatSlot in availableSlots) {
-                    val candHariIdx = daftarHari.indexOfFirst { it.nama.equals(kandidatSlot.hari.nama, ignoreCase = true) }
-                    val currHariIdx = daftarHari.indexOfFirst { it.nama.equals(item.slot.hari.nama, ignoreCase = true) }
-                    
+                    val candHariIdx = daftarHari.indexOfFirst {
+                        it.nama.equals(
+                            kandidatSlot.hari.nama,
+                            ignoreCase = true
+                        )
+                    }
+                    val currHariIdx = daftarHari.indexOfFirst {
+                        it.nama.equals(
+                            item.slot.hari.nama,
+                            ignoreCase = true
+                        )
+                    }
+
                     // Hanya target slot yg benar-benar LUAR BIASA lebih awal
                     if (candHariIdx > currHariIdx) continue
                     if (candHariIdx == currHariIdx && kandidatSlot.jamMulai >= item.slot.jamMulai) continue
-                    
+
                     // Kalau praktek > 1 pertemuan per minggu, jangan sampai nimpa hari yg sama
                     var melanggarHariSama = false
                     if (item.mataKuliah.pertemuanPerMinggu > 1) {
-                        melanggarHariSama = jadwal.any { 
-                            it.mataKuliah == item.mataKuliah && it.slot.hari == kandidatSlot.hari 
+                        melanggarHariSama = jadwal.any {
+                            it.mataKuliah == item.mataKuliah && it.slot.hari == kandidatSlot.hari
                         }
                     }
                     if (melanggarHariSama) continue
-                    
+
                     for (kandidatRuangan in ruanganCocok) {
                         val adaKonflik = conflictIndex
                             .candidates(item.mataKuliah, kandidatSlot, kandidatRuangan)
@@ -599,20 +634,25 @@ class WelchPowellAlgorithm {
                                     kandidatRuangan, existing.ruangan
                                 )
                             }
-                            
+
                         if (!adaKonflik) {
-                            slotBaruDitemukan = JadwalItem(item.mataKuliah, kandidatRuangan, kandidatSlot, item.pertemuanKe)
+                            slotBaruDitemukan = JadwalItem(
+                                item.mataKuliah,
+                                kandidatRuangan,
+                                kandidatSlot,
+                                item.pertemuanKe
+                            )
                             break@searchSlot
                         }
                     }
                 }
-                
+
                 val targetItem = slotBaruDitemukan ?: item
                 if (slotBaruDitemukan != null) {
                     adaPerubahan = true
                     println("➜ COMPACTION PASS: Menggeser ${item.getNamaLengkap()} dari ${item.slot.hari.nama} ${item.slot.jamMulai} ke ${targetItem.slot.hari.nama} ${targetItem.slot.jamMulai}")
                 }
-                
+
                 jadwal.add(targetItem)
                 conflictIndex.add(targetItem)
                 jadwalPerHari.getOrPut(targetItem.slot.hari) { mutableListOf() }.add(targetItem)

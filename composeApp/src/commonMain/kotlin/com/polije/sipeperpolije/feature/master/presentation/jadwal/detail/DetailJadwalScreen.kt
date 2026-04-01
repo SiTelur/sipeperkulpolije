@@ -79,11 +79,11 @@ fun DetailJadwalScreen(
             }
 
             is DetailJadwalEvent.OnFailureDownloadJadwal -> {
-                snackbarHost.showSnackbar("Berhasil mengunduh jadwal")
+                snackbarHost.showSnackbar("Berhasil mengunduh jadwal" + event.message)
             }
 
             DetailJadwalEvent.OnSuccessDownloadJadwal -> {
-                snackbarHost.showSnackbar("Gagal mengunduh jadwal")
+                snackbarHost.showSnackbar("Berhasil mengunduh jadwal")
 
             }
         }

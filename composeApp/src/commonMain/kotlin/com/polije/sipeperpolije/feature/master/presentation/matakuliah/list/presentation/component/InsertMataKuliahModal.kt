@@ -172,7 +172,7 @@ fun InsertMataKuliahModal(
                 ) {
                     OutlinedTextField(
                         state = sksTeori,
-                        label = { Text("Jumlah SKS Praktek") },
+                        label = { Text("Jumlah SKS Teori") },
                         inputTransformation = InputTransformation {
                             val filtered = asCharSequence().filter { it.isDigit() }.take(1)
                             replace(0, length, filtered)

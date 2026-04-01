@@ -194,7 +194,13 @@ fun MataKuliahDetailScreen(
                             semester = state.detail!!.semester
                         )
                     }
-                    item { QuickStats(state.detail!!.kode, state.detail!!.sksTeori) }
+                    item {
+                        QuickStats(
+                            state.detail!!.kode,
+                            state.detail!!.sksTeori,
+                            state.detail!!.sksPraktek
+                        )
+                    }
                     item {
                         InfoSection(
                             state.detail!!.namaPenampu,
@@ -344,7 +350,7 @@ private fun HeroSection(name: String, kelas: String, semester: Int) {
 }
 
 @Composable
-private fun QuickStats(kode: String, sks: Int) {
+private fun QuickStats(kode: String, sksTeori: Int, sksPraktek: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -360,7 +366,7 @@ private fun QuickStats(kode: String, sks: Int) {
         StatCard(
             modifier = Modifier.weight(1f),
             label = "Kredit",
-            value = "$sks SKS",
+            value = "Teori $sksTeori SKS | Praktek $sksPraktek SKS",
             icon = Icons.Default.School
         )
     }
@@ -381,7 +387,7 @@ private fun StatCard(
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
