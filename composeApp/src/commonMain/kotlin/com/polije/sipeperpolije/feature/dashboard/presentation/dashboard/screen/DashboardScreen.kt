@@ -71,8 +71,8 @@ fun DashboardScreen(
     ObserveAsEvent(viewModel.events) { event ->
         when (event) {
             is DashboardEvent.LogoutSuccess -> {
-                snackBarState.showSnackbar("User Logout")
                 onLogout()
+                snackBarState.showSnackbar("User Logout")
             }
 
             is DashboardEvent.LogoutFailed -> {
