@@ -1,0 +1,253 @@
+package com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.component
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndSelectAll
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.DosenUI
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InsertMataKuliahModal(
+    modalBottomSheetState: SheetState,
+    onDismiss: () -> Unit,
+    listDosen: List<DosenUI>,
+    onSave: (nama: String, kode: String, sksTeori: Int, sksPraktek: Int, semester: Int, idDosen: Int?, isActive: Boolean, namaDosen: String?, namaKelas: String) -> Unit
+) {
+    val namaMataKuliahState = rememberTextFieldState()
+    val kodeMataKuliahState = rememberTextFieldState()
+    val namaDosenState = rememberTextFieldState()
+    val sksTeori = rememberTextFieldState()
+    val sksPraktek = rememberTextFieldState()
+    val semesterState = rememberTextFieldState()
+    var expandedSemester by remember { mutableStateOf(false) }
+    var namaKelasMataKuliahState = rememberTextFieldState()
+    val semesterOptions = (1..6)
+    var isActive by remember { mutableStateOf(false) }
+
+    var sksTeoriInsert = 0
+    var sksPraktekInsert = 0
+    var semester = 0
+    var idDosen: Int? = null
+
+    val isFormValid by remember {
+        derivedStateOf {
+            namaMataKuliahState.text.isNotBlank() &&
+                    kodeMataKuliahState.text.isNotBlank() &&
+                    namaDosenState.text.isNotBlank() &&
+                    sksTeori.text.toString().toIntOrNull() != null &&
+                    sksPraktek.text.toString().toIntOrNull() != null &&
+                    semesterState.text.toString().toIntOrNull() != null
+        }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = modalBottomSheetState,
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Row {
+                Text(
+                    text = "Tambah Mata Kuliah",
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+            }
+            Text(
+                text = "Lengkapi detail mata kuliah baru di bawah ini.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                OutlinedTextField(
+                    state = namaMataKuliahState,
+                    label = { Text("Nama Mata Kuliah") },
+                    placeholder = { Text("Contoh: Pemrograman Web") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    state = namaKelasMataKuliahState,
+                    label = { Text("Nama Kelas Mata Kuliah") },
+                    placeholder = { Text("Contoh : A, B, C, D") },
+                    inputTransformation = InputTransformation {
+                        val filtered =
+                            asCharSequence().filter { it.isLetter() }.take(1).toString().uppercase()
+                        replace(0, length, filtered)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    state = kodeMataKuliahState,
+                    label = { Text("Kode Mata Kuliah") },
+                    placeholder = { Text("Contoh: IF-101") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                DosenSearchBar(
+                    namaDosenState,
+                    items = listDosen,
+                    label = "Dosen Pengampu",
+                    onItemSelected = {
+                        idDosen = it.id
+                        namaDosenState.setTextAndSelectAll(it.nama)
+                    })
+
+                ExposedDropdownMenuBox(
+                    expanded = expandedSemester,
+                    onExpandedChange = { expandedSemester = !expandedSemester },
+                ) {
+                    OutlinedTextField(
+                        state = semesterState,
+                        readOnly = true,
+                        label = { Text("Semester") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSemester)
+                        },
+                        modifier = Modifier.menuAnchor(
+                            ExposedDropdownMenuAnchorType.PrimaryEditable,
+                            enabled = true
+                        ).fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedSemester,
+                        onDismissRequest = { expandedSemester = false }
+                    ) {
+                        semesterOptions.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text("Semester ke $option") },
+                                onClick = {
+                                    semesterState.setTextAndSelectAll("Semester ke $option")
+                                    semester = option
+                                    expandedSemester = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    OutlinedTextField(
+                        state = sksTeori,
+                        label = { Text("Jumlah SKS Teori") },
+                        inputTransformation = InputTransformation {
+                            val filtered = asCharSequence().filter { it.isDigit() }.take(1)
+                            replace(0, length, filtered)
+                        },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    OutlinedTextField(
+                        state = sksPraktek,
+                        label = { Text("Jumlah SKS Praktek") },
+                        inputTransformation = InputTransformation {
+                            val filtered = asCharSequence().filter { it.isDigit() }.take(1)
+                            replace(0, length, filtered)
+                        },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Aktif")
+                Switch(
+                    checked = isActive,
+                    onCheckedChange = { checked -> isActive = checked })
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                enabled = isFormValid,
+                onClick = {
+                    onSave(
+                        namaMataKuliahState.text.toString(),
+                        kodeMataKuliahState.text.toString(),
+                        sksTeoriInsert,
+                        sksPraktekInsert,
+                        semester,
+                        idDosen,
+                        isActive,
+                        namaDosenState.text.toString(),
+                        namaKelasMataKuliahState.text.toString()
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(
+                    text = "Simpan Mata Kuliah",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+            ) {
+                Text(
+                    text = "Batal",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(modifier = Modifier.height(40.dp))
+        }
+    }
+
+}

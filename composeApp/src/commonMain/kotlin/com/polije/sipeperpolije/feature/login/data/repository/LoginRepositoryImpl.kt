@@ -17,7 +17,6 @@ class LoginRepositoryImpl(val supabase: SupabaseClient) : LoginRepository {
         }
     }
 
-
     override fun isLogin(): Flow<Boolean> = supabase.auth.sessionStatus.map {
         when (it) {
             is SessionStatus.Authenticated -> true

@@ -4,6 +4,7 @@ data class DashboardEntity(
     val dosenActiveCount: Int,
     val matkulActiveCount: Int,
     val isLastGeneratedScheduleSuccess: Boolean,
+    val totalGenerateJadwalCount: Int,
     val recentActivities: List<ActivityItemEntity>
 )
 
