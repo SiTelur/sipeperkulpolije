@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -32,7 +31,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -41,12 +39,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.polije.sipeperpolije.LocalSnackbarHostState
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.component.DosenListItem
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.component.InsertDosenModal
-import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.DosenUI
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.ListDosenAction
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.ListDosenEvent
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.ListDosenViewModel
 import com.polije.sipeperpolije.utils.ObserveAsEvent
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -55,7 +51,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun DosenScreen(
     dosenListViewModel: ListDosenViewModel = koinViewModel(),
     resultFromDetail: Boolean?,
-    onListItemClick: (DosenUI) -> Unit
+    onListItemClick: (Int) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
     val snackBarState = LocalSnackbarHostState.current
@@ -70,10 +66,13 @@ fun DosenScreen(
                 snackBarState.showSnackbar(it.toString())
             }
 
-            is ListDosenEvent.OnSaveError -> {}
+            is ListDosenEvent.OnSaveError -> {
+
+            }
 
             ListDosenEvent.OnSaveSuccess -> {
-                dosenListViewModel.resetItems()
+                dosenListViewModel.onAction(ListDosenAction.OnInitial)
+
             }
         }
     }
@@ -81,7 +80,7 @@ fun DosenScreen(
     LaunchedEffect(resultFromDetail) {
         resultFromDetail?.let {
             if (it) {
-                dosenListViewModel.resetItems()
+                dosenListViewModel.onAction(ListDosenAction.OnInitial)
             }
         }
     }
@@ -102,27 +101,31 @@ fun DosenScreen(
             )
         },
     ) { paddingValues ->
-        val lazyListState = rememberLazyListState()
 
-        LaunchedEffect(state.dosens) {
-            snapshotFlow {
-                lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-            }.distinctUntilChanged().collect {
-                if (it == state.dosens.lastIndex) {
-                    dosenListViewModel.loadNextItems()
-                }
-            }
-        }
 
         LazyColumn(
-            state = lazyListState,
             modifier = Modifier.fillMaxSize().padding(paddingValues),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(state.dosens, key = { it.id }) {
-                DosenListItem(it.initial, name = it.nama, nidn = it.nidn) {
-                    onListItemClick(it)
+            items(state.dosenGrouped, key = { it.tipeDosen.ordinal }) { group ->
+                // Header judul grup
+                Text(
+                    text = group.tipeDosen.name.replace("_", " "), // atau label yang lebih readable
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+
+                // List dosen dalam grup
+                group.listDosen.forEach { dosen ->
+                    DosenListItem(
+                        dosen.initial,
+                        name = dosen.nama,
+                        nidn = dosen.nidn,
+                        dosen.isActive
+                    ) {
+                        onListItemClick(dosen.id)
+                    }
                 }
             }
 
@@ -147,7 +150,7 @@ fun DosenScreen(
                                 showInsertDosenModal = false
                             }
                         }
-                    }, onSaveAction = { nama, nidn ->
+                    }, onSaveAction = { nama, nidn, isActive, tipeDosen ->
                         scope.launch {
                             modalBottomSheetState.hide()
                         }.invokeOnCompletion {
@@ -156,7 +159,14 @@ fun DosenScreen(
                             }
                         }
 
-                        dosenListViewModel.onAction(ListDosenAction.InsertDosen(nama, nidn))
+                        dosenListViewModel.onAction(
+                            ListDosenAction.InsertDosen(
+                                nama,
+                                nidn,
+                                isActive,
+                                tipeDosen
+                            )
+                        )
                     })
 
             }

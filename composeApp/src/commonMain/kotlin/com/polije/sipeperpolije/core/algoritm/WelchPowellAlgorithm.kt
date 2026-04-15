@@ -110,6 +110,13 @@ data class JadwalDataItem(
 data class JadwalPerItem(val nama: String, val items: List<JadwalDataItem>)
 
 @Serializable
+data class DosenSummary(
+    @SerialName("nama_dosen") val namaDosen: String,
+    @SerialName("total_sks") val totalSks: Int,
+    @SerialName("total_sesi") val totalSesi: Int
+)
+
+@Serializable
 data class Jadwal(
     val title: String,
     @SerialName("is_success") val isSuccess: Boolean,
@@ -117,7 +124,8 @@ data class Jadwal(
     @SerialName("jadwal_view") val listJadwalView: List<JadwalPerItem>,
     val semester: String,
     @SerialName("unscheduled_count") val unscheduledCount: Int = 0,
-    @SerialName("unscheduled_items") val unscheduledItems: List<UnscheduledItem> = emptyList()
+    @SerialName("unscheduled_items") val unscheduledItems: List<UnscheduledItem> = emptyList(),
+    val summary: List<DosenSummary> = emptyList()
 )
 
 @Serializable
@@ -822,6 +830,20 @@ class WelchPowellAlgorithm {
                 )
             }
 
+        val dosenSummary = jadwal
+            .groupBy { it.mataKuliah.dosen }
+            .entries.sortedBy { it.key.nama }
+            .map { (dosen, items) ->
+                DosenSummary(
+                    namaDosen = dosen.nama,
+                    totalSks = items.map { it.mataKuliah }
+                        .toSet()
+                        .sumOf { it.sksTeori + it.sksPraktek },
+                    totalSesi = items.size
+                )
+            }
+
+
         val groupedByHari = jadwalData
             .groupBy { it.hari }
             .entries.sortedBy { (hari, _) -> HARI_ORDER[hari.lowercase()] ?: Int.MAX_VALUE }
@@ -829,7 +851,7 @@ class WelchPowellAlgorithm {
 
         return Jadwal(
             title, isSuccess, groupedByRuangan, groupedByHari, semester,
-            unscheduledItems.size, unscheduledItems
+            unscheduledItems.size, unscheduledItems, dosenSummary
         )
     }
 

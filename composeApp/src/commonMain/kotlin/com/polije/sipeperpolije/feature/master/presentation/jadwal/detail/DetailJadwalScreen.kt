@@ -150,6 +150,50 @@ fun DetailJadwalScreen(
 
                 !state.isLoading -> {
                     if (state.jadwal.isSuccess) {
+                        item {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Text(
+                                        "Beban Mengajar Dosen",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(bottom = 12.dp)
+                                    )
+                                    state.jadwal.summary.forEach { dosen ->
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 4.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = dosen.namaDosen,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                                SummaryChip(
+                                                    label = "${dosen.totalSks} SKS",
+                                                    color = Color(0xFF3B82F6)
+                                                )
+                                                SummaryChip(
+                                                    label = "${dosen.totalSesi} Sesi",
+                                                    color = Color(0xFF10B981)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         items(state.jadwal.jadwalView) {
                             DaySchedule(it)
                         }
@@ -264,6 +308,21 @@ fun ErrorGenerateListItem(unsheduledItem: UnscheduledItemUI, modifier: Modifier 
             )
             Text("Alasan: ${unsheduledItem.alasan}", style = MaterialTheme.typography.bodySmall)
         }
+    }
+}
+
+@Composable
+fun SummaryChip(label: String, color: Color) {
+    Box(
+        modifier = Modifier
+            .background(color.copy(alpha = 0.1f), RoundedCornerShape(50))
+            .padding(horizontal = 10.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = label,
+            color = color,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold)
+        )
     }
 }
 

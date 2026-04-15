@@ -33,11 +33,12 @@ fun DosenListItem(
     initials: String,
     name: String,
     nidn: String,
+    isActive : Boolean,
     modifier: Modifier = Modifier,
     onItemClick: () -> Unit
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().padding(vertical = 4.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -77,13 +78,14 @@ fun DosenListItem(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-//            Text(
-//                text = dosen.faculty,
-//                style = MaterialTheme.typography.bodySmall,
-//                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-//            )
+                if (!isActive){
+                    Text(
+                        text = "Nonaktif",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                }
             }
-
             DosenDropdownMenu()
         }
     }
@@ -93,6 +95,6 @@ fun DosenListItem(
 @Composable
 fun DosenListItemPreview() {
     AppTheme {
-        DosenListItem(initials = "A", name = "Ahmad Dina", nidn = "29023042", onItemClick = {})
+        DosenListItem(initials = "A", name = "Ahmad Dina", nidn = "29023042", isActive = false,onItemClick = {})
     }
 }

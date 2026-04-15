@@ -74,11 +74,13 @@ fun appModule() = module {
     }
 
     factoryOf(::LoginRepositoryImpl) { bind<LoginRepository>() }
+    factoryOf(::MasterRepositoryImpl) { bind<MasterRepository>() }
+    factoryOf(::DashboardRepositoryImpl) { bind<DashboardRepository>() }
+
     singleOf(::LoginUseCase)
     singleOf(::IsLoginUseCase)
     viewModelOf(::LoginViewModel)
 
-    factoryOf(::DashboardRepositoryImpl) { bind<DashboardRepository>() }
     singleOf(::PreviewJadwalUseCase)
     singleOf(::LogoutUseCase)
     singleOf(::FetchDashboardUseCase)
@@ -86,7 +88,6 @@ fun appModule() = module {
     viewModelOf(::DashboardViewModel)
     viewModelOf(::GenerateJadwalViewModel)
 
-    factoryOf(::MasterRepositoryImpl) { bind<MasterRepository>() }
 
     singleOf(::ListDosenPagingUseCase)
     viewModelOf(::ListDosenViewModel)
@@ -100,9 +101,9 @@ fun appModule() = module {
     viewModelOf(::ListMataKuliahViewModel)
     viewModelOf(::DetailMataKuliahViewModel)
 
+    singleOf(::DetailDosenUseCase)
     singleOf(::UpdateDosenUseCase)
     singleOf(::DeleteDosenUseCase)
-    singleOf(::DetailDosenUseCase)
     singleOf(::InsertDosenUseCase)
     viewModelOf(::DetailDosenViewModel)
 

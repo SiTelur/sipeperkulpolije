@@ -1,5 +1,6 @@
 package com.polije.sipeperpolije.feature.master.data.model
 
+import com.polije.sipeperpolije.feature.master.domain.entity.DosenSummaryEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.JadwalEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.JadwalItemEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.JadwalPerItemEntity
@@ -21,7 +22,15 @@ data class JadwalModel(
     @SerialName("unscheduled_count")
     val unscheduledCount: Int = 0,
     @SerialName("unscheduled_items")
-    val unscheduledItems: List<UnscheduledItemModel> = emptyList()
+    val unscheduledItems: List<UnscheduledItemModel> = emptyList(),
+    val summary: List<DosenSummaryModel> = emptyList()
+)
+
+@Serializable
+data class DosenSummaryModel(
+    @SerialName("nama_dosen") val namaDosen: String,
+    @SerialName("total_sks") val totalSks: Int,
+    @SerialName("total_sesi") val totalSesi: Int
 )
 
 @Serializable
@@ -70,6 +79,13 @@ private fun JadwalItemModel.toEntity() = JadwalItemEntity(
     semester = semester, hari = hari, namaRuangan = namaRuangan, sks = sks
 )
 
+private fun DosenSummaryModel.toEntity() = DosenSummaryEntity(
+    namaDosen = namaDosen,
+    totalSks = totalSks,
+    totalSesi = totalSesi
+)
+
+
 fun JadwalModel.toEntity() = JadwalEntity(
     id = id,
     title = title,
@@ -78,5 +94,6 @@ fun JadwalModel.toEntity() = JadwalEntity(
     jadwal = listJadwal.map { it.toEntity() },
     jadwalView = listJadwalView.map { it.toEntity() },
     unscheduledCount = unscheduledCount,
-    unscheduledItems = unscheduledItems.map { it.toEntity() }
+    unscheduledItems = unscheduledItems.map { it.toEntity() },
+    summary = summary.map { it.toEntity() }
 )

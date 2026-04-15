@@ -8,6 +8,7 @@ import com.polije.sipeperpolije.feature.master.data.model.HariModel
 import com.polije.sipeperpolije.feature.master.data.model.JadwalModel
 import com.polije.sipeperpolije.feature.master.data.model.MataKuliahModel
 import com.polije.sipeperpolije.feature.master.data.model.RuanganModel
+import com.polije.sipeperpolije.feature.master.data.model.TipeDosen
 import com.polije.sipeperpolije.feature.master.data.model.toEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.DosenEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.HariEntity
@@ -24,21 +25,14 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 
 class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
-    override suspend fun getDosenPaging(offset: Int, limit: Int): Result<List<DosenEntity>> {
+    override suspend fun getDosen(): Result<Map<TipeDosen, List<DosenEntity>>> {
         val response = try {
-            val safeOffset = offset.coerceAtLeast(0)
-            val safeLimit = limit.coerceAtLeast(1)
-
             val data = supabase
                 .from("dosen")
-                .select(columns = Columns.list("id", "nama", "nidn")) {
-                    range(
-                        from = safeOffset.toLong(),
-                        to = (safeOffset + safeLimit - 1).toLong()
-                    )
-                }
+                .select(columns = Columns.list("id", "nama", "nidn", "is_active", "tipe_dosen"))
                 .decodeList<DosenModel>().map { it.toEntity() }
-            data
+            val dataGrouped = data.groupBy { it.tipeDosen }
+            dataGrouped
         } catch (e: Exception) {
             currentCoroutineContext().ensureActive();
             return Result.failure(e)
@@ -46,14 +40,23 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
         return Result.success(response)
     }
 
-    override suspend fun getDetailDosenMataKuliah(id: Int): Result<List<MataKuliahEntity>> {
+    override suspend fun getDetailDosenMataKuliah(id: Int): Result<Pair<DosenEntity, List<MataKuliahEntity>>> {
         val response = try {
-            val data = supabase.from("mata_kuliah_view").select {
+            val dataMataKuliah = supabase.from("mata_kuliah_view").select {
                 filter {
                     MataKuliahModel::idPengampu eq id
                 }
             }.decodeList<MataKuliahModel>().map { it.toEntity() }
-            data
+
+            val detail = supabase.from("dosen")
+                .select(columns = Columns.list("id", "nama", "nidn", "is_active", "tipe_dosen")) {
+                    filter {
+                        DosenModel::id eq id
+                    }
+                    limit(1)
+                }.decodeSingle<DosenModel>().toEntity()
+
+            Pair(detail, dataMataKuliah)
         } catch (e: Exception) {
             currentCoroutineContext().ensureActive();
             return Result.failure(e)
@@ -84,6 +87,8 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                 {
                     set("nama", dosen.nama)
                     set("nidn", dosen.nidn)
+                    set("is_active", dosen.isActive)
+                    set("tipe_dosen", dosen.tipeDosen)
                 }
             ) {
                 filter {
@@ -235,7 +240,8 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                         "jadwal_view",
                         "semester",
                         "unscheduled_count",
-                        "unscheduled_items"
+                        "unscheduled_items",
+                        "summary"
                     )
                 ) {
                     filter {

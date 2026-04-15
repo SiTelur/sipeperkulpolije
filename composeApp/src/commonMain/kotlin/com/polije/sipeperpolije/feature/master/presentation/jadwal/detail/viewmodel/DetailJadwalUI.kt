@@ -5,9 +5,15 @@ data class DetailJadwalUI(
     val jadwal: List<DetailJadwalListUI> = emptyList(),
     val jadwalView: List<DetailJadwalListUI> = emptyList(),
     val unscheduledCount: Int = 0,
-    val unscheduledItems: List<UnscheduledItemUI> = emptyList()
+    val unscheduledItems: List<UnscheduledItemUI> = emptyList(),
+    val summary: List<DosenSummaryUI> = emptyList()
 )
 
+data class DosenSummaryUI(
+    val namaDosen: String,
+    val totalSks: Int,
+    val totalSesi: Int
+)
 
 data class DetailJadwalListUI(
     val nama: String,

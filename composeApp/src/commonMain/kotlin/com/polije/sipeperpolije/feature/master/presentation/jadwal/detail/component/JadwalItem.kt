@@ -33,9 +33,9 @@ import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmo
 @Composable
 fun JadwalItem(jadwal: DetailJadwalItemUI) {
     val semesterColor = when (jadwal.semester) {
-        1, 2 -> Color(0xFFFACC15)
-        3, 4 -> Color(0xFF10B981)
-        5, 6 -> Color(0xFF3B82F6)
+        1, 2 -> Color(0xFFFCE883)
+        3, 4 -> Color(0xFF90EE90)
+        5, 6 -> Color(0xFFADD8E6)
         else -> MaterialTheme.colorScheme.secondary
     }
     Card(

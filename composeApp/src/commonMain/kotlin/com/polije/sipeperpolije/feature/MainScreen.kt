@@ -21,7 +21,6 @@ import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.screen.
 import com.polije.sipeperpolije.feature.dashboard.presentation.generate.GenerateJadwalScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.screen.DetailDosenScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.screen.DosenScreen
-import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.DosenUI
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.DetailJadwalScreen
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.JadwalScreen
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.screen.MataKuliahDetailScreen
@@ -84,7 +83,7 @@ fun MainScreen(
                     ?.collectAsState()
 
                 DosenScreen(resultFromDetail = result?.value) {
-                    navController.navigate(DetailDosen(it.id, it.nama, it.nidn))
+                    navController.navigate(DetailDosen(it))
                 }
             }
 
@@ -131,11 +130,8 @@ fun MainScreen(
             composable<DetailDosen> { backStackEntry ->
                 val detailDosen: DetailDosen = backStackEntry.toRoute()
                 DetailDosenScreen(
-                    DosenUI(
-                        detailDosen.id,
-                        detailDosen.nama,
-                        nidn = detailDosen.nidn
-                    ), onNavigateBack = {
+                    id =
+                        detailDosen.id, onNavigateBack = {
                         navController.popBackStack()
                     }, onSuccessAction = {
                         navController.previousBackStackEntry
@@ -224,7 +220,7 @@ sealed class DashboardRoute(val route: String) {
 }
 
 @Serializable
-data class DetailDosen(val id: Int, val nama: String, val nidn: String)
+data class DetailDosen(val id: Int)
 
 @Serializable
 data class DetailMataKuliah(
