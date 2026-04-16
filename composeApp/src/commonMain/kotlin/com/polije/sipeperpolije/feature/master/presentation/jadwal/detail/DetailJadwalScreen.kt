@@ -1,5 +1,6 @@
 package com.polije.sipeperpolije.feature.master.presentation.jadwal.detail
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -52,7 +54,7 @@ import com.polije.sipeperpolije.theme.AppTheme
 import com.polije.sipeperpolije.utils.ObserveAsEvent
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun DetailJadwalScreen(
     id: Int,
@@ -167,26 +169,47 @@ fun DetailJadwalScreen(
                                         modifier = Modifier.padding(bottom = 12.dp)
                                     )
                                     state.jadwal.summary.forEach { dosen ->
-                                        Row(
+                                        Column(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(vertical = 4.dp),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
+                                                .padding(vertical = 8.dp)
                                         ) {
-                                            Text(
-                                                text = dosen.namaDosen,
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                modifier = Modifier.weight(1f)
-                                            )
-                                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                                SummaryChip(
-                                                    label = "${dosen.totalSks} SKS",
-                                                    color = Color(0xFF3B82F6)
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = dosen.namaDosen,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.Bold,
+                                                    modifier = Modifier.weight(1f)
                                                 )
                                                 SummaryChip(
                                                     label = "${dosen.totalSesi} Sesi",
                                                     color = Color(0xFF10B981)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                            ) {
+                                                BebanItem(
+                                                    label = "SKS Teori",
+                                                    value = "${dosen.sksTeori}"
+                                                )
+                                                BebanItem(
+                                                    label = "SKS Workshop",
+                                                    value = "${dosen.sksWorkshop}"
+                                                )
+                                                BebanItem(
+                                                    label = "SKS Ajar",
+                                                    value = "${dosen.sksAjar}"
+                                                )
+                                                BebanItem(
+                                                    label = "Beban SKS",
+                                                    value = "${dosen.bebanSks}"
                                                 )
                                             }
                                         }
@@ -215,11 +238,27 @@ fun DetailJadwalScreen(
 }
 
 @Composable
+fun BebanItem(label: String, value: String) {
+    Column {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
 fun LegendChip(semester: IntRange) {
     val color = when (semester) {
-        1..2 -> Color(0xFFFACC15)
-        3..4 -> Color(0xFF10B981)
-        5..6 -> Color(0xFF3B82F6)
+        1..2 -> Color(0xFFFCE883) // #FCE883
+        3..4 -> Color(0xFF90EE90) // #90EE90
+        5..6 -> Color(0xFFADD8E6) // #ADD8E6
         else -> MaterialTheme.colorScheme.secondary
     }
     Row(

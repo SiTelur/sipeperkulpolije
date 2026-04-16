@@ -5,6 +5,7 @@ import com.polije.sipeperpolije.core.algoritm.Dosen
 import com.polije.sipeperpolije.core.algoritm.Hari
 import com.polije.sipeperpolije.core.algoritm.MataKuliah
 import com.polije.sipeperpolije.core.algoritm.Ruangan
+import com.polije.sipeperpolije.core.algoritm.Teknisi
 import com.polije.sipeperpolije.core.algoritm.WelchPowellAlgorithm
 import com.polije.sipeperpolije.core.log
 import com.polije.sipeperpolije.core.logList
@@ -21,6 +22,7 @@ import com.polije.sipeperpolije.feature.master.data.model.HariModel
 import com.polije.sipeperpolije.feature.master.data.model.JadwalModel
 import com.polije.sipeperpolije.feature.master.data.model.MataKuliahModel
 import com.polije.sipeperpolije.feature.master.data.model.RuanganModel
+import com.polije.sipeperpolije.feature.master.data.model.TeknisiModel
 import com.polije.sipeperpolije.feature.master.data.model.toEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.JadwalEntity
 import io.github.jan.supabase.SupabaseClient
@@ -164,10 +166,19 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                 )
             }
 
+        val teknisi = supabase.from("teknisi").select(Columns.list("id", "nama", "is_active")) {
+            filter {
+                TeknisiModel::isActive eq true
+            }
+        }
+            .decodeList<TeknisiModel>().map { Teknisi(it.id, it.nama) }
+
+
         val jadwal = welchPowellAlgorithm.buatJadwal(
             rawJadwal,
             ruangan,
             hariJam,
+            teknisi,
             overrideDurasiWorkshop = workshopTime
         )
         welchPowellAlgorithm.tampilkanJadwal(jadwal.second, daftarRuangan = ruangan)
@@ -180,6 +191,7 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                         jadwal.first,
                         jadwal.second,
                         " ${semester.name.uppercase()}",
+                        rawJadwal,
                         jadwal.third
                     )
                 ) {
@@ -224,6 +236,12 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                     )
                 ).decodeList<HariModel>()
 
+            val teknisi = supabase.from("teknisi").select(Columns.list("id", "nama", "is_active")) {
+                filter {
+                    TeknisiModel::isActive eq true
+                }
+            }
+                .decodeList<TeknisiModel>()
 
             val dosenCache = mutableMapOf<Int, Dosen>()
 
@@ -286,6 +304,12 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                             "Jam Kuliah ${it.jamMulai} s/d ${it.jamSelesai} Jam Istirahat ${it.jamMulaiIstirahat ?: "-"} s/d ${it.jamSelesaiIstirahat ?: "-"}"
                         )
                     })
+            )
+
+            list.add(
+                PreviewJadwalModel(
+                    "Teknisi",
+                    listItem = teknisi.map { PreviewJadwalModelItem(it.nama, "") })
             )
 
             val result = list.map { it.toEntity() }.toList()

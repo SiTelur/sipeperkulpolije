@@ -6,6 +6,7 @@ import com.polije.sipeperpolije.feature.master.domain.entity.HariEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.JadwalEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.MataKuliahEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.RuanganEntity
+import com.polije.sipeperpolije.feature.master.domain.entity.TeknisiEntity
 
 interface MasterRepository {
     suspend fun getDosen(): Result<Map<TipeDosen, List<DosenEntity>>>
@@ -29,4 +30,10 @@ interface MasterRepository {
     suspend fun deleteRuangan(id: Int): Result<Boolean>
     suspend fun insertRuangan(ruangan: RuanganEntity): Result<Boolean>
     suspend fun downloadJadwal(id: Int): Result<Boolean>
+
+    suspend fun getTeknisi(): Result<List<TeknisiEntity>>
+    suspend fun updateTeknisi(teknisi: TeknisiEntity): Result<Boolean>
+    suspend fun deleteTeknisi(id: Int): Result<Boolean>
+    suspend fun insertTeknisi(teknisi: TeknisiEntity): Result<Boolean>
+
 }

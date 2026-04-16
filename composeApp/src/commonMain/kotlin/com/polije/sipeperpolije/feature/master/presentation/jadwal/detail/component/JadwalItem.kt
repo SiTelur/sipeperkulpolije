@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Workspaces
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -109,6 +110,22 @@ fun JadwalItem(jadwal: DetailJadwalItemUI) {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Semester ${jadwal.semester}", style = MaterialTheme.typography.bodySmall)
+                }
+                if (jadwal.namaTeknisi.isNullOrBlank().not()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Workspaces,
+                            contentDescription = "Teknisi",
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            "Teknisi: ${jadwal.namaTeknisi}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
             }
         }

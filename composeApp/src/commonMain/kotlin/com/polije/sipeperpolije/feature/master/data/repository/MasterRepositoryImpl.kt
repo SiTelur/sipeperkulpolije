@@ -8,6 +8,7 @@ import com.polije.sipeperpolije.feature.master.data.model.HariModel
 import com.polije.sipeperpolije.feature.master.data.model.JadwalModel
 import com.polije.sipeperpolije.feature.master.data.model.MataKuliahModel
 import com.polije.sipeperpolije.feature.master.data.model.RuanganModel
+import com.polije.sipeperpolije.feature.master.data.model.TeknisiModel
 import com.polije.sipeperpolije.feature.master.data.model.TipeDosen
 import com.polije.sipeperpolije.feature.master.data.model.toEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.DosenEntity
@@ -15,6 +16,7 @@ import com.polije.sipeperpolije.feature.master.domain.entity.HariEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.JadwalEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.MataKuliahEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.RuanganEntity
+import com.polije.sipeperpolije.feature.master.domain.entity.TeknisiEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.toModel
 import com.polije.sipeperpolije.feature.master.domain.repository.MasterRepository
 import io.github.jan.supabase.SupabaseClient
@@ -241,7 +243,8 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
                         "semester",
                         "unscheduled_count",
                         "unscheduled_items",
-                        "summary"
+                        "summary",
+                        "teknisi_summary"
                     )
                 ) {
                     filter {
@@ -413,12 +416,66 @@ class MasterRepositoryImpl(val supabase: SupabaseClient) : MasterRepository {
         return Result.success(true)
     }
 
-    companion object {
-        // Moved out of jadwalToJson so it's allocated once, not on every call
-        private val HARI_ORDER = mapOf(
-            "senin" to 1, "selasa" to 2, "rabu" to 3,
-            "kamis" to 4, "jumat" to 5, "sabtu" to 6, "minggu" to 7
-        )
+    override suspend fun getTeknisi(): Result<List<TeknisiEntity>> {
+        val response = try {
+            val data = supabase.from("teknisi")
+                .select(
+                    Columns.list(
+                        "id",
+                        "is_active",
+                        "nama",
+                    )
+                ).decodeList<TeknisiModel>()
+            data
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive();
+            log("error ${e.message}")
+            return Result.failure(e)
+        }
+        return Result.success(response.map { it.toEntity() })
+    }
+
+    override suspend fun updateTeknisi(teknisi: TeknisiEntity): Result<Boolean> {
+        val response = try {
+            supabase.from("teknisi").update({
+                TeknisiModel::nama setTo teknisi.nama
+                TeknisiModel::isActive setTo teknisi.isActive
+            }) {
+                filter {
+                    eq("id", teknisi.id)
+                }
+            }
+            true
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive()
+            return Result.failure(e)
+        }
+        return Result.success(response)
+    }
+
+    override suspend fun deleteTeknisi(id: Int): Result<Boolean> {
+        val response = try {
+            supabase.from("teknisi").delete {
+                filter {
+                    eq("id", id)
+                }
+            }
+            true
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive()
+            return Result.failure(e)
+        }
+        return Result.success(response)
+    }
+
+    override suspend fun insertTeknisi(teknisi: TeknisiEntity): Result<Boolean> {
+        val response = try {
+            supabase.from("teknisi").insert(teknisi.toModel())
+            true
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive()
+            return Result.failure(e)
+        }
+        return Result.success(response)
     }
 }
-

@@ -31,8 +31,11 @@ data class UnscheduledItemEntity(
 
 data class DosenSummaryEntity(
     val namaDosen: String,
-    val totalSks: Int,
-    val totalSesi: Int
+    val totalSesi: Int,
+    val sksTeori: Int,
+    val sksWorkshop: Int,
+    val sksAjar: Int,
+    val bebanSks: Int,
 )
 
 fun UnscheduledItemEntity.toUI() = UnscheduledItemUI(
@@ -51,14 +54,15 @@ data class JadwalPerItemEntity(
 )
 
 data class JadwalItemEntity(
+    val sks: Int,
+    val hari: String,
     val jamMulai: Int,
     val jamSelesai: Int,
-    val hari: String,
+    val semester: Int,
     val namaDosen: String,
     val namaJadwal: String,
-    val semester: Int,
     val namaRuangan: String,
-    val sks: Int
+    val namaTeknisi: String? = null
 )
 
 fun JadwalEntity.toUI() = JadwalUI(
@@ -75,12 +79,16 @@ fun JadwalItemEntity.toUI() = DetailJadwalItemUI(
     namaRuangan,
     sks,
     semester,
+    namaTeknisi
 )
 
 fun DosenSummaryEntity.toUI() = DosenSummaryUI(
-    namaDosen,
-    totalSks,
-    totalSesi
+    namaDosen = namaDosen,
+    totalSesi = totalSesi,
+    sksTeori = sksTeori,
+    sksWorkshop = sksWorkshop,
+    sksAjar = sksAjar,
+    bebanSks = bebanSks
 )
 
 

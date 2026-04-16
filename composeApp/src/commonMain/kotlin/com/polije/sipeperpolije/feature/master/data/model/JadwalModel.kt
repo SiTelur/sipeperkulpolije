@@ -23,14 +23,18 @@ data class JadwalModel(
     val unscheduledCount: Int = 0,
     @SerialName("unscheduled_items")
     val unscheduledItems: List<UnscheduledItemModel> = emptyList(),
-    val summary: List<DosenSummaryModel> = emptyList()
+    val summary: List<DosenSummaryModel> = emptyList(),
+    @SerialName("teknisi_summary") val teknisiSummary: List<TeknisiSummary> = emptyList()  // ← tambahkan ini
 )
 
 @Serializable
 data class DosenSummaryModel(
     @SerialName("nama_dosen") val namaDosen: String,
-    @SerialName("total_sks") val totalSks: Int,
-    @SerialName("total_sesi") val totalSesi: Int
+    @SerialName("total_sesi") val totalSesi: Int,
+    @SerialName("sks_teori") val sksTeori: Int,
+    @SerialName("sks_workshop") val sksWorkshop: Int,
+    @SerialName("sks_ajar") val sksAjar: Int,
+    @SerialName("beban_sks") val bebanSks: Int
 )
 
 @Serializable
@@ -41,12 +45,15 @@ data class JadwalPerItemModel(
 
 @Serializable
 data class JadwalItemModel(
-    val namaJadwal: String,
+    val sks: Int,
     val hari: String,
     val jamMulai: Int,
     val jamSelesai: Int,
+    val semester: Int,
     val namaDosen: String,
-    val semester: Int, val namaRuangan: String, val sks: Int
+    val namaJadwal: String,
+    val namaRuangan: String,
+    val namaTeknisi: String? = null
 )
 
 private fun JadwalPerItemModel.toEntity() = JadwalPerItemEntity(
@@ -71,18 +78,31 @@ fun UnscheduledItemModel.toEntity() = UnscheduledItemEntity(
     namaMk, semester, sks, namaDosen, pertemuanKe, alasan, degree
 )
 
+@Serializable
+data class TeknisiSummary(
+    @SerialName("nama_teknisi") val namaTeknisi: String,
+    @SerialName("total_sesi") val totalSesi: Int
+)
+
 private fun JadwalItemModel.toEntity() = JadwalItemEntity(
     jamMulai = jamMulai,
     jamSelesai = jamSelesai,
     namaDosen = namaDosen,
     namaJadwal = namaJadwal,
-    semester = semester, hari = hari, namaRuangan = namaRuangan, sks = sks
+    semester = semester,
+    hari = hari,
+    namaRuangan = namaRuangan,
+    sks = sks,
+    namaTeknisi = namaTeknisi
 )
 
 private fun DosenSummaryModel.toEntity() = DosenSummaryEntity(
     namaDosen = namaDosen,
-    totalSks = totalSks,
-    totalSesi = totalSesi
+    totalSesi = totalSesi,
+    sksTeori = sksTeori,
+    sksWorkshop = sksWorkshop,
+    sksAjar = sksAjar,
+    bebanSks = bebanSks
 )
 
 

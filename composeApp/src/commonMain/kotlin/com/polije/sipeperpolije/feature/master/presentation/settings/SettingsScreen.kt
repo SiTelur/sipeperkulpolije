@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -55,6 +56,7 @@ fun SettingsScreen(
     settingsViewModel: SettingsViewModel = koinViewModel(),
     navigateToEditHari: () -> Unit,
     navigateToEditRuangan: () -> Unit,
+    navigateToEditTeknisi: () -> Unit,
     onLogout: () -> Unit
 ) {
 
@@ -99,136 +101,45 @@ fun SettingsScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Konfigurasi Hari & Jam
+            // Konfigurasi Master Data
             Column(Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "Konfigurasi Hari & Jam",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Text(
+                    "Konfigurasi Master Data",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
                 Spacer(Modifier.height(12.dp))
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                    modifier = Modifier.clickable { navigateToEditHari() }
-                ) {
-                    Column(Modifier.padding(20.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    Icons.Outlined.CalendarMonth,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                            }
-                            Spacer(Modifier.size(16.dp))
-                            Column {
-                                Text(
-                                    "Jam & Hari",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                Text(
-                                    "Atur ketersediaan waktu dan hari",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-                }
+                
+                // Jam & Hari
+                SettingsCard(
+                    title = "Jam & Hari",
+                    subtitle = "Atur ketersediaan waktu dan hari",
+                    icon = Icons.Outlined.CalendarMonth,
+                    onClick = navigateToEditHari
+                )
 
                 Spacer(Modifier.height(8.dp))
 
+                // Ruangan
+                SettingsCard(
+                    title = "Ruangan",
+                    subtitle = "Atur ketersediaan ruangan",
+                    icon = Icons.Outlined.Place,
+                    onClick = navigateToEditRuangan
+                )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "Konfigurasi Hari & Jam",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Spacer(Modifier.height(12.dp))
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                    modifier = Modifier.clickable { navigateToEditRuangan() }
-                ) {
-                    Column(Modifier.padding(20.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    Icons.Outlined.Place,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                            }
-                            Spacer(Modifier.size(16.dp))
-                            Column {
-                                Text(
-                                    "Ruangan",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                Text(
-                                    "Atur ketersediaan ruangan.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-                }
+                Spacer(Modifier.height(8.dp))
 
+                // Teknisi
+                SettingsCard(
+                    title = "Teknisi",
+                    subtitle = "Atur daftar teknisi yang tersedia",
+                    icon = Icons.Outlined.Person,
+                    onClick = navigateToEditTeknisi
+                )
             }
 
             Spacer(Modifier.height(32.dp))
-
-            // Akun & Aplikasi
-//            Column(Modifier.fillMaxWidth()) {
-//                Text(
-//                    text = "Akun & Aplikasi",
-//                    style = MaterialTheme.typography.labelMedium,
-//                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-//                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
-//                )
-//                SettingsItem(Icons.Outlined.Lock, "Ganti Password", onClick = {})
-//            }
-//
-//
-//            Spacer(Modifier.height(24.dp))
 
             Button(
                 onClick = { settingsViewModel.onAction(SettingsAction.OnLogoutPressed) },
@@ -248,6 +159,56 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
+        }
+    }
+}
+
+@Composable
+fun SettingsCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        Column(Modifier.padding(20.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+                Spacer(Modifier.size(16.dp))
+                Column {
+                    Text(
+                        title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }
@@ -315,4 +276,3 @@ fun SettingsItem(icon: ImageVector, title: String, onClick: () -> Unit) {
         }
     }
 }
-

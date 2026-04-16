@@ -11,8 +11,11 @@ data class DetailJadwalUI(
 
 data class DosenSummaryUI(
     val namaDosen: String,
-    val totalSks: Int,
-    val totalSesi: Int
+    val totalSesi: Int,
+    val sksTeori: Int,
+    val sksWorkshop: Int,
+    val sksAjar: Int,
+    val bebanSks: Int,
 )
 
 data class DetailJadwalListUI(
@@ -36,7 +39,5 @@ data class DetailJadwalItemUI(
     val namaJadwal: String,
     val namaRuangan: String,
     val sks: Int,
-    val semester: Int
+    val semester: Int, val namaTeknisi: String? = null
 )
-
-
