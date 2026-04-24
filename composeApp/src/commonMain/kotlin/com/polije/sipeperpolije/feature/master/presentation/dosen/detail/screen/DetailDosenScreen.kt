@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
@@ -65,7 +64,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailDosenScreen(
-    dosenUI: DosenUI,
+    id: Int,
     detailDosenViewModel: DetailDosenViewModel = koinViewModel(),
     onNavigateBack: () -> Unit,
     onSuccessAction: () -> Unit,
@@ -80,8 +79,8 @@ fun DetailDosenScreen(
     val state by detailDosenViewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = LocalSnackbarHostState.current
 
-    LaunchedEffect(dosenUI) {
-        detailDosenViewModel.onAction(DetailDosenAction.OnInitial(dosenUI.id))
+    LaunchedEffect(id) {
+        detailDosenViewModel.onAction(DetailDosenAction.OnInitial(id))
     }
 
     ObserveAsEvent(detailDosenViewModel.events) { event ->
@@ -98,13 +97,13 @@ fun DetailDosenScreen(
 
             is DetailDosenEvent.OnMataKuliahFetchFailed -> {
                 val result = snackbarHostState.showSnackbar(
-                    "Gagal mengambil data mata kuliah untuk dosen ${dosenUI.nama}",
+                    "Gagal mengambil data mata kuliah",
                     actionLabel = "Muat Ulang"
                 )
 
                 when (result) {
                     SnackbarResult.ActionPerformed -> {
-                        detailDosenViewModel.onAction(DetailDosenAction.OnInitial(dosenUI.id))
+                        detailDosenViewModel.onAction(DetailDosenAction.OnInitial(id))
                     }
 
                     SnackbarResult.Dismissed -> {
@@ -175,14 +174,21 @@ fun DetailDosenScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            item { ProfileHeader(dosenUI.nama) }
+            item {
+                ProfileHeader(
+                    state.dosenDetail.nama,
+                    state.dosenDetail.tipeDosen.name.replace("_", " ").lowercase()
+                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
+                    state.dosenDetail.isActive
+                )
+            }
             item {
                 Spacer(
                     modifier = Modifier.height(8.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                 )
             }
-            item { AcademicInfoSection(dosenUI.nidn) }
+            item { AcademicInfoSection(state.dosenDetail.nidn) }
             item {
                 Spacer(
                     modifier = Modifier.height(8.dp)
@@ -195,8 +201,10 @@ fun DetailDosenScreen(
         when {
             showBottomSheet -> {
                 UpdateDosenModal(
-                    namaDosenTextState = TextFieldState(initialText = dosenUI.nama),
-                    nidnTextState = TextFieldState(initialText = dosenUI.nidn),
+                    initialName = state.dosenDetail.nama,
+                    initialNIDN = state.dosenDetail.nidn,
+                    initialTipeDosen = state.dosenDetail.tipeDosen,
+                    initialActive = state.dosenDetail.isActive,
                     modalBottomSheetState, onDismissRequest = {
                         scope.launch {
                             modalBottomSheetState.hide()
@@ -205,7 +213,7 @@ fun DetailDosenScreen(
                                 showBottomSheet = false
                             }
                         }
-                    }, onSaveAction = { newNama, newNIDN ->
+                    }, onSaveAction = { newNama, newNIDN, newIsActive, newTipeDosen ->
                         scope.launch {
                             modalBottomSheetState.hide()
                         }.invokeOnCompletion {
@@ -217,9 +225,9 @@ fun DetailDosenScreen(
                         detailDosenViewModel.onAction(
                             DetailDosenAction.OnDosenUpdate(
                                 DosenUI(
-                                    dosenUI.id,
+                                    state.dosenDetail.id,
                                     newNama,
-                                    newNIDN
+                                    newNIDN, newIsActive, newTipeDosen
                                 )
                             )
                         )
@@ -233,7 +241,7 @@ fun DetailDosenScreen(
                         showConfirmationDialog = false
                         detailDosenViewModel.onAction(
                             DetailDosenAction.OnDosenDelete(
-                                dosenUI.id
+                                state.dosenDetail.id
                             )
 
                         )
@@ -247,7 +255,7 @@ fun DetailDosenScreen(
 }
 
 @Composable
-private fun ProfileHeader(nama: String) {
+private fun ProfileHeader(nama: String, tipeDosen: String, status: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -264,11 +272,11 @@ private fun ProfileHeader(nama: String) {
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
-//            Text(
-//                text = "Dosen Tetap • Aktif",
-//                style = MaterialTheme.typography.bodyMedium,
-//                color = MaterialTheme.colorScheme.onSurfaceVariant
-//            )
+            Text(
+                text = "Dosen $tipeDosen • ${if (status) "Aktif" else "Nonaktif"}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

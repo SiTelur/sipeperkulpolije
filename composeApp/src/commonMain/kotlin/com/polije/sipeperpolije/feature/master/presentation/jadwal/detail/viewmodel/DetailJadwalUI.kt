@@ -5,9 +5,19 @@ data class DetailJadwalUI(
     val jadwal: List<DetailJadwalListUI> = emptyList(),
     val jadwalView: List<DetailJadwalListUI> = emptyList(),
     val unscheduledCount: Int = 0,
-    val unscheduledItems: List<UnscheduledItemUI> = emptyList()
+    val unscheduledItems: List<UnscheduledItemUI> = emptyList(),
+    val summary: List<DosenSummaryUI> = emptyList(),
+    val teknisiSummary: List<TeknisiSummaryUI> = emptyList()
 )
 
+data class DosenSummaryUI(
+    val namaDosen: String,
+    val totalSesi: Int,
+    val sksTeori: Int,
+    val sksWorkshop: Int,
+    val sksAjar: Int,
+    val bebanSks: Int,
+)
 
 data class DetailJadwalListUI(
     val nama: String,
@@ -30,7 +40,11 @@ data class DetailJadwalItemUI(
     val namaJadwal: String,
     val namaRuangan: String,
     val sks: Int,
-    val semester: Int
+    val semester: Int, val namaTeknisi: String? = null
 )
 
-
+data class TeknisiSummaryUI(
+    val namaTeknisi: String,
+    val totalSesi: Int,
+    val bebanSks: Int
+)

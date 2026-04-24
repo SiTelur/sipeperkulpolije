@@ -21,7 +21,6 @@ import com.polije.sipeperpolije.feature.dashboard.presentation.dashboard.screen.
 import com.polije.sipeperpolije.feature.dashboard.presentation.generate.GenerateJadwalScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.detail.screen.DetailDosenScreen
 import com.polije.sipeperpolije.feature.master.presentation.dosen.list.screen.DosenScreen
-import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.DosenUI
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.DetailJadwalScreen
 import com.polije.sipeperpolije.feature.master.presentation.jadwal.list.JadwalScreen
 import com.polije.sipeperpolije.feature.master.presentation.matakuliah.detail.screen.MataKuliahDetailScreen
@@ -29,6 +28,7 @@ import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.pres
 import com.polije.sipeperpolije.feature.master.presentation.settings.SettingsScreen
 import com.polije.sipeperpolije.feature.master.presentation.settings.hari.edit.EditHariScreen
 import com.polije.sipeperpolije.feature.master.presentation.settings.ruangan.edit.EditRuanganScreen
+import com.polije.sipeperpolije.feature.master.presentation.settings.teknisi.edit.EditTeknisiScreen
 import kotlinx.serialization.Serializable
 
 @Composable
@@ -84,7 +84,7 @@ fun MainScreen(
                     ?.collectAsState()
 
                 DosenScreen(resultFromDetail = result?.value) {
-                    navController.navigate(DetailDosen(it.id, it.nama, it.nidn))
+                    navController.navigate(DetailDosen(it))
                 }
             }
 
@@ -121,21 +121,22 @@ fun MainScreen(
             }
 
             composable(DashboardRoute.Settings.route) {
-                SettingsScreen(navigateToEditHari = {
-                    navController.navigate(EditJadwalHariScreen)
-                }, navigateToEditRuangan = {
-                    navController.navigate(EditJadwalRuanganScreen)
-                }, onLogout = onLogout)
+                SettingsScreen(
+                    navigateToEditHari = {
+                        navController.navigate(EditJadwalHariScreen)
+                    }, navigateToEditRuangan = {
+                        navController.navigate(EditJadwalRuanganScreen)
+                    }, navigateToEditTeknisi = {
+                        navController.navigate(EditTeknisiScreen)
+                    }, onLogout = onLogout
+                )
             }
 
             composable<DetailDosen> { backStackEntry ->
                 val detailDosen: DetailDosen = backStackEntry.toRoute()
                 DetailDosenScreen(
-                    DosenUI(
-                        detailDosen.id,
-                        detailDosen.nama,
-                        nidn = detailDosen.nidn
-                    ), onNavigateBack = {
+                    id =
+                        detailDosen.id, onNavigateBack = {
                         navController.popBackStack()
                     }, onSuccessAction = {
                         navController.previousBackStackEntry
@@ -209,6 +210,12 @@ fun MainScreen(
                 }
             }
 
+            composable<EditTeknisiScreen> {
+                EditTeknisiScreen {
+                    navController.popBackStack()
+                }
+            }
+
         }
 
         NavHost(navController = navController, graph = graph)
@@ -224,7 +231,7 @@ sealed class DashboardRoute(val route: String) {
 }
 
 @Serializable
-data class DetailDosen(val id: Int, val nama: String, val nidn: String)
+data class DetailDosen(val id: Int)
 
 @Serializable
 data class DetailMataKuliah(
@@ -250,3 +257,6 @@ object EditJadwalRuanganScreen
 
 @Serializable
 object GenerateJadwalScreen
+
+@Serializable
+object EditTeknisiScreen

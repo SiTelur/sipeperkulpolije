@@ -1,14 +1,16 @@
 package com.polije.sipeperpolije.feature.master.domain.repository
 
+import com.polije.sipeperpolije.feature.master.data.model.TipeDosen
 import com.polije.sipeperpolije.feature.master.domain.entity.DosenEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.HariEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.JadwalEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.MataKuliahEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.RuanganEntity
+import com.polije.sipeperpolije.feature.master.domain.entity.TeknisiEntity
 
 interface MasterRepository {
-    suspend fun getDosenPaging(offset: Int, limit: Int): Result<List<DosenEntity>>
-    suspend fun getDetailDosenMataKuliah(id: Int): Result<List<MataKuliahEntity>>
+    suspend fun getDosen(): Result<Map<TipeDosen, List<DosenEntity>>>
+    suspend fun getDetailDosenMataKuliah(id: Int): Result<Pair<DosenEntity, List<MataKuliahEntity>>>
     suspend fun getMataKuliah(): Result<List<MataKuliahEntity>>
     suspend fun updateDosen(dosen: DosenEntity): Result<Boolean>
     suspend fun getDetailMataKuliah(id: Int): Result<MataKuliahEntity>
@@ -28,4 +30,10 @@ interface MasterRepository {
     suspend fun deleteRuangan(id: Int): Result<Boolean>
     suspend fun insertRuangan(ruangan: RuanganEntity): Result<Boolean>
     suspend fun downloadJadwal(id: Int): Result<Boolean>
+
+    suspend fun getTeknisi(): Result<List<TeknisiEntity>>
+    suspend fun updateTeknisi(teknisi: TeknisiEntity): Result<Boolean>
+    suspend fun deleteTeknisi(id: Int): Result<Boolean>
+    suspend fun insertTeknisi(teknisi: TeknisiEntity): Result<Boolean>
+
 }

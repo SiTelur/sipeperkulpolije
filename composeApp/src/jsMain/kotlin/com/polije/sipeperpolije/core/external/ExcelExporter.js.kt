@@ -8,14 +8,13 @@ import kotlinx.coroutines.launch
 actual object ExcelExporter {
 
     private fun getSemesterBgColor(semester: Int): String = when (semester) {
-        1, 2 -> "FACC15"  // Yellow
-        3, 4 -> "10B981"  // Green
-        5, 6 -> "3B82F6"  // Blue
+        1, 2 -> "FCE883"  // Yellow
+        3, 4 -> "90EE90"  // Green
+        5, 6 -> "ADD8E6"  // Blue
         else -> "AAAAAA"  // Gray
     }
 
-    private fun getSemesterFontColor(semester: Int): String =
-        if (semester <= 2) "1A1A1A" else "FFFFFF"
+    private fun getSemesterFontColor(semester: Int): String = "000000"
 
     private fun headerStyle(): dynamic {
         val style = js("({})")
@@ -206,8 +205,16 @@ actual object ExcelExporter {
                     val ruanganCell = row.getCell(colNum)
 
                     if (item != null && jam == item.jamMulai) {
-                        ruanganCell.value =
-                            "${item.namaJadwal}\n${item.namaDosen}\n(Smt ${item.semester})"
+                        ruanganCell.value = buildString {
+                            append(item.namaJadwal)
+                            append("\n")
+                            append(item.namaDosen)
+                            if (!item.namaTeknisi.isNullOrEmpty()) {
+                                append("\n(Teknisi: ${item.namaTeknisi})")
+                            }
+                            append("\n(Smt ${item.semester})")
+                        }
+
                         val js3 = jadwalStyle(item.semester)
                         ruanganCell.fill = js3.fill
                         ruanganCell.font = js3.font

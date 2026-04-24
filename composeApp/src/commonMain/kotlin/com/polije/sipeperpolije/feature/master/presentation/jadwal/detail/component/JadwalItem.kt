@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Workspaces
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -33,9 +34,9 @@ import com.polije.sipeperpolije.feature.master.presentation.jadwal.detail.viewmo
 @Composable
 fun JadwalItem(jadwal: DetailJadwalItemUI) {
     val semesterColor = when (jadwal.semester) {
-        1, 2 -> Color(0xFFFACC15)
-        3, 4 -> Color(0xFF10B981)
-        5, 6 -> Color(0xFF3B82F6)
+        1, 2 -> Color(0xFFFCE883)
+        3, 4 -> Color(0xFF90EE90)
+        5, 6 -> Color(0xFFADD8E6)
         else -> MaterialTheme.colorScheme.secondary
     }
     Card(
@@ -109,6 +110,22 @@ fun JadwalItem(jadwal: DetailJadwalItemUI) {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Semester ${jadwal.semester}", style = MaterialTheme.typography.bodySmall)
+                }
+                if (jadwal.namaTeknisi.isNullOrBlank().not()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Workspaces,
+                            contentDescription = "Teknisi",
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            "Teknisi: ${jadwal.namaTeknisi}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
             }
         }

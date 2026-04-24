@@ -82,7 +82,8 @@ data class JadwalItem(
     val mataKuliah: MataKuliah,
     val ruangan: Ruangan,
     val slot: Slot,
-    val pertemuanKe: Int = 1
+    val pertemuanKe: Int = 1,
+    val teknisi: Teknisi? = null
 ) {
     fun getNamaLengkap(): String {
         val kelasLabel = if (mataKuliah.kelas.isNotEmpty()) " ${mataKuliah.kelas}" else ""
@@ -94,6 +95,8 @@ data class JadwalItem(
     }
 }
 
+data class Teknisi(val id: Int, val nama: String)
+
 @Serializable
 data class JadwalDataItem(
     val namaJadwal: String,
@@ -103,11 +106,29 @@ data class JadwalDataItem(
     val namaDosen: String,
     val semester: Int,
     val sks: Int,
-    val namaRuangan: String
+    val namaRuangan: String,
+    val namaTeknisi: String? = null
 )
 
 @Serializable
 data class JadwalPerItem(val nama: String, val items: List<JadwalDataItem>)
+
+@Serializable
+data class DosenSummary(
+    @SerialName("nama_dosen") val namaDosen: String,
+    @SerialName("sks_teori") val sksTeori: Int,
+    @SerialName("sks_workshop") val sksWorkshop: Int,
+    @SerialName("sks_ajar") val sksAjar: Int,          // sksTeori + sksWorkshop
+    @SerialName("beban_sks") val bebanSks: Double,
+    @SerialName("total_sesi") val totalSesi: Int
+)
+
+@Serializable
+data class TeknisiSummary(
+    @SerialName("nama_teknisi") val namaTeknisi: String,
+    @SerialName("total_sesi") val totalSesi: Int,
+    @SerialName("beban_sks") val bebanSks: Int
+)
 
 @Serializable
 data class Jadwal(
@@ -117,7 +138,9 @@ data class Jadwal(
     @SerialName("jadwal_view") val listJadwalView: List<JadwalPerItem>,
     val semester: String,
     @SerialName("unscheduled_count") val unscheduledCount: Int = 0,
-    @SerialName("unscheduled_items") val unscheduledItems: List<UnscheduledItem> = emptyList()
+    @SerialName("unscheduled_items") val unscheduledItems: List<UnscheduledItem> = emptyList(),
+    val summary: List<DosenSummary> = emptyList(),
+    @SerialName("teknisi_summary") val teknisiSummary: List<TeknisiSummary> = emptyList()  // ← tambahkan ini
 )
 
 @Serializable
@@ -141,12 +164,16 @@ private class ConflictIndex {
     val byDosen = HashMap<Int, MutableList<JadwalItem>>()
     val byRuangan = HashMap<String, MutableList<JadwalItem>>()
     val bySemester = HashMap<Int, MutableList<JadwalItem>>()
+    val byTeknisi = HashMap<Int, MutableList<JadwalItem>>()   // ← tambahkan
 
     fun add(item: JadwalItem) {
         byHari.getOrPut(item.slot.hari.nama) { mutableListOf() }.add(item)
         byDosen.getOrPut(item.mataKuliah.dosen.id) { mutableListOf() }.add(item)
         byRuangan.getOrPut(item.ruangan.nama) { mutableListOf() }.add(item)
         bySemester.getOrPut(item.mataKuliah.semester) { mutableListOf() }.add(item)
+        item.teknisi?.let { t ->                                // ← tambahkan
+            byTeknisi.getOrPut(t.id) { mutableListOf() }.add(item)
+        }
     }
 
     fun candidates(mk: MataKuliah, slot: Slot, ruangan: Ruangan): Set<JadwalItem> {
@@ -163,8 +190,10 @@ private class ConflictIndex {
         byDosen[item.mataKuliah.dosen.id]?.remove(item)
         byRuangan[item.ruangan.nama]?.remove(item)
         bySemester[item.mataKuliah.semester]?.remove(item)
+        item.teknisi?.let { t -> byTeknisi[t.id]?.remove(item) }  // ← tambahkan
     }
 }
+
 
 class WelchPowellAlgorithm {
     private lateinit var daftarHari: List<Hari>
@@ -200,6 +229,20 @@ class WelchPowellAlgorithm {
     private fun isTimeOverlap(slot1: Slot, slot2: Slot): Boolean {
         if (slot1.hari != slot2.hari) return false
         return slot1.jamMulai < slot2.jamSelesai && slot2.jamMulai < slot1.jamSelesai
+    }
+
+    private fun findTeknisi(
+        slot: Slot,
+        daftarTeknisi: List<Teknisi>,
+        conflictIndex: ConflictIndex
+    ): Teknisi? {
+        for (teknisi in daftarTeknisi) {
+            val sibuk = conflictIndex.byTeknisi[teknisi.id]
+                ?.any { item -> isTimeOverlap(item.slot, slot) }
+                ?: false
+            if (!sibuk) return teknisi
+        }
+        return null  // semua teknisi sibuk, workshop tetap jalan tanpa teknisi
     }
 
     private fun getRuanganCocok(
@@ -423,6 +466,7 @@ class WelchPowellAlgorithm {
         daftarMataKuliah: List<MataKuliah>,
         daftarRuangan: List<Ruangan>,
         daftarHari: List<Hari>,
+        daftarTeknisi: List<Teknisi>,   // ← tambahkan, default kosong agar backward-compatible
         overrideDurasiWorkshop: Int? = null
     ): Triple<Boolean, List<JadwalItem>, List<UnscheduledItem>> {
         this.daftarMataKuliah = daftarMataKuliah
@@ -524,14 +568,17 @@ class WelchPowellAlgorithm {
                         }
 
                     if (!adaKonflik) {
-                        val newItem = JadwalItem(mataKuliah, ruangan, slot, pertemuanKe)
+                        // ← assign teknisi hanya untuk workshop
+                        val teknisiAssigned = if (mataKuliah.isWorkshop) {
+                            findTeknisi(slot, daftarTeknisi, conflictIndex)
+                        } else null
+
+                        val newItem =
+                            JadwalItem(mataKuliah, ruangan, slot, pertemuanKe, teknisiAssigned)
                         jadwal.add(newItem)
                         conflictIndex.add(newItem)
-
-                        // ✅ OPT: update incremental map
                         jadwalPerHari.getOrPut(slot.hari) { mutableListOf() }.add(newItem)
 
-                        // ✅ OPT: simpan slot pertemuan-1 untuk workshop
                         if (pertemuanKe == 1 && mataKuliah.isWorkshop) {
                             pertemuan1SlotMap[mataKuliah] = slot
                         }
@@ -539,7 +586,8 @@ class WelchPowellAlgorithm {
                         berhasil = true
                         val suffix =
                             if (mataKuliah.pertemuanPerMinggu > 1) " (Pertemuan $pertemuanKe)" else ""
-                        println("✓ ${mataKuliah.nama}$suffix → ${slot.hari.nama} ${slot.jamMulai}:00-${slot.jamSelesai}:00 | ${ruangan.nama}")
+                        val teknisiLog = teknisiAssigned?.let { " | Teknisi: ${it.nama}" } ?: ""
+                        println("✓ ${mataKuliah.nama}$suffix → ${slot.hari.nama} ${slot.jamMulai}:00-${slot.jamSelesai}:00 | ${ruangan.nama}$teknisiLog")
                         break@outer
                     }
                 }
@@ -636,11 +684,17 @@ class WelchPowellAlgorithm {
                             }
 
                         if (!adaKonflik) {
+                            // Re-assign teknisi di slot baru
+                            val teknisiAssigned = if (item.mataKuliah.isWorkshop) {
+                                findTeknisi(kandidatSlot, daftarTeknisi, conflictIndex)
+                            } else null
+
                             slotBaruDitemukan = JadwalItem(
                                 item.mataKuliah,
                                 kandidatRuangan,
                                 kandidatSlot,
-                                item.pertemuanKe
+                                item.pertemuanKe,
+                                teknisiAssigned   // ← tambahkan
                             )
                             break@searchSlot
                         }
@@ -792,8 +846,11 @@ class WelchPowellAlgorithm {
         isSuccess: Boolean,
         jadwal: List<JadwalItem>,
         semester: String,
+        daftarMataKuliah: List<MataKuliah>,
+        referensiRombel: List<MataKuliah>,
         unscheduledItems: List<UnscheduledItem> = emptyList()
     ): Jadwal {
+
         val jadwalData = jadwal.map { item ->
             JadwalDataItem(
                 namaJadwal = item.getNamaLengkap(),
@@ -803,7 +860,8 @@ class WelchPowellAlgorithm {
                 namaDosen = item.mataKuliah.dosen.nama,
                 semester = item.mataKuliah.semester,
                 sks = item.mataKuliah.sksTeori + item.mataKuliah.sksPraktek,
-                namaRuangan = item.ruangan.nama
+                namaRuangan = item.ruangan.nama,
+                namaTeknisi = item.teknisi?.nama   // ← tambahkan
             )
         }
 
@@ -822,6 +880,103 @@ class WelchPowellAlgorithm {
                 )
             }
 
+        val dosenPerKode: Map<String, Int> = daftarMataKuliah
+            .groupBy { it.kode }
+            .mapValues { (_, mks) -> mks.map { it.dosen.id }.distinct().count().coerceAtLeast(1) }
+
+        // Pakai referensiRombel (semua semester) bukan daftarMataKuliah
+        val kelasPerSemesterRaw: Map<Int, Int> = referensiRombel
+            .filter { it.kelas.isNotEmpty() }
+            .groupBy { it.semester }
+            .mapValues { (_, mks) -> mks.map { it.kelas.uppercase().trim() }.distinct().count() }
+
+        fun jumlahRombelSemester(semester: Int): Int {
+            // Cek semester ini dulu
+            kelasPerSemesterRaw[semester]?.let { if (it > 0) return it }
+
+            // Cek semester pasangan (genap ↔ ganjil, selisih 1)
+            val pasangan = if (semester % 2 == 0) semester - 1 else semester + 1
+            kelasPerSemesterRaw[pasangan]?.let { if (it > 0) return it }
+
+            // Fallback
+            return 1
+        }
+
+        val jumlahKelasPerKode: Map<String, Int> = daftarMataKuliah
+            .groupBy { it.kode }
+            .mapValues { (_, mks) ->
+                val kelasList = mks.map { it.kelas }.filter { it.isNotEmpty() }.distinct()
+                if (kelasList.isEmpty()) {
+                    // Matkul tanpa label kelas (teori umum) → pakai rombel dari semesternya
+                    jumlahRombelSemester(mks.first().semester)
+                } else {
+                    kelasList.size
+                }
+            }
+
+        val dosenSummary = jadwal
+            .groupBy { it.mataKuliah.dosen }
+            .entries.sortedBy { it.key.nama }
+            .map { (dosen, items) ->
+                var sksAjarTeori = 0
+                var sksAjarPraktek = 0
+                var bebanSksTotal = 0.0
+
+                val myUniqueMks = items.map { it.mataKuliah }.distinct()
+
+                for (mk in myUniqueMks) {
+                    val kode = mk.kode
+                    val kls = mk.kelas
+
+                    val totalDosenSatuMatkul = dosenPerKode[kode] ?: 1
+
+                    if (kls.isEmpty()) {
+                        val pengali = jumlahKelasPerKode[kode] ?: 1
+                        sksAjarTeori += mk.sksTeori * pengali
+                        sksAjarPraktek += mk.sksPraktek * pengali
+
+                        bebanSksTotal += (mk.sksTeori * pengali).toDouble() / totalDosenSatuMatkul
+                        bebanSksTotal += (mk.sksPraktek * pengali).toDouble() / totalDosenSatuMatkul
+                    } else {
+                        sksAjarTeori += mk.sksTeori
+                        sksAjarPraktek += mk.sksPraktek
+
+                        bebanSksTotal += mk.sksTeori.toDouble() / totalDosenSatuMatkul
+                        bebanSksTotal += mk.sksPraktek.toDouble() / totalDosenSatuMatkul
+                    }
+                }
+
+                val sksAjarTotal = sksAjarTeori + sksAjarPraktek
+
+                DosenSummary(
+                    namaDosen = dosen.nama,
+                    sksTeori = sksAjarTeori,
+                    sksWorkshop = sksAjarPraktek,
+                    sksAjar = sksAjarTotal,
+                    bebanSks = bebanSksTotal,
+                    totalSesi = items.size
+                )
+            }
+
+        val teknisiSummary = jadwal
+            .filter { it.teknisi != null }
+            .groupBy { it.teknisi!! }
+            .entries.sortedBy { it.key.nama }
+            .map { (teknisi, items) ->
+                val mkDipegang = items.map { it.mataKuliah }.toSet()
+
+                val bebanSks = mkDipegang.sumOf { mk ->
+                    mk.sksPraktek  // jumlah kelas sudah terwakili karena tiap kelas = 1 MataKuliah berbeda
+                }
+
+                TeknisiSummary(
+                    namaTeknisi = teknisi.nama,
+                    totalSesi = items.size,
+                    bebanSks = bebanSks
+                )
+            }
+
+
         val groupedByHari = jadwalData
             .groupBy { it.hari }
             .entries.sortedBy { (hari, _) -> HARI_ORDER[hari.lowercase()] ?: Int.MAX_VALUE }
@@ -829,9 +984,11 @@ class WelchPowellAlgorithm {
 
         return Jadwal(
             title, isSuccess, groupedByRuangan, groupedByHari, semester,
-            unscheduledItems.size, unscheduledItems
+            unscheduledItems.size, unscheduledItems, if (isSuccess) dosenSummary else emptyList(),
+            if (isSuccess) teknisiSummary else emptyList()   // ← tambahkan
         )
     }
+
 
     companion object {
         private val HARI_ORDER = mapOf(

@@ -14,7 +14,6 @@ import org.koin.compose.KoinApplication
 @Composable
 fun App() {
     val navController = rememberNavController()
-
     KoinApplication(application = { modules(appModule()) }) {
         val snackbarHostState = remember { SnackbarHostState() }
         AppTheme {

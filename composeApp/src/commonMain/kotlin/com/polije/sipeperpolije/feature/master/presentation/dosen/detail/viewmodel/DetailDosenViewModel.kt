@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.polije.sipeperpolije.feature.master.domain.usecase.DeleteDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.DetailDosenUseCase
 import com.polije.sipeperpolije.feature.master.domain.usecase.UpdateDosenUseCase
+import com.polije.sipeperpolije.feature.master.presentation.dosen.list.viewmodel.dosen.toUI
+import com.polije.sipeperpolije.feature.master.presentation.matakuliah.list.presentation.viewmodel.toUI
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +19,6 @@ class DetailDosenViewModel(
     private val deleteDosenUseCase: DeleteDosenUseCase,
     private val detailDosenUseCase: DetailDosenUseCase
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(DetailDosenState())
     val state = _state.asStateFlow()
     fun onAction(detailDosenAction: DetailDosenAction) {
@@ -59,11 +60,12 @@ class DetailDosenViewModel(
                     it.copy(isLoading = true)
                 }
                 viewModelScope.launch {
-                    detailDosenUseCase(detailDosenAction.id).onSuccess { value ->
-                        _state.update {
-                            it.copy(
+                    detailDosenUseCase(detailDosenAction.id).onSuccess { (dosen, mataKuliah) ->
+                        _state.update { detailDosenState ->
+                            detailDosenState.copy(
                                 isLoading = false,
-                                listMataKuliah = value
+                                listMataKuliah = mataKuliah.map { it.toUI() },
+                                dosenDetail = dosen.toUI()
                             )
                         }
                     }.onFailure {

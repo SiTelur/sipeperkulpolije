@@ -14,8 +14,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.TypeSpecimen
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -23,25 +28,41 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.polije.sipeperpolije.feature.master.data.model.TipeDosen
 import com.polije.sipeperpolije.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdateDosenModal(
-    namaDosenTextState: TextFieldState,
-    nidnTextState: TextFieldState,
+    initialName: String,
+    initialNIDN: String,
+    initialTipeDosen: TipeDosen,
+    initialActive: Boolean,
     modalBottomSheetState: SheetState,
     onDismissRequest: () -> Unit,
-    onSaveAction: (String, String) -> Unit
+    onSaveAction: (String, String, Boolean, TipeDosen) -> Unit
 ) {
+
+    val namaDosenTextState = TextFieldState(initialName)
+    val nidnTextState = TextFieldState(initialNIDN)
+    val (tipeDosen, setTipeDosen) = remember { mutableStateOf(initialTipeDosen) }
+    val tipeDosenState = TextFieldState(tipeDosen.name.replace("_", " "))
+    var expandedTipeDosen by remember { mutableStateOf(false) }
+    val (isActive, setIsActive) = remember { mutableStateOf(initialActive) }
+
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = modalBottomSheetState,
@@ -84,6 +105,41 @@ fun UpdateDosenModal(
                     },
                     shape = RoundedCornerShape(12.dp)
                 )
+                ExposedDropdownMenuBox(
+                    expanded = expandedTipeDosen,
+                    onExpandedChange = { expandedTipeDosen = !expandedTipeDosen }
+                ) {
+                    OutlinedTextField(
+                        state = tipeDosenState,
+                        readOnly = true,
+                        label = { Text("Tipe Dosen") },
+                        leadingIcon = {
+                            Icon(Icons.Default.TypeSpecimen, contentDescription = "Tipe Dosen")
+                        },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipeDosen) },
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.menuAnchor(
+                            type = ExposedDropdownMenuAnchorType.PrimaryEditable,
+                            true
+                        ).fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedTipeDosen,
+                        onDismissRequest = { expandedTipeDosen = false }) {
+                        TipeDosen.entries.forEach { tipeDosen ->
+                            DropdownMenuItem({ Text(tipeDosen.name.replace("_", " ")) }, onClick = {
+                                setTipeDosen(tipeDosen)
+                                expandedTipeDosen = false
+
+                            })
+                        }
+
+                    }
+                }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
+                    Text("Aktif")
+                    Switch(isActive, onCheckedChange = {setIsActive(it)})
+                }
             }
             Spacer(modifier = Modifier.height(24.dp))
             Row(
@@ -104,7 +160,9 @@ fun UpdateDosenModal(
                         onClick = {
                             onSaveAction(
                                 namaDosenTextState.text.toString(),
-                                nidnTextState.text.toString()
+                                nidnTextState.text.toString(),
+                                isActive,
+                                tipeDosen
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -124,11 +182,13 @@ fun UpdateDosenModal(
 fun UpdateDosenModalPreview() {
     AppTheme {
         UpdateDosenModal(
-            TextFieldState(),
-            TextFieldState(),
+            initialName = "Dosen Baru",
+            initialNIDN = "1234567890",
+            initialTipeDosen = TipeDosen.TETAP,
+            initialActive = true,
             rememberModalBottomSheetState(),
             onDismissRequest = {},
-            onSaveAction = { _, _ -> }
+            onSaveAction = { _, _, _, _ -> }
         )
     }
 }
