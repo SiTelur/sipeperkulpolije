@@ -126,7 +126,8 @@ data class DosenSummary(
 @Serializable
 data class TeknisiSummary(
     @SerialName("nama_teknisi") val namaTeknisi: String,
-    @SerialName("total_sesi") val totalSesi: Int
+    @SerialName("total_sesi") val totalSesi: Int,
+    @SerialName("beban_sks") val bebanSks: Int
 )
 
 @Serializable
@@ -845,7 +846,8 @@ class WelchPowellAlgorithm {
         isSuccess: Boolean,
         jadwal: List<JadwalItem>,
         semester: String,
-        daftarMataKuliah: List<MataKuliah>,   // ← tambahkan untuk hitung pembagi
+        daftarMataKuliah: List<MataKuliah>,
+        referensiRombel: List<MataKuliah>,
         unscheduledItems: List<UnscheduledItem> = emptyList()
     ): Jadwal {
 
@@ -878,50 +880,80 @@ class WelchPowellAlgorithm {
                 )
             }
 
-        val dosenPerKodeDanKelas = daftarMataKuliah
-            .groupBy { "${it.kode}|${it.kelas}" }
+        val dosenPerKode: Map<String, Int> = daftarMataKuliah
+            .groupBy { it.kode }
             .mapValues { (_, mks) -> mks.map { it.dosen.id }.distinct().count().coerceAtLeast(1) }
+
+        // Pakai referensiRombel (semua semester) bukan daftarMataKuliah
+        val kelasPerSemesterRaw: Map<Int, Int> = referensiRombel
+            .filter { it.kelas.isNotEmpty() }
+            .groupBy { it.semester }
+            .mapValues { (_, mks) -> mks.map { it.kelas.uppercase().trim() }.distinct().count() }
+
+        fun jumlahRombelSemester(semester: Int): Int {
+            // Cek semester ini dulu
+            kelasPerSemesterRaw[semester]?.let { if (it > 0) return it }
+
+            // Cek semester pasangan (genap ↔ ganjil, selisih 1)
+            val pasangan = if (semester % 2 == 0) semester - 1 else semester + 1
+            kelasPerSemesterRaw[pasangan]?.let { if (it > 0) return it }
+
+            // Fallback
+            return 1
+        }
 
         val jumlahKelasPerKode: Map<String, Int> = daftarMataKuliah
             .groupBy { it.kode }
             .mapValues { (_, mks) ->
                 val kelasList = mks.map { it.kelas }.filter { it.isNotEmpty() }.distinct()
-                if (kelasList.isEmpty()) 1 else kelasList.size
+                if (kelasList.isEmpty()) {
+                    // Matkul tanpa label kelas (teori umum) → pakai rombel dari semesternya
+                    jumlahRombelSemester(mks.first().semester)
+                } else {
+                    kelasList.size
+                }
             }
 
         val dosenSummary = jadwal
             .groupBy { it.mataKuliah.dosen }
             .entries.sortedBy { it.key.nama }
             .map { (dosen, items) ->
-                var sksTeoriCalc = 0.0
-                var sksWorkshopCalc = 0.0
+                var sksAjarTeori = 0
+                var sksAjarPraktek = 0
+                var bebanSksTotal = 0.0
 
                 val myUniqueMks = items.map { it.mataKuliah }.distinct()
 
                 for (mk in myUniqueMks) {
                     val kode = mk.kode
                     val kls = mk.kelas
-                    
-                    val dosens = dosenPerKodeDanKelas["$kode|$kls"] ?: 1
+
+                    val totalDosenSatuMatkul = dosenPerKode[kode] ?: 1
 
                     if (kls.isEmpty()) {
                         val pengali = jumlahKelasPerKode[kode] ?: 1
-                        sksTeoriCalc += (mk.sksTeori * pengali).toDouble() / dosens
-                        sksWorkshopCalc += (mk.sksPraktek * pengali).toDouble() / dosens
+                        sksAjarTeori += mk.sksTeori * pengali
+                        sksAjarPraktek += mk.sksPraktek * pengali
+
+                        bebanSksTotal += (mk.sksTeori * pengali).toDouble() / totalDosenSatuMatkul
+                        bebanSksTotal += (mk.sksPraktek * pengali).toDouble() / totalDosenSatuMatkul
                     } else {
-                        sksTeoriCalc += mk.sksTeori.toDouble() / dosens
-                        sksWorkshopCalc += mk.sksPraktek.toDouble() / dosens
+                        sksAjarTeori += mk.sksTeori
+                        sksAjarPraktek += mk.sksPraktek
+
+                        bebanSksTotal += mk.sksTeori.toDouble() / totalDosenSatuMatkul
+                        bebanSksTotal += mk.sksPraktek.toDouble() / totalDosenSatuMatkul
                     }
                 }
 
-                val bebanSks = sksTeoriCalc + sksWorkshopCalc
+                val sksAjarTotal = sksAjarTeori + sksAjarPraktek
 
                 DosenSummary(
                     namaDosen = dosen.nama,
-                    sksTeori = sksTeoriCalc.toInt(),
-                    sksWorkshop = sksWorkshopCalc.toInt(),
-                    sksAjar = bebanSks.toInt(),
-                    bebanSks = bebanSks,
+                    sksTeori = sksAjarTeori,
+                    sksWorkshop = sksAjarPraktek,
+                    sksAjar = sksAjarTotal,
+                    bebanSks = bebanSksTotal,
                     totalSesi = items.size
                 )
             }
@@ -931,9 +963,16 @@ class WelchPowellAlgorithm {
             .groupBy { it.teknisi!! }
             .entries.sortedBy { it.key.nama }
             .map { (teknisi, items) ->
+                val mkDipegang = items.map { it.mataKuliah }.toSet()
+
+                val bebanSks = mkDipegang.sumOf { mk ->
+                    mk.sksPraktek  // jumlah kelas sudah terwakili karena tiap kelas = 1 MataKuliah berbeda
+                }
+
                 TeknisiSummary(
                     namaTeknisi = teknisi.nama,
-                    totalSesi = items.size
+                    totalSesi = items.size,
+                    bebanSks = bebanSks
                 )
             }
 
@@ -945,10 +984,11 @@ class WelchPowellAlgorithm {
 
         return Jadwal(
             title, isSuccess, groupedByRuangan, groupedByHari, semester,
-            unscheduledItems.size, unscheduledItems, dosenSummary,
-            teknisiSummary   // ← tambahkan
+            unscheduledItems.size, unscheduledItems, if (isSuccess) dosenSummary else emptyList(),
+            if (isSuccess) teknisiSummary else emptyList()   // ← tambahkan
         )
     }
+
 
     companion object {
         private val HARI_ORDER = mapOf(

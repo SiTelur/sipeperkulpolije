@@ -94,7 +94,7 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
         semester: Semester,
         workshopTime: Int?
     ): Result<JadwalEntity> {
-        val mataKuliahs = supabase
+        val semuaMataKuliah = supabase
             .from("mata_kuliah_view").select {
                 order("semester", Order.ASCENDING)
                 order("kode", Order.ASCENDING)
@@ -102,10 +102,10 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                     MataKuliahModel::isActive eq true
                 }
             }.decodeList<MataKuliahModel>()
-            .filter { semester.matches(it.semester) }
+
+        val mataKuliahs = semuaMataKuliah.filter { semester.matches(it.semester) }
 
         val isMataKuliahValid = mataKuliahs.all { it.idPengampu != null }
-
         if (!isMataKuliahValid) {
             return Result.failure(Exception("Ada mata kuliah yang belum memiliki dosen pengampu"))
         }
@@ -116,7 +116,21 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
             val dosen = dosenCache.getOrPut(it.idPengampu!!) {
                 Dosen(it.idPengampu, it.namaPengampu.toString())
             }
+            MataKuliah(
+                it.kode,
+                it.nama,
+                dosen,
+                it.sksTeori,
+                it.sksPraktek,
+                it.semester,
+                it.namaKelas
+            )
+        }
 
+        val referensiRombel = semuaMataKuliah.map {
+            val dosen = dosenCache.getOrPut(it.idPengampu ?: -1) {
+                Dosen(it.idPengampu ?: -1, it.namaPengampu.toString())
+            }
             MataKuliah(
                 it.kode,
                 it.nama,
@@ -192,6 +206,7 @@ class DashboardRepositoryImpl(private val supabase: SupabaseClient) : DashboardR
                         jadwal.second,
                         " ${semester.name.uppercase()}",
                         rawJadwal,
+                        referensiRombel,
                         jadwal.third
                     )
                 ) {

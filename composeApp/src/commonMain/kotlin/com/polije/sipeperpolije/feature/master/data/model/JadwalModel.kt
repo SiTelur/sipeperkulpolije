@@ -4,6 +4,7 @@ import com.polije.sipeperpolije.feature.master.domain.entity.DosenSummaryEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.JadwalEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.JadwalItemEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.JadwalPerItemEntity
+import com.polije.sipeperpolije.feature.master.domain.entity.TeknisiSummaryEntity
 import com.polije.sipeperpolije.feature.master.domain.entity.UnscheduledItemEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -81,7 +82,12 @@ fun UnscheduledItemModel.toEntity() = UnscheduledItemEntity(
 @Serializable
 data class TeknisiSummary(
     @SerialName("nama_teknisi") val namaTeknisi: String,
-    @SerialName("total_sesi") val totalSesi: Int
+    @SerialName("total_sesi") val totalSesi: Int,
+    @SerialName("beban_sks") val bebanSks: Int
+)
+
+fun TeknisiSummary.toEntity() = TeknisiSummaryEntity(
+    namaTeknisi, totalSesi, bebanSks
 )
 
 private fun JadwalItemModel.toEntity() = JadwalItemEntity(
@@ -115,5 +121,6 @@ fun JadwalModel.toEntity() = JadwalEntity(
     jadwalView = listJadwalView.map { it.toEntity() },
     unscheduledCount = unscheduledCount,
     unscheduledItems = unscheduledItems.map { it.toEntity() },
-    summary = summary.map { it.toEntity() }
+    summary = summary.map { it.toEntity() },
+    teknisiSummary = teknisiSummary.map { it.toEntity() }
 )

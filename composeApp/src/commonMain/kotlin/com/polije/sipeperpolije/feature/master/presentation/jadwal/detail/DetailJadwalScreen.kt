@@ -214,6 +214,47 @@ fun DetailJadwalScreen(
                                             }
                                         }
                                     }
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        "Beban Teknisi",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(bottom = 12.dp)
+                                    )
+                                    state.jadwal.teknisiSummary.forEach { dosen ->
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 8.dp)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = dosen.namaTeknisi,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.Bold,
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                                SummaryChip(
+                                                    label = "${dosen.totalSesi} Sesi",
+                                                    color = Color(0xFF10B981)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                            ) {
+                                                BebanItem(
+                                                    label = "Beban SKS",
+                                                    value = "${dosen.bebanSks}"
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -275,7 +316,6 @@ fun LegendChip(semester: IntRange) {
         Spacer(modifier = Modifier.width(6.dp))
         Text(
             text = "Semester ${semester.first}-${semester.last}",
-            color = color.copy(alpha = 0.9f),
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium)
         )
     }
